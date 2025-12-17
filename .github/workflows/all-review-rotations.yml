@@ -109,7 +109,7 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          TODAY=$(date -u +%Y-%m-%d)
+          TODAY=$(date -u +%d-%m-%Y)
           echo "📝 Updating LAST_SCHEDULED_ROTATION_DATE to: $TODAY"
           
           # Update the GitHub Variable using GitHub CLI
