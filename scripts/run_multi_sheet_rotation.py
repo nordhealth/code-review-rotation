@@ -79,8 +79,9 @@ def detect_sheet_type(sheet_name: str, sheet_index: int) -> SheetTypes | None:
             else:
                 return None
 
-    except Exception:  # noqa: BLE001 # pylint: disable=broad-except
-        # Sheet doesn't exist or error reading it
+    except Exception as e:  # noqa: BLE001 # pylint: disable=broad-except
+        # Log the error for debugging - could be permissions, network, or sheet doesn't exist
+        print(f"   ⚠️  Error detecting sheet type at index {sheet_index}: {e}")
         return None
 
 
@@ -111,6 +112,9 @@ def detect_all_sheet_types(sheet_name: str) -> dict[SheetTypes, int]:
             }
             label = type_labels.get(sheet_type, sheet_type.value.upper())
             print(f"   📄 Found {label} at index {sheet_index}")
+
+        # Small delay between API calls to be safe
+        time.sleep(0.3)
 
     return detected
 
