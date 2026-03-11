@@ -186,20 +186,25 @@ def run_devs_rotation_for_sheet(
             return True
 
         except Exception as exc:  # noqa: BLE001 # pylint: disable=broad-except
-            # Check if it's a rate limit error
             error_msg = str(exc)
-            if "429" in error_msg or "RATE_LIMIT_EXCEEDED" in error_msg:
-                if attempt < max_retries - 1:
-                    wait_time = 70  # Fixed 70s delay to be safe
-                    print(
-                        f"⚠️  Rate limit hit on {sheet_name}. "
-                        f"Waiting {wait_time}s before retry "
-                        f"{attempt + 2}/{max_retries}..."
-                    )
-                    time.sleep(wait_time)
-                    continue
-                else:
-                    print(f"❌ Rate limit exceeded after {max_retries} " f"attempts: {sheet_name}")
+            is_rate_limit = "429" in error_msg or "RATE_LIMIT_EXCEEDED" in error_msg
+            is_server_error = "500" in error_msg or "Internal Error" in error_msg
+
+            if (is_rate_limit or is_server_error) and attempt < max_retries - 1:
+                wait_time = 70 if is_rate_limit else 15
+                label = "Rate limit" if is_rate_limit else "Server error (500)"
+                print(
+                    f"⚠️  {label} on {sheet_name}. "
+                    f"Waiting {wait_time}s before retry "
+                    f"{attempt + 2}/{max_retries}..."
+                )
+                time.sleep(wait_time)
+                continue
+
+            if is_rate_limit:
+                print(f"❌ Rate limit exceeded after {max_retries} attempts: {sheet_name}")
+            elif is_server_error:
+                print(f"❌ Server error (500) after {max_retries} attempts: {sheet_name}")
             else:
                 print(f"❌ Error processing {sheet_name}: {exc}")
                 traceback.print_exc()
@@ -305,20 +310,25 @@ def run_teams_rotation_for_sheet(
                 print(f"ℹ️  Teams sheet not found in {sheet_name} - skipping Teams rotation")
                 return True  # Not an error, just skip
 
-            # Check if it's a rate limit error
             error_msg = str(exc)
-            if "429" in error_msg or "RATE_LIMIT_EXCEEDED" in error_msg:
-                if attempt < max_retries - 1:
-                    wait_time = 70  # Fixed 70s delay to be safe
-                    print(
-                        f"⚠️  Rate limit hit on {sheet_name}. "
-                        f"Waiting {wait_time}s before retry "
-                        f"{attempt + 2}/{max_retries}..."
-                    )
-                    time.sleep(wait_time)
-                    continue
-                else:
-                    print(f"❌ Rate limit exceeded after {max_retries} " f"attempts: {sheet_name}")
+            is_rate_limit = "429" in error_msg or "RATE_LIMIT_EXCEEDED" in error_msg
+            is_server_error = "500" in error_msg or "Internal Error" in error_msg
+
+            if (is_rate_limit or is_server_error) and attempt < max_retries - 1:
+                wait_time = 70 if is_rate_limit else 15
+                label = "Rate limit" if is_rate_limit else "Server error (500)"
+                print(
+                    f"⚠️  {label} on {sheet_name}. "
+                    f"Waiting {wait_time}s before retry "
+                    f"{attempt + 2}/{max_retries}..."
+                )
+                time.sleep(wait_time)
+                continue
+
+            if is_rate_limit:
+                print(f"❌ Rate limit exceeded after {max_retries} attempts: {sheet_name}")
+            elif is_server_error:
+                print(f"❌ Server error (500) after {max_retries} attempts: {sheet_name}")
             else:
                 print(f"❌ Error processing {sheet_name}: {exc}")
                 traceback.print_exc()

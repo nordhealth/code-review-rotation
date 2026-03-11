@@ -278,6 +278,7 @@ This workflow processes **multiple Google Sheets** automatically:
 - ✅ **Centralized**: One workflow for all teams
 - ✅ **No Code Changes**: Add/remove sheets via GitHub Variables
 - ✅ **Error Handling**: Continues even if one sheet fails
+- ✅ **Retry Logic**: Automatically retries on Google API rate limits (429) and transient server errors (500)
 
 ### Single-Sheet Workflows (Backward Compatible)
 
