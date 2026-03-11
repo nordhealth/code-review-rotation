@@ -132,7 +132,8 @@ def run_devs_rotation_for_sheet(
     Args:
         sheet_name: Name of the Google Sheet to process
         sheet_index: Index of the worksheet (default: 1, most common case)
-        config_index: Index of the Config worksheet (default: None, uses SheetIndicesFallback.CONFIG)
+        config_index: Index of the Config worksheet
+            (default: None, uses SheetIndicesFallback.CONFIG)
         is_manual: Whether this is a manual run
         max_retries: Maximum number of retries on rate limit errors
 
@@ -226,7 +227,8 @@ def run_teams_rotation_for_sheet(
     Args:
         sheet_name: Name of the Google Sheet to process
         sheet_index: Index of the worksheet (default: 2)
-        config_index: Index of the Config worksheet (default: None, uses SheetIndicesFallback.CONFIG)
+        config_index: Index of the Config worksheet
+            (default: None, uses SheetIndicesFallback.CONFIG)
         is_manual: Whether this is a manual run
         max_retries: Maximum number of retries on rate limit errors
 
@@ -418,7 +420,7 @@ def main() -> None:
             # Add delay after devs rotation to avoid rate limits
             # Google Sheets API: 60 write requests per minute
             if args.type == "all" or (i < len(sheet_names) - 1):
-                print(f"⏳ Waiting {API_RATE_LIMIT_DELAY} seconds " f"to avoid API rate limits...")
+                print(f"⏳ Waiting {API_RATE_LIMIT_DELAY} seconds to avoid API rate limits...")
                 time.sleep(API_RATE_LIMIT_DELAY)
         elif args.type == SheetTypes.DEVS.value:
             print(f"ℹ️  No Developer sheet found in {sheet_name} - skipping")
@@ -437,7 +439,7 @@ def main() -> None:
 
             # Add delay after teams rotation to avoid rate limits
             if i < len(sheet_names) - 1:
-                print(f"⏳ Waiting {API_RATE_LIMIT_DELAY} seconds " f"to avoid API rate limits...")
+                print(f"⏳ Waiting {API_RATE_LIMIT_DELAY} seconds to avoid API rate limits...")
                 time.sleep(API_RATE_LIMIT_DELAY)
         elif args.type == SheetTypes.TEAMS.value:
             print(f"ℹ️  No Team sheet found in {sheet_name} - skipping")

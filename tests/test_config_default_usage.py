@@ -55,17 +55,17 @@ def test_load_developers_uses_config_default_when_column_empty(mock_get_remote_s
         imad = next(d for d in developers if d.name == "Imad")
 
         # Alex and Grigorii should have the default value (2)
-        assert (
-            alex.reviewer_number == 2
-        ), f"Alex should have default reviewer_number=2, got {alex.reviewer_number}"
-        assert (
-            grigorii.reviewer_number == 2
-        ), f"Grigorii should have default reviewer_number=2, got {grigorii.reviewer_number}"
+        assert alex.reviewer_number == 2, (
+            f"Alex should have default reviewer_number=2, got {alex.reviewer_number}"
+        )
+        assert grigorii.reviewer_number == 2, (
+            f"Grigorii should have default reviewer_number=2, got {grigorii.reviewer_number}"
+        )
 
         # Imad should have the explicit value (3)
-        assert (
-            imad.reviewer_number == 3
-        ), f"Imad should have explicit reviewer_number=3, got {imad.reviewer_number}"
+        assert imad.reviewer_number == 3, (
+            f"Imad should have explicit reviewer_number=3, got {imad.reviewer_number}"
+        )
 
     finally:
         # Restore original default
@@ -98,27 +98,27 @@ def test_load_developers_respects_different_config_defaults(mock_get_remote_shee
         developers = load_developers_from_sheet(
             expected_headers=["Developer", "Number of Reviewers", "Preferable Reviewers"]
         )
-        assert (
-            developers[0].reviewer_number == 1
-        ), "Should use default=1 when Number of Reviewers is empty"
+        assert developers[0].reviewer_number == 1, (
+            "Should use default=1 when Number of Reviewers is empty"
+        )
 
         # Test with default = 3
         env_constants.DEFAULT_REVIEWER_NUMBER = 3
         developers = load_developers_from_sheet(
             expected_headers=["Developer", "Number of Reviewers", "Preferable Reviewers"]
         )
-        assert (
-            developers[0].reviewer_number == 3
-        ), "Should use default=3 when Number of Reviewers is empty"
+        assert developers[0].reviewer_number == 3, (
+            "Should use default=3 when Number of Reviewers is empty"
+        )
 
         # Test with default = 5
         env_constants.DEFAULT_REVIEWER_NUMBER = 5
         developers = load_developers_from_sheet(
             expected_headers=["Developer", "Number of Reviewers", "Preferable Reviewers"]
         )
-        assert (
-            developers[0].reviewer_number == 5
-        ), "Should use default=5 when Number of Reviewers is empty"
+        assert developers[0].reviewer_number == 5, (
+            "Should use default=5 when Number of Reviewers is empty"
+        )
 
     finally:
         env_constants.DEFAULT_REVIEWER_NUMBER = original_default
@@ -151,9 +151,9 @@ def test_explicit_zero_is_respected(mock_get_remote_sheet):
         )
 
         # Explicit 0 should be used, not the default
-        assert (
-            developers[0].reviewer_number == 0
-        ), "Explicit 0 should be respected, not replaced with default"
+        assert developers[0].reviewer_number == 0, (
+            "Explicit 0 should be respected, not replaced with default"
+        )
 
     finally:
         env_constants.DEFAULT_REVIEWER_NUMBER = original_default

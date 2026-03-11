@@ -34,9 +34,9 @@ poetry run coverage run -m pytest tests/ && poetry run coverage report -m  # Wit
 
 ## Code Style
 
-- Formatter: **Black** (line-length 100)
-- Import sorting: **isort** (black profile)
-- Unused imports: **autoflake**
+- Linting + formatting: **Ruff** (line-length 100, replaces Black, isort, autoflake)
+- Format: `poetry run ruff format .`
+- Lint + fix: `poetry run ruff check --fix .`
 - Pre-commit hooks handle all formatting: `poetry run pre-commit run --all-files`
 
 ## Key Conventions

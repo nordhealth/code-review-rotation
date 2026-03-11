@@ -63,8 +63,7 @@ def load_config_from_sheet(
                     default_reviewer_number = int(all_values[1][1])
             except (ValueError, IndexError):
                 print(
-                    "Warning: Could not read Default Number of Reviewers "
-                    "from B2, using default: 1"
+                    "Warning: Could not read Default Number of Reviewers from B2, using default: 1"
                 )
 
             # Read Unexperienced Developers from column A (row 2 onwards)

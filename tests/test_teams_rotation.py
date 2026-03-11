@@ -151,3 +151,179 @@ class TestAssignTeamReviewers:
 
         assert len(teams[0].reviewer_names) == 1
         assert len(teams[1].reviewer_names) == 3
+
+
+# ============================================================================
+# NO-REPEAT STRESS TESTS (consecutive rotations must not repeat reviewer sets)
+# ============================================================================
+
+
+class TestTeamRotationNoRepeat:
+    """Stress tests ensuring consecutive rotations never repeat reviewer sets."""
+
+    @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+    def test_no_repeat_single_squad_100_iterations(self):
+        """100 consecutive rotations for 1 squad — no repeats."""
+        members = ["Dev1", "Dev2", "Dev3", "Dev4", "Dev5", "Dev6", "Dev7"]
+        previous_assignments: dict[str, set[str]] | None = None
+
+        for i in range(100):
+            teams = [
+                Developer(
+                    name="BugSheriff",
+                    reviewer_number=3,
+                    preferable_reviewer_names=set(members),
+                )
+            ]
+            all_devs = list(members)
+            assign_team_reviewers(
+                teams,
+                all_developers=all_devs,
+                previous_assignments=previous_assignments,
+            )
+
+            reviewers = teams[0].reviewer_names
+
+            if previous_assignments:
+                prev = previous_assignments.get("BugSheriff")
+                if prev and len(prev) > 0:
+                    assert reviewers != prev, (
+                        f"Iter {i}: BugSheriff got same reviewers {sorted(prev)} twice in a row"
+                    )
+
+            previous_assignments = {"BugSheriff": set(reviewers)}
+
+    @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+    def test_no_repeat_multiple_squads_100_iterations(self):
+        """100 consecutive rotations for 2 squads — no repeats."""
+        all_devs = ["Dev1", "Dev2", "Dev3", "Dev4", "Dev5", "Dev6", "Dev7", "Dev8"]
+        squad1_members: set[str] = set()  # 0 members, picks from experienced pool
+        squad2_members = set(all_devs[:5])
+
+        previous_assignments: dict[str, set[str]] | None = None
+
+        for i in range(100):
+            teams = [
+                Developer(
+                    name="Squad1",
+                    reviewer_number=2,
+                    preferable_reviewer_names=squad1_members,
+                ),
+                Developer(
+                    name="Squad2",
+                    reviewer_number=3,
+                    preferable_reviewer_names=squad2_members,
+                ),
+            ]
+            assign_team_reviewers(
+                teams,
+                all_developers=all_devs,
+                previous_assignments=previous_assignments,
+            )
+
+            if previous_assignments:
+                for team in teams:
+                    prev = previous_assignments.get(team.name)
+                    if prev and len(prev) > 0:
+                        assert team.reviewer_names != prev, (
+                            f"Iter {i}: {team.name} got same reviewers "
+                            f"{sorted(prev)} twice in a row"
+                        )
+
+            previous_assignments = {}
+            for team in teams:
+                previous_assignments[team.name] = set(team.reviewer_names)
+
+
+class TestTeamRotationCooldown:
+    """Tests for cooldown rule: when members >= 2 * reviewerCount,
+    previous reviewers are excluded from the candidate pool."""
+
+    @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+    def test_cooldown_zero_overlap_200_iterations(self):
+        """Bug Sheriff scenario: 7 members, 3 reviewers → cooldown applies.
+        Previous reviewers must have ZERO overlap with current reviewers."""
+        members = ["Cuong", "Marko", "Anja", "Pekka", "Sergio", "Vilhelm", "Gonzalo"]
+        previous_assignments: dict[str, set[str]] | None = None
+
+        for i in range(200):
+            teams = [
+                Developer(
+                    name="BugSheriff",
+                    reviewer_number=3,
+                    preferable_reviewer_names=set(members),
+                )
+            ]
+            assign_team_reviewers(
+                teams,
+                all_developers=members,
+                previous_assignments=previous_assignments,
+            )
+
+            reviewers = teams[0].reviewer_names
+            assert len(reviewers) == 3, f"Iter {i}: expected 3 reviewers, got {len(reviewers)}"
+
+            if previous_assignments:
+                prev = previous_assignments.get("BugSheriff")
+                if prev and len(prev) > 0:
+                    overlap = reviewers & prev
+                    assert len(overlap) == 0, (
+                        f"Iter {i}: overlap {sorted(overlap)} between "
+                        f"prev {sorted(prev)} and current {sorted(reviewers)}"
+                    )
+
+            previous_assignments = {"BugSheriff": set(reviewers)}
+
+    @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+    def test_cooldown_does_not_apply_when_too_few_members(self):
+        """5 members, 3 reviewers → 5 < 6, cooldown does NOT apply."""
+        members = ["Dev1", "Dev2", "Dev3", "Dev4", "Dev5"]
+        previous_assignments = {"TestTeam": {"Dev1", "Dev2", "Dev3"}}
+
+        teams = [
+            Developer(
+                name="TestTeam",
+                reviewer_number=3,
+                preferable_reviewer_names=set(members),
+            )
+        ]
+        assign_team_reviewers(
+            teams,
+            all_developers=members,
+            previous_assignments=previous_assignments,
+        )
+
+        # Should still select 3 reviewers
+        assert len(teams[0].reviewer_names) == 3
+
+    @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+    def test_cooldown_fair_distribution_200_iterations(self):
+        """With 7 members, 3 reviewers, and cooldown, each member should appear roughly equally."""
+        members = ["Cuong", "Marko", "Anja", "Pekka", "Sergio", "Vilhelm", "Gonzalo"]
+        frequency: dict[str, int] = {m: 0 for m in members}
+        previous_assignments: dict[str, set[str]] | None = None
+
+        for i in range(200):
+            teams = [
+                Developer(
+                    name="BugSheriff",
+                    reviewer_number=3,
+                    preferable_reviewer_names=set(members),
+                )
+            ]
+            assign_team_reviewers(
+                teams,
+                all_developers=members,
+                previous_assignments=previous_assignments,
+            )
+
+            for name in teams[0].reviewer_names:
+                frequency[name] += 1
+
+            previous_assignments = {"BugSheriff": set(teams[0].reviewer_names)}
+
+        # 200 rotations × 3 slots = 600 total / 7 members ≈ 85.7 each
+        avg = 600 / 7
+        for name, count in frequency.items():
+            assert count < avg * 1.5, f"{name} appeared {count} times (avg {avg:.1f}), too skewed"
+            assert count > avg * 0.5, f"{name} appeared {count} times (avg {avg:.1f}), too low"

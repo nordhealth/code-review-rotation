@@ -61,7 +61,8 @@ def main() -> None:
     else:
         print(f"⏳ Rotation not needed yet ({days_since} < {MINIMUM_DAYS_BETWEEN_ROTATIONS} days)")
         print(
-            f"   Next rotation will be due on: {last_date.strftime('%d-%m-%Y')} + {MINIMUM_DAYS_BETWEEN_ROTATIONS} days"
+            f"   Next rotation will be due on: "
+            f"{last_date.strftime('%d-%m-%Y')} + {MINIMUM_DAYS_BETWEEN_ROTATIONS} days"
         )
         sys.exit(1)
 

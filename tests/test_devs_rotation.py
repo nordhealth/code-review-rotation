@@ -65,21 +65,20 @@ def test_allocate_reviewers(mocked_devs: List[Developer]) -> None:
 
         # Must have at least 1 experienced reviewer
         experienced_reviewers = reviewer_names & experienced_devs
-        assert (
-            len(experienced_reviewers) >= 1
-        ), f"{dev.name} must have at least 1 experienced reviewer"
+        assert len(experienced_reviewers) >= 1, (
+            f"{dev.name} must have at least 1 experienced reviewer"
+        )
 
         if not is_experienced:
             # Non-experienced devs can ONLY have experienced reviewers
             assert reviewer_names.issubset(experienced_devs), (
-                f"Non-exp dev {dev.name} can only have exp reviewers, " f"got {reviewer_names}"
+                f"Non-exp dev {dev.name} can only have exp reviewers, got {reviewer_names}"
             )
         else:
             # Experienced devs can have at most 1 non-experienced reviewer
             non_experienced_reviewers = reviewer_names - experienced_devs
             assert len(non_experienced_reviewers) <= 1, (
-                f"Exp dev {dev.name} can have at most 1 non-exp, "
-                f"got {non_experienced_reviewers}"
+                f"Exp dev {dev.name} can have at most 1 non-exp, got {non_experienced_reviewers}"
             )
 
 
@@ -139,18 +138,18 @@ def test_allocate_reviewers_realistic_scenario() -> None:
             # Non-experienced devs (Dev1, Dev11, Dev12) can
             # ONLY have experienced reviewers
             assert reviewer_names.issubset(experienced_devs), (
-                f"Non-exp {dev.name} can only have exp reviewers, " f"got {reviewer_names}"
+                f"Non-exp {dev.name} can only have exp reviewers, got {reviewer_names}"
             )
             # Verify no non-experienced reviewers
             non_exp_reviewers = reviewer_names & non_experienced_devs
             assert len(non_exp_reviewers) == 0, (
-                f"Non-exp {dev.name} has non-exp reviewers: " f"{non_exp_reviewers}"
+                f"Non-exp {dev.name} has non-exp reviewers: {non_exp_reviewers}"
             )
         else:
             # Experienced devs can have at most 1 non-experienced
             non_exp_reviewers = reviewer_names & non_experienced_devs
             assert len(non_exp_reviewers) <= 1, (
-                f"Exp {dev.name} can have at most 1 non-exp, " f"got {non_exp_reviewers}"
+                f"Exp {dev.name} can have at most 1 non-exp, got {non_exp_reviewers}"
             )
 
 
@@ -206,9 +205,9 @@ def test_allocate_reviewers_multiple_iterations() -> None:
             assert len(reviewer_names) >= 1, f"Iteration {iteration}: {dev.name} has no reviewers"
 
             # No self-review
-            assert (
-                dev.name not in reviewer_names
-            ), f"Iteration {iteration}: {dev.name} reviewing themselves"
+            assert dev.name not in reviewer_names, (
+                f"Iteration {iteration}: {dev.name} reviewing themselves"
+            )
 
             # Must have at least 1 experienced reviewer
             exp_reviewers = reviewer_names & experienced_devs
@@ -231,7 +230,7 @@ def test_allocate_reviewers_multiple_iterations() -> None:
                 # Experienced devs can have at most 1 non-experienced
                 non_exp_reviewers = reviewer_names & non_experienced_devs
                 assert len(non_exp_reviewers) <= 1, (
-                    f"Iteration {iteration}: Exp {dev.name} has >1 " f"non-exp: {non_exp_reviewers}"
+                    f"Iteration {iteration}: Exp {dev.name} has >1 non-exp: {non_exp_reviewers}"
                 )
 
     # Reset random seed to avoid affecting other tests
@@ -364,7 +363,7 @@ def test_allocate_reviewers_extreme_minimal_scenario() -> None:
                 # Exp can have at most 1 non-experienced
                 non_exp_reviewers = reviewer_names & non_experienced_devs
                 assert len(non_exp_reviewers) <= 1, (
-                    f"Iter {iteration}: Exp has too many non-exp: " f"{non_exp_reviewers}"
+                    f"Iter {iteration}: Exp has too many non-exp: {non_exp_reviewers}"
                 )
 
     random.seed()
@@ -424,39 +423,44 @@ def test_non_experienced_devs_are_assigned() -> None:
     non_exp_dev2 = next(d for d in developers if d.name == "NonExperiencedDev2")
 
     # Verify non-experienced devs have ONLY experienced reviewers
-    assert non_exp_dev1.reviewer_names.issubset(
-        experienced_devs
-    ), f"NonExperiencedDev1 should only have experienced reviewers, got {non_exp_dev1.reviewer_names}"
-    assert non_exp_dev2.reviewer_names.issubset(
-        experienced_devs
-    ), f"NonExperiencedDev2 should only have experienced reviewers, got {non_exp_dev2.reviewer_names}"
+    assert non_exp_dev1.reviewer_names.issubset(experienced_devs), (
+        f"NonExperiencedDev1 should only have experienced reviewers, "
+        f"got {non_exp_dev1.reviewer_names}"
+    )
+    assert non_exp_dev2.reviewer_names.issubset(experienced_devs), (
+        f"NonExperiencedDev2 should only have experienced reviewers, "
+        f"got {non_exp_dev2.reviewer_names}"
+    )
 
     # THE KEY TEST: Non-experienced devs should be assigned to review others
-    assert (
-        len(non_exp_dev1.review_for) > 0
-    ), f"NonExperiencedDev1 should be assigned to review someone! Currently reviewing: {non_exp_dev1.review_for}"
-    assert (
-        len(non_exp_dev2.review_for) > 0
-    ), f"NonExperiencedDev2 should be assigned to review someone! Currently reviewing: {non_exp_dev2.review_for}"
+    assert len(non_exp_dev1.review_for) > 0, (
+        f"NonExperiencedDev1 should be assigned to review someone! "
+        f"Currently reviewing: {non_exp_dev1.review_for}"
+    )
+    assert len(non_exp_dev2.review_for) > 0, (
+        f"NonExperiencedDev2 should be assigned to review someone! "
+        f"Currently reviewing: {non_exp_dev2.review_for}"
+    )
 
     # They should be reviewing experienced devs only
     for dev_name in non_exp_dev1.review_for:
-        assert (
-            dev_name in experienced_devs
-        ), f"NonExperiencedDev1 is reviewing {dev_name} but should only review experienced devs"
+        assert dev_name in experienced_devs, (
+            f"NonExperiencedDev1 is reviewing {dev_name} but should only review experienced devs"
+        )
 
     for dev_name in non_exp_dev2.review_for:
-        assert (
-            dev_name in experienced_devs
-        ), f"NonExperiencedDev2 is reviewing {dev_name} but should only review experienced devs"
+        assert dev_name in experienced_devs, (
+            f"NonExperiencedDev2 is reviewing {dev_name} but should only review experienced devs"
+        )
 
     # Verify experienced devs they're reviewing have at most 1 non-exp reviewer
     for dev in developers:
         if dev.name in experienced_devs:
             non_exp_reviewers = dev.reviewer_names & non_experienced_devs
-            assert (
-                len(non_exp_reviewers) <= 1
-            ), f"Experienced dev {dev.name} has {len(non_exp_reviewers)} non-exp reviewers: {non_exp_reviewers}"
+            assert len(non_exp_reviewers) <= 1, (
+                f"Experienced dev {dev.name} has {len(non_exp_reviewers)} "
+                f"non-exp reviewers: {non_exp_reviewers}"
+            )
 
 
 @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", {"NonExpA", "NonExpB"})
@@ -487,9 +491,9 @@ def test_non_experienced_devs_load_balancing() -> None:
     # All non-experienced devs should be assigned
     for dev in developers:
         if dev.name in non_experienced_devs:
-            assert (
-                len(dev.review_for) > 0
-            ), f"Non-exp dev {dev.name} should be assigned to review someone"
+            assert len(dev.review_for) > 0, (
+                f"Non-exp dev {dev.name} should be assigned to review someone"
+            )
 
     # Check distribution - count how many non-exp reviewers each exp dev has
     non_exp_reviewer_counts = {}
@@ -504,9 +508,9 @@ def test_non_experienced_devs_load_balancing() -> None:
     # we expect relatively even distribution
     total_non_exp_assigned = sum(non_exp_reviewer_counts.values())
     # Both non-exp devs should be assigned somewhere
-    assert (
-        total_non_exp_assigned >= 2
-    ), f"Expected at least 2 non-exp devs to be assigned, got {total_non_exp_assigned}"
+    assert total_non_exp_assigned >= 2, (
+        f"Expected at least 2 non-exp devs to be assigned, got {total_non_exp_assigned}"
+    )
 
 
 @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", {"NonExpA", "NonExpB"})
@@ -573,14 +577,14 @@ def test_non_experienced_assignment_multiple_runs() -> None:
         for dev in developers:
             if dev.name in non_experienced_devs:
                 # Must have only experienced reviewers
-                assert dev.reviewer_names.issubset(
-                    experienced_devs
-                ), f"Iter {iteration}: {dev.name} has non-exp reviewers"
+                assert dev.reviewer_names.issubset(experienced_devs), (
+                    f"Iter {iteration}: {dev.name} has non-exp reviewers"
+                )
 
                 # THE KEY TEST: Must be assigned to review someone
-                assert (
-                    len(dev.review_for) > 0
-                ), f"Iter {iteration}: {dev.name} not assigned to review anyone"
+                assert len(dev.review_for) > 0, (
+                    f"Iter {iteration}: {dev.name} not assigned to review anyone"
+                )
 
     random.seed()
 
@@ -616,9 +620,9 @@ def test_allocate_reviewers_all_experienced() -> None:
 
         # Since all are experienced, they should all get experienced reviewers
         # (which is everyone else)
-        assert (
-            len(reviewer_names) <= dev.reviewer_number
-        ), f"{dev.name} should not exceed their reviewer number"
+        assert len(reviewer_names) <= dev.reviewer_number, (
+            f"{dev.name} should not exceed their reviewer number"
+        )
 
 
 # ============================================================================
@@ -673,9 +677,9 @@ def test_preferable_reviewers_partial_fulfillment() -> None:
 
     # Dev1 should have Dev2 (preferable) plus 2 others
     assert "Dev2" in dev1.reviewer_names, "Dev1 should have preferable reviewer Dev2"
-    assert (
-        len(dev1.reviewer_names) == 3
-    ), f"Dev1 should have 3 reviewers, got {len(dev1.reviewer_names)}"
+    assert len(dev1.reviewer_names) == 3, (
+        f"Dev1 should have 3 reviewers, got {len(dev1.reviewer_names)}"
+    )
 
 
 @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
@@ -729,9 +733,9 @@ def test_preferable_reviewers_with_experience_constraints() -> None:
     experienced_devs = {"Dev2", "Dev3", "Dev4"}
 
     # Dev1 is unexperienced, so can only have experienced reviewers
-    assert dev1.reviewer_names.issubset(
-        experienced_devs
-    ), f"Unexperienced Dev1 can only have experienced reviewers, got {dev1.reviewer_names}"
+    assert dev1.reviewer_names.issubset(experienced_devs), (
+        f"Unexperienced Dev1 can only have experienced reviewers, got {dev1.reviewer_names}"
+    )
     # Should have Dev2 (preferable and experienced) plus another experienced dev
     assert "Dev2" in dev1.reviewer_names, "Dev1 should have preferable reviewer Dev2"
     assert "Dev5" not in dev1.reviewer_names, "Dev1 should not have Dev5 (both unexperienced)"
@@ -785,9 +789,9 @@ def test_preferable_reviewers_empty_list() -> None:
     dev1 = next(d for d in developers if d.name == "Dev1")
 
     # Dev1 should still get 2 reviewers (randomly selected)
-    assert (
-        len(dev1.reviewer_names) == 2
-    ), f"Dev1 should have 2 reviewers even without preferences, got {len(dev1.reviewer_names)}"
+    assert len(dev1.reviewer_names) == 2, (
+        f"Dev1 should have 2 reviewers even without preferences, got {len(dev1.reviewer_names)}"
+    )
     assert "Dev1" not in dev1.reviewer_names, "Dev1 should not review themselves"
 
 
@@ -819,9 +823,9 @@ def test_preferable_reviewers_experienced_dev_prefers_unexperienced() -> None:
 
     # E1 can have at most 1 unexperienced reviewer
     non_exp_reviewers = e1.reviewer_names & non_experienced_devs
-    assert (
-        len(non_exp_reviewers) <= 1
-    ), f"E1 can have at most 1 unexperienced reviewer, got {non_exp_reviewers}"
+    assert len(non_exp_reviewers) <= 1, (
+        f"E1 can have at most 1 unexperienced reviewer, got {non_exp_reviewers}"
+    )
 
 
 @patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
@@ -846,9 +850,9 @@ def test_preferable_reviewers_nonexistent_names() -> None:
 
     # Dev1 should have Dev2 (the valid preferable) plus one other
     assert "Dev2" in dev1.reviewer_names, "Dev1 should have valid preferable reviewer Dev2"
-    assert (
-        len(dev1.reviewer_names) == 2
-    ), f"Dev1 should have 2 reviewers, got {len(dev1.reviewer_names)}"
+    assert len(dev1.reviewer_names) == 2, (
+        f"Dev1 should have 2 reviewers, got {len(dev1.reviewer_names)}"
+    )
     assert "NonExistent" not in dev1.reviewer_names, "NonExistent should not be assigned"
 
 
@@ -879,11 +883,107 @@ def test_preferable_reviewers_priority_ordering() -> None:
 
     # Dev1 should get at least 2 of their preferable reviewers
     preferable_assigned_dev1 = dev1.reviewer_names & {"Dev4", "Dev5", "Dev6"}
-    assert (
-        len(preferable_assigned_dev1) >= 2
-    ), f"Dev1 should get at least 2 preferable reviewers, got {preferable_assigned_dev1}"
+    assert len(preferable_assigned_dev1) >= 2, (
+        f"Dev1 should get at least 2 preferable reviewers, got {preferable_assigned_dev1}"
+    )
 
     # All should have correct number of reviewers
     assert len(dev1.reviewer_names) == 2
     assert len(dev2.reviewer_names) == 2
     assert len(dev3.reviewer_names) == 2
+
+
+# ============================================================================
+# NO-REPEAT STRESS TESTS (consecutive rotations must not repeat reviewer sets)
+# ============================================================================
+
+
+def _run_consecutive_dev_rotations(
+    make_devs,
+    unexperienced_names: set,
+    iterations: int = 200,
+):
+    """
+    Helper: run N consecutive rotations, asserting that no developer gets
+    the exact same reviewer set (unordered) in two consecutive iterations.
+    """
+    previous_assignments: dict[str, Set[str]] | None = None
+
+    for i in range(iterations):
+        devs = make_devs()
+        allocate_reviewers(devs, previous_assignments=previous_assignments)
+
+        if previous_assignments:
+            for dev in devs:
+                prev = previous_assignments.get(dev.name)
+                if prev and len(prev) > 0:
+                    assert dev.reviewer_names != prev, (
+                        f"Iter {i}: {dev.name} got same reviewers {sorted(prev)} twice in a row"
+                    )
+
+        # Build previous_assignments for next iteration
+        previous_assignments = {}
+        for dev in devs:
+            previous_assignments[dev.name] = set(dev.reviewer_names)
+
+
+@patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+def test_no_repeat_all_experienced_8_devs() -> None:
+    """200 consecutive rotations with 8 experienced devs — no repeats."""
+
+    def make_devs():
+        return [Developer(name=f"Dev{i}", reviewer_number=2) for i in range(1, 9)]
+
+    _run_consecutive_dev_rotations(make_devs, set(), iterations=200)
+
+
+@patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", {"Dev1", "Dev11", "Dev12"})
+def test_no_repeat_pvc_finance_core_scenario() -> None:
+    """200 iterations: 12 devs (9 exp + 3 unexp) with 2 reviewers each."""
+
+    def make_devs():
+        return [Developer(name=f"Dev{i}", reviewer_number=2) for i in range(1, 13)]
+
+    _run_consecutive_dev_rotations(make_devs, {"Dev1", "Dev11", "Dev12"}, iterations=200)
+
+
+@patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+def test_no_repeat_kissu_scenario() -> None:
+    """
+    200 iterations reproducing the Kissu bug scenario:
+    7 experienced devs, 2 reviewers each.
+    """
+
+    def make_devs():
+        names = ["Kissu", "Chris", "Pasha", "Gonzalo", "Sergio", "Anja", "João"]
+        return [Developer(name=n, reviewer_number=2) for n in names]
+
+    _run_consecutive_dev_rotations(make_devs, set(), iterations=200)
+
+
+@patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", set())
+def test_no_repeat_5_devs_2_reviewers() -> None:
+    """200 iterations: 5 experienced devs with 2 reviewers — tight pool."""
+
+    def make_devs():
+        return [Developer(name=f"Dev{i}", reviewer_number=2) for i in range(1, 6)]
+
+    _run_consecutive_dev_rotations(make_devs, set(), iterations=200)
+
+
+@patch("lib.env_constants.UNEXPERIENCED_DEV_NAMES", {"NE1", "NE2"})
+def test_no_repeat_mixed_experience() -> None:
+    """200 iterations: 5 exp + 2 unexp devs, 2 reviewers each."""
+
+    def make_devs():
+        return [
+            Developer(name="E1", reviewer_number=2),
+            Developer(name="E2", reviewer_number=2),
+            Developer(name="E3", reviewer_number=2),
+            Developer(name="E4", reviewer_number=2),
+            Developer(name="E5", reviewer_number=2),
+            Developer(name="NE1", reviewer_number=2),
+            Developer(name="NE2", reviewer_number=2),
+        ]
+
+    _run_consecutive_dev_rotations(make_devs, {"NE1", "NE2"}, iterations=200)

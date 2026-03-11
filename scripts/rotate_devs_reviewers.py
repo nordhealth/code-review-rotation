@@ -110,16 +110,67 @@ from lib.utilities import (  # noqa: E402
 load_dotenv(find_dotenv())
 
 
+def load_previous_dev_assignments(
+    sheet_index: int = SheetIndicesFallback.DEVS.value,
+) -> dict[str, Set[str]] | None:
+    """
+    Load the most recent rotation column from the Google Sheet.
+
+    Returns a dict of developer name → set of reviewer names from the
+    previous rotation, or None if no previous rotation exists.
+    """
+    try:
+        with get_remote_sheet(sheet_index) as sheet:
+            all_values = sheet.get_all_values()
+            increment_api_call_count()
+
+        if not all_values or len(all_values) < 2:
+            return None
+
+        header_row = all_values[0]
+        num_static_cols = len(EXPECTED_HEADERS_FOR_ALLOCATION)
+
+        # The first column after static headers is the most recent rotation
+        if len(header_row) <= num_static_cols:
+            return None
+
+        dev_col_idx = 0  # "Developer" column
+        prev_col_idx = num_static_cols  # First data column
+
+        result: dict[str, Set[str]] = {}
+        for row in all_values[1:]:
+            if len(row) <= prev_col_idx:
+                continue
+            dev_name = row[dev_col_idx].strip()
+            prev_reviewers_str = row[prev_col_idx].strip()
+            if dev_name and prev_reviewers_str:
+                result[dev_name] = set(
+                    name.strip() for name in prev_reviewers_str.split(",") if name.strip()
+                )
+
+        return result if result else None
+
+    except Exception as e:
+        print(f"⚠️  Could not load previous assignments: {e}")
+        return None
+
+
 def shuffle_and_get_the_most_available_names(
-    available_names: Set[str], number_of_names: int, devs
+    available_names: Set[str],
+    number_of_names: int,
+    devs,
+    previous_reviewers: Set[str] | None = None,
 ) -> List[str]:
     """
     Select reviewers with load balancing - prioritize least assigned.
+    Deprioritizes reviewers from the previous rotation to avoid repeats.
 
     Args:
         available_names: Set of available reviewer names
         number_of_names: Number of reviewers to select
         devs: List of all developers (to check current assignments)
+        previous_reviewers: Set of reviewer names from the previous rotation
+            for the current developer (used to avoid repeating same set)
 
     Returns:
         List of selected reviewer names (load-balanced and shuffled)
@@ -136,15 +187,21 @@ def shuffle_and_get_the_most_available_names(
         return names
 
     random.shuffle(names)
-    # To select names that have the least assigned times.
+    # Sort by: (1) not-previous before previous, (2) reviewingFor count ascending
     names.sort(
-        key=lambda name: len(next(dev for dev in devs if dev.name == name).review_for),
+        key=lambda name: (
+            1 if previous_reviewers and name in previous_reviewers else 0,
+            len(next(dev for dev in devs if dev.name == name).review_for),
+        ),
     )
 
     return names[0:number_of_names]
 
 
-def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
+def run_reviewer_allocation_algorithm(
+    devs: List[Developer],
+    previous_assignments: dict[str, Set[str]] | None = None,
+) -> None:
     """
     Single attempt at assigning reviewers (internal function).
 
@@ -172,14 +229,14 @@ def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
 
     print("\n📊 Developer Classification (INVERTED LOGIC):")
     print(f"   Names in FE Developers sheet: {sorted(all_dev_names)}")
-    print(f"   Names from UNEXPERIENCED_DEV_NAMES config: " f"{sorted(unexperienced_dev_names)}")
-    print(f"   ✅ 👨‍🎓 Matched (Unexperienced/Junior): " f"{sorted(valid_unexperienced_dev_names)}")
+    print(f"   Names from UNEXPERIENCED_DEV_NAMES config: {sorted(unexperienced_dev_names)}")
+    print(f"   ✅ 👨‍🎓 Matched (Unexperienced/Junior): {sorted(valid_unexperienced_dev_names)}")
     print(f"   ✅ 👷 Experienced (NOT in config): {sorted(experienced_dev_names)}")
 
     # Show mismatches
     unmatched_from_config = unexperienced_dev_names - all_dev_names
     if unmatched_from_config:
-        print("\n⚠️  WARNING: These names from Config don't match " "any developer:")
+        print("\n⚠️  WARNING: These names from Config don't match any developer:")
         for name in sorted(unmatched_from_config):
             print(f"      '{name}' (length: {len(name)}, repr: {repr(name)})")
 
@@ -201,6 +258,7 @@ def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
         print(f"🔄 {dev.name} ({exp_label}, needs {reviewer_number} reviewers)")
 
         chosen_reviewer_names: Set[str] = set()
+        prev_reviewers = previous_assignments.get(dev.name) if previous_assignments else None
 
         # Step 1: Try preferable reviewers first
         if dev.preferable_reviewer_names:
@@ -208,7 +266,7 @@ def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
             needed = reviewer_number - len(chosen_reviewer_names)
             if available_preferable and needed > 0:
                 selected = shuffle_and_get_the_most_available_names(
-                    available_preferable, needed, devs
+                    available_preferable, needed, devs, prev_reviewers
                 )
                 chosen_reviewer_names.update(selected)
                 print(f"   Preferable: {sorted(selected)}")
@@ -218,7 +276,9 @@ def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
         remaining_needed = reviewer_number - len(chosen_reviewer_names)
         if remaining_needed > 0:
             available = all_dev_names - chosen_reviewer_names - {dev.name}
-            selected = shuffle_and_get_the_most_available_names(available, remaining_needed, devs)
+            selected = shuffle_and_get_the_most_available_names(
+                available, remaining_needed, devs, prev_reviewers
+            )
             chosen_reviewer_names.update(selected)
             if selected:
                 print(f"   Filled: {sorted(selected)}")
@@ -276,7 +336,7 @@ def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
         # Recalculate to get current state
         current_unexp_reviewers = dev.reviewer_names & valid_unexperienced_dev_names
         if not is_experienced and len(current_unexp_reviewers) > 0:
-            msg = f"⚠️  {dev.name} (Unexp) has unexp reviewers: " f"{current_unexp_reviewers}"
+            msg = f"⚠️  {dev.name} (Unexp) has unexp reviewers: {current_unexp_reviewers}"
             print(msg)
             # Make a copy of the set to avoid modification during iteration
             for unexp_name in list(current_unexp_reviewers):
@@ -387,7 +447,7 @@ def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
                 )
                 print(msg)
             else:
-                msg = f"⚠️  Could not assign {unexp_dev.name} - " "no suitable candidates"
+                msg = f"⚠️  Could not assign {unexp_dev.name} - no suitable candidates"
                 print(msg)
     else:
         print("✅ All unexperienced developers already assigned")
@@ -430,22 +490,42 @@ def run_reviewer_allocation_algorithm(devs: List[Developer]) -> None:
         assigned_unexp = dev.reviewer_names & valid_unexperienced_dev_names
 
         print(f"{dev.name} ({exp_label}): {sorted(dev.reviewer_names)}")
-        print(f"  Reviewers: Exp={len(assigned_exp)}, " f"Unexp={len(assigned_unexp)}")
+        print(f"  Reviewers: Exp={len(assigned_exp)}, Unexp={len(assigned_unexp)}")
         review_for_str = sorted(dev.review_for) if dev.review_for else "(none)"
         print(f"  Reviewing: {len(dev.review_for)} devs {review_for_str}")
         print()
 
 
-def allocate_reviewers(devs: List[Developer], max_retries: int = 10) -> None:
+def count_repeated_assignments(
+    devs: List[Developer],
+    previous_assignments: dict[str, Set[str]],
+) -> int:
+    """Count how many devs got the exact same reviewer set as the previous rotation."""
+    count = 0
+    for dev in devs:
+        prev = previous_assignments.get(dev.name)
+        if prev and prev == dev.reviewer_names:
+            count += 1
+    return count
+
+
+def allocate_reviewers(
+    devs: List[Developer],
+    max_retries: int = 10,
+    previous_assignments: dict[str, Set[str]] | None = None,
+) -> None:
     """
     Assign reviewers to developers with retry mechanism.
 
     This function wraps run_reviewer_allocation_algorithm and retries with different
-    random seeds if unexperienced developers are not assigned.
+    random seeds if unexperienced developers are not assigned or if too many
+    developers get the same reviewer set as the previous rotation.
 
     Args:
         devs: List of developers to assign reviewers to
         max_retries: Maximum number of retry attempts (default: 10)
+        previous_assignments: Dict of dev name → set of reviewer names from
+            the previous rotation (used to avoid repeating same sets)
 
     Note: Uses INVERTED logic - config lists UNEXPERIENCED developers.
     """
@@ -461,7 +541,7 @@ def allocate_reviewers(devs: List[Developer], max_retries: int = 10) -> None:
     )
 
     best_attempt = None
-    best_assigned_count = 0
+    best_score = -float("inf")
 
     for attempt in range(max_retries):
         # Create a deep copy for this attempt
@@ -469,7 +549,7 @@ def allocate_reviewers(devs: List[Developer], max_retries: int = 10) -> None:
 
         # Try allocation
         try:
-            run_reviewer_allocation_algorithm(devs_copy)
+            run_reviewer_allocation_algorithm(devs_copy, previous_assignments)
         except Exception as e:
             print(f"Attempt {attempt + 1} failed with error: {e}")
             continue
@@ -481,18 +561,27 @@ def allocate_reviewers(devs: List[Developer], max_retries: int = 10) -> None:
             if dev.name in valid_unexperienced_dev_names and len(dev.review_for) > 0
         )
 
+        # Count repeated assignments (lower is better)
+        repeats = (
+            count_repeated_assignments(devs_copy, previous_assignments)
+            if previous_assignments
+            else 0
+        )
+
+        # Score: prioritize unexp assignment, then penalize repeats
+        score = assigned_count * 1000 - repeats
+
         # Track best attempt
-        if assigned_count > best_assigned_count:
-            best_assigned_count = assigned_count
+        if score > best_score:
+            best_score = score
             best_attempt = devs_copy
 
-        # If all unexp devs are assigned, we're done!
-        if assigned_count == len(valid_unexperienced_dev_names):
+        # Perfect: all unexp assigned AND no repeats
+        if assigned_count == len(valid_unexperienced_dev_names) and repeats == 0:
             print(
                 f"\n✅ Success on attempt {attempt + 1}: All {assigned_count} "
-                f"unexp devs assigned!"
+                f"unexp devs assigned, 0 repeats!"
             )
-            # Copy results back to original devs list
             for i, dev in enumerate(devs):
                 dev.reviewer_names = devs_copy[i].reviewer_names
                 dev.review_for = devs_copy[i].review_for
@@ -505,10 +594,11 @@ def allocate_reviewers(devs: List[Developer], max_retries: int = 10) -> None:
 
     # If we get here, use best attempt
     if best_attempt:
-        print(
-            f"\n⚠️  After {max_retries} attempts, best result: "
-            f"{best_assigned_count}/{len(valid_unexperienced_dev_names)} unexp devs assigned"
-        )
+        repeats_info = ""
+        if previous_assignments:
+            final_repeats = count_repeated_assignments(best_attempt, previous_assignments)
+            repeats_info = f", {final_repeats} repeated assignments"
+        print(f"\n⚠️  After {max_retries} attempts, using best result{repeats_info}")
         # Copy results back to original devs list
         for i, dev in enumerate(devs):
             dev.reviewer_names = best_attempt[i].reviewer_names
@@ -580,7 +670,13 @@ if __name__ == "__main__":
         env_constants.UNEXPERIENCED_DEV_NAMES = unexp_dev_names
 
         developers = load_developers_from_sheet(EXPECTED_HEADERS_FOR_ALLOCATION)
-        allocate_reviewers(developers)
+
+        # Load previous rotation from the sheet to avoid repeating same reviewer sets
+        previous_assignments = load_previous_dev_assignments()
+        if previous_assignments:
+            print(f"\n📋 Loaded previous rotation for {len(previous_assignments)} developers")
+
+        allocate_reviewers(developers, previous_assignments=previous_assignments)
 
         # Manual runs update existing column, scheduled runs create new column
         is_manual = os.environ.get("MANUAL_RUN", "").lower() == "true"
