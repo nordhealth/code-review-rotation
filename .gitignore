@@ -8,4 +8,6 @@ __pycache__/
 htmlcov
 .DS_Store
 
+node_modules
+.pnpm-store
 web/.data
