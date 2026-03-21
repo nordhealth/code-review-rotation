@@ -172,6 +172,21 @@ export const rotationAssignments = sqliteTable("rotation_assignments", {
     .$defaultFn(() => new Date()),
 });
 
+export const apiKeys = sqliteTable("api_keys", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull(),
+  keyPrefix: text("key_prefix").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const rotationAssignmentReviewers = sqliteTable("rotation_assignment_reviewers", {
   id: text("id")
     .primaryKey()

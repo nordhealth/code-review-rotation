@@ -15,6 +15,13 @@
       "when": 1774110624600,
       "tag": "0001_pink_groot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1774112080721,
+      "tag": "0002_cool_karnak",
+      "breakpoints": true
     }
   ]
 }

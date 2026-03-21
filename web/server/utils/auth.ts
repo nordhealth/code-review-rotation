@@ -21,3 +21,35 @@ export async function requireAdmin(event: H3Event) {
   }
   return user;
 }
+
+/**
+ * Authenticate via Bearer token (API key).
+ * Returns the user associated with the key, or throws 401.
+ */
+export async function requireApiKey(event: H3Event) {
+  const authorization = getHeader(event, "authorization");
+  if (!authorization?.startsWith("Bearer ")) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Missing or invalid Authorization header. Use: Bearer <api_key>",
+    });
+  }
+
+  const key = authorization.slice(7);
+  if (!key) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "API key is empty",
+    });
+  }
+
+  const user = await resolveApiKeyUser(key);
+  if (!user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Invalid API key",
+    });
+  }
+
+  return user;
+}

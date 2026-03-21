@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { LayoutDashboard, Users, ShieldCheck, Settings, LogOut, Moon, Sun } from "lucide-vue-next";
+import {
+  LayoutDashboard,
+  Users,
+  ShieldCheck,
+  Settings,
+  Key,
+  LogOut,
+  Moon,
+  Sun,
+} from "lucide-vue-next";
 
 const { user, clear } = useUserSession();
 const colorMode = useColorMode();
@@ -8,6 +17,7 @@ const navigation = computed(() => {
   const items = [
     { name: "Teams", to: "/", icon: LayoutDashboard },
     { name: "Developers", to: "/developers", icon: Users },
+    { name: "API Keys", to: "/api-keys", icon: Key },
   ];
   if (user.value?.role === "admin") {
     items.push({ name: "Users", to: "/users", icon: ShieldCheck });
