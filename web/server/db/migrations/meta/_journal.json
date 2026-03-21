@@ -8,6 +8,13 @@
       "when": 1773238422899,
       "tag": "0000_great_squadron_supreme",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1774110624600,
+      "tag": "0001_pink_groot",
+      "breakpoints": true
     }
   ]
 }

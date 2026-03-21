@@ -1,5 +1,22 @@
 import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { nanoid } from "nanoid";
+import { ROTATION_DAYS } from "../utils/rotation/schedule";
+
+export { ROTATION_DAYS } from "../utils/rotation/schedule";
+export type { RotationDay } from "../utils/rotation/schedule";
+
+export const settings = sqliteTable("settings", {
+  id: text("id").primaryKey(),
+  defaultRotationIntervalDays: integer("default_rotation_interval_days").notNull().default(14),
+  defaultRotationTime: text("default_rotation_time").notNull().default("04:00"),
+  defaultRotationDay: text("default_rotation_day", { enum: ROTATION_DAYS })
+    .notNull()
+    .default("wednesday"),
+  defaultRotationTimezone: text("default_rotation_timezone").notNull().default("Europe/Helsinki"),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
 
 export const users = sqliteTable("users", {
   id: text("id")
@@ -50,6 +67,10 @@ export const teams = sqliteTable("teams", {
   name: text("name").notNull().unique(),
   slug: text("slug").notNull().unique(),
   defaultReviewerCount: integer("default_reviewer_count").notNull().default(2),
+  rotationIntervalDays: integer("rotation_interval_days"),
+  rotationTime: text("rotation_time"),
+  rotationDay: text("rotation_day", { enum: ROTATION_DAYS }),
+  rotationTimezone: text("rotation_timezone"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -158,7 +179,8 @@ export const rotationAssignmentReviewers = sqliteTable("rotation_assignment_revi
   assignmentId: text("assignment_id")
     .notNull()
     .references(() => rotationAssignments.id, { onDelete: "cascade" }),
-  reviewerDeveloperId: text("reviewer_developer_id")
-    .references(() => developers.id, { onDelete: "set null" }),
+  reviewerDeveloperId: text("reviewer_developer_id").references(() => developers.id, {
+    onDelete: "set null",
+  }),
   reviewerName: text("reviewer_name"),
 });

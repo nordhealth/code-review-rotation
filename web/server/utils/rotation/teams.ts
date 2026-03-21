@@ -91,6 +91,7 @@ function runTeamRotationOnce(context: TeamRotationContext): Map<string, string[]
     if (numMembers === 0) {
       // No team members -> assign balanced experienced devs
       let pool = experiencedDeveloperIds;
+      /* v8 ignore next 3 -- cooldownApplies requires numMembers >= 2*numReviewers, unreachable when 0 */
       if (cooldownApplies) {
         pool = pool.filter((id) => !prevReviewers.has(id));
       }

@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ChevronDown, ChevronRight, X, Check, ChevronsUpDown } from "lucide-vue-next";
+import {
+  ChevronDown,
+  ChevronRight,
+  X,
+  Check,
+  ChevronsUpDown,
+  CalendarClock,
+} from "lucide-vue-next";
+import type { Settings, Team } from "~/types";
 
 const props = defineProps<{
   teamId: string;
@@ -10,7 +18,8 @@ const { data: rotations, refresh: refreshRotations } = await useFetch(
   `/api/teams/${props.teamId}/rotations`,
 );
 const { data: members } = await useFetch(`/api/teams/${props.teamId}/members`);
-const { data: team } = await useFetch(`/api/teams/${props.teamId}`);
+const { data: team } = await useFetch<Team>(`/api/teams/${props.teamId}`);
+const { data: globalSettings } = await useFetch<Settings>("/api/settings");
 
 const filteredRotations = computed(() => {
   if (!rotations.value) return [];
@@ -134,10 +143,69 @@ const reviewerCountLabel = computed(() => {
   if (!team.value) return "";
   return `${team.value.defaultReviewerCount} reviewer${team.value.defaultReviewerCount !== 1 ? "s" : ""} each`;
 });
+
+const DAY_INDEX: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+const nextRotationDate = computed(() => {
+  if (!team.value || !globalSettings.value) return null;
+
+  const intervalDays =
+    team.value.rotationIntervalDays ?? globalSettings.value.defaultRotationIntervalDays;
+  const targetDay = team.value.rotationDay ?? globalSettings.value.defaultRotationDay;
+  const targetTime = team.value.rotationTime ?? globalSettings.value.defaultRotationTime;
+  const timezone = team.value.rotationTimezone ?? globalSettings.value.defaultRotationTimezone;
+
+  const lastRotation = filteredRotations.value[0];
+  if (!lastRotation) return null;
+
+  const lastDate = new Date(lastRotation.date);
+  const candidate = new Date(lastDate.getTime() + intervalDays * 24 * 60 * 60 * 1000);
+
+  // Align to the target day of week
+  const targetDayIndex = DAY_INDEX[targetDay] ?? 3;
+  const candidateDay = candidate.getDay();
+  const dayDifference = (targetDayIndex - candidateDay + 7) % 7;
+  if (dayDifference > 0) {
+    candidate.setDate(candidate.getDate() + dayDifference);
+  }
+
+  // Set target time
+  const [hours, minutes] = targetTime.split(":").map(Number);
+  candidate.setHours(hours, minutes, 0, 0);
+
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: timezone,
+    timeZoneName: "short",
+  }).format(candidate);
+});
 </script>
 
 <template>
   <template v-if="filteredRotations.length">
+    <!-- Next rotation banner -->
+    <div
+      v-if="nextRotationDate"
+      class="flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-2.5"
+    >
+      <CalendarClock class="size-4 text-muted-foreground" />
+      <span class="text-sm text-muted-foreground">Next rotation:</span>
+      <span class="text-sm font-medium">{{ nextRotationDate }}</span>
+    </div>
+
     <!-- Active rotation -->
     <div v-if="activeRotation" class="overflow-hidden rounded-lg border border-primary/30">
       <div class="flex items-center gap-3 border-b bg-primary/5 px-4 py-3">

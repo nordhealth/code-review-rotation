@@ -1,5 +1,35 @@
 import { users } from "../../db/schema";
 
+export async function queryAllUsers() {
+  return db
+    .select({
+      id: users.id,
+      email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      role: users.role,
+      emailConfirmed: users.emailConfirmed,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .orderBy(users.createdAt);
+}
+
+export async function updateUserRole(userId: string, role: "admin" | "developer") {
+  const [updated] = await db
+    .update(users)
+    .set({ role, updatedAt: new Date() })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      role: users.role,
+    });
+  return updated;
+}
+
 export async function queryUserByEmail(email: string) {
   return db.select().from(users).where(eq(users.email, email)).get();
 }

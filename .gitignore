@@ -6,8 +6,11 @@ client_key.json
 __pycache__/
 .coverage
 htmlcov
+coverage.xml
 .DS_Store
 
 node_modules
 .pnpm-store
 web/.data
+*.db
+*.db-journal

@@ -204,6 +204,21 @@ describe("runTeamRotation", () => {
     }
   });
 
+  it("handles previousAssignments with empty set for a squad", () => {
+    const members = ["Dev1", "Dev2", "Dev3", "Dev4", "Dev5"];
+    const previous = new Map([["squad1", new Set<string>()]]);
+
+    const context = makeContext({
+      squads: [{ id: "squad1", name: "Squad1", reviewerCount: 2, memberIds: members }],
+      allDeveloperIds: members,
+      experiencedDeveloperIds: members,
+      previousAssignments: previous,
+    });
+
+    const result = runTeamRotation(context);
+    expect(result.get("squad1")!.length).toBe(2);
+  });
+
   it("cooldown does NOT apply when members < 2 * reviewerCount", () => {
     // 5 members, 3 reviewers → 5 < 6, cooldown does NOT apply
     // Some overlap is acceptable (and unavoidable with only 2 non-previous candidates)

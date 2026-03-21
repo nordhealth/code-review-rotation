@@ -22,3 +22,20 @@ logs
 .env
 .env.*
 !.env.example
+
+# Test / coverage
+coverage
+*.lcov
+
+# Playwright
+test-results
+playwright-report
+blob-report
+
+# Storybook
+storybook-static
+
+# SQLite (local dev database)
+*.db
+*.db-journal
+*.db-wal
