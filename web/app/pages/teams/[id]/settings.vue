@@ -242,7 +242,7 @@ async function deleteTeam() {
         <p class="mt-1 text-sm text-muted-foreground">
           Deleting this team will remove all members, squads, and rotation history.
         </p>
-        <UIButton variant="destructive" class="mt-3" @click="deleteTeam">
+        <UIButton variant="destructive" type="button" class="mt-3" @click="deleteTeam">
           <Trash2 class="size-4" />
           Delete Team
         </UIButton>

@@ -77,6 +77,7 @@ async function deleteDeveloper(slug: string, name: string) {
                   <NuxtLink :to="`/developers/${dev.slug}/edit`"> Edit </NuxtLink>
                 </UIButton>
                 <UIButton
+                  type="button"
                   variant="ghost"
                   size="icon-sm"
                   class="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"

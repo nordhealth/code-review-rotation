@@ -98,6 +98,7 @@ async function deleteSquad(squadId: string, name: string) {
               <NuxtLink :to="`/teams/${teamId}/squads/${squad.id}/edit`"> Edit </NuxtLink>
             </UIButton>
             <UIButton
+              type="button"
               variant="ghost"
               size="icon-sm"
               class="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
@@ -142,6 +143,7 @@ async function deleteSquad(squadId: string, name: string) {
             >
               <UIPopoverTrigger as-child>
                 <button
+                  type="button"
                   class="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
                 >
                   +{{ squad.members.length - (visibleCounts[squad.id] ?? squad.members.length) }}

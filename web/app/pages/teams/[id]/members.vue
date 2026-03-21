@@ -118,7 +118,7 @@ function getPreferableNames(member: any): string {
   <div class="space-y-6">
     <TeamSubNav :team-id="teamId" :team-name="team?.name ?? 'Loading...'">
       <template #actions>
-        <UIButton size="sm" @click="showAddForm = !showAddForm">
+        <UIButton size="sm" type="button" @click="showAddForm = !showAddForm">
           <Plus class="size-4" />
           Add Member
         </UIButton>
@@ -140,10 +140,10 @@ function getPreferableNames(member: any): string {
             </UISelectContent>
           </UISelect>
         </div>
-        <UIButton :disabled="!selectedDeveloperId || addingMember" @click="addMember">
+        <UIButton type="button" :disabled="!selectedDeveloperId || addingMember" @click="addMember">
           {{ addingMember ? "Adding..." : "Add" }}
         </UIButton>
-        <UIButton variant="ghost" @click="showAddForm = false"> Cancel </UIButton>
+        <UIButton variant="ghost" type="button" @click="showAddForm = false"> Cancel </UIButton>
       </div>
       <p v-if="availableDevelopers.length === 0" class="mt-2 text-xs text-muted-foreground">
         All developers are already members of this team.
@@ -209,6 +209,7 @@ function getPreferableNames(member: any): string {
                 <UIButton
                   variant="outline"
                   size="sm"
+                  type="button"
                   class="h-7 px-2.5 text-xs"
                   @click="openEditDialog(member)"
                 >
@@ -217,6 +218,7 @@ function getPreferableNames(member: any): string {
                 <UIButton
                   variant="ghost"
                   size="icon-sm"
+                  type="button"
                   class="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   title="Remove"
                   @click="
@@ -240,7 +242,7 @@ function getPreferableNames(member: any): string {
       class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
     >
       <p class="text-sm text-muted-foreground">No members yet</p>
-      <UIButton size="sm" class="mt-3" @click="showAddForm = true">
+      <UIButton size="sm" type="button" class="mt-3" @click="showAddForm = true">
         <Plus class="size-4" />
         Add your first member
       </UIButton>
@@ -351,8 +353,10 @@ function getPreferableNames(member: any): string {
         </div>
 
         <UIDialogFooter>
-          <UIButton variant="ghost" @click="editDialogOpen = false"> Cancel </UIButton>
-          <UIButton @click="saveEdit"> Save </UIButton>
+          <UIButton variant="ghost" type="button" @click="editDialogOpen = false">
+            Cancel
+          </UIButton>
+          <UIButton type="button" @click="saveEdit"> Save </UIButton>
         </UIDialogFooter>
       </UIDialogContent>
     </UIDialog>

@@ -230,7 +230,13 @@ const nextRotationDate = computed(() => {
 
         <!-- Card-level Edit / Save / Cancel -->
         <template v-if="!isEditing">
-          <UIButton size="sm" variant="outline" class="h-7 px-2.5 text-xs" @click="startEditing">
+          <UIButton
+            size="sm"
+            variant="outline"
+            type="button"
+            class="h-7 px-2.5 text-xs"
+            @click="startEditing"
+          >
             Edit
           </UIButton>
         </template>
@@ -238,13 +244,20 @@ const nextRotationDate = computed(() => {
           <UIButton
             size="sm"
             variant="default"
+            type="button"
             :disabled="saving"
             class="h-7 px-2.5 text-xs"
             @click="saveAll"
           >
             {{ saving ? "Saving..." : "Save" }}
           </UIButton>
-          <UIButton size="sm" variant="ghost" class="h-7 px-2.5 text-xs" @click="cancelEditing">
+          <UIButton
+            size="sm"
+            variant="ghost"
+            type="button"
+            class="h-7 px-2.5 text-xs"
+            @click="cancelEditing"
+          >
             Cancel
           </UIButton>
         </template>
@@ -326,6 +339,7 @@ const nextRotationDate = computed(() => {
                 </UIAvatar>
                 {{ devName(devId) }}
                 <button
+                  type="button"
                   class="ml-0.5 rounded-full p-0.5 hover:bg-primary/20"
                   @click="toggleReviewer(assignment.id, devId)"
                 >
@@ -339,6 +353,7 @@ const nextRotationDate = computed(() => {
               >
                 <UIPopoverTrigger as-child>
                   <button
+                    type="button"
                     class="inline-flex items-center gap-1 rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-muted hover:text-foreground"
                   >
                     <ChevronsUpDown class="size-3" />
@@ -390,6 +405,7 @@ const nextRotationDate = computed(() => {
     <!-- Past rotations -->
     <div v-if="pastRotations.length" class="overflow-hidden rounded-lg border">
       <button
+        type="button"
         class="flex w-full items-center gap-3 bg-muted/30 px-4 py-3 text-left transition-colors hover:bg-muted/50"
         @click="historyOpen = !historyOpen"
       >
@@ -404,6 +420,7 @@ const nextRotationDate = computed(() => {
       <div v-if="historyOpen">
         <div v-for="rotation in pastRotations" :key="rotation.id">
           <button
+            type="button"
             class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
             @click="toggleExpanded(rotation.id)"
           >

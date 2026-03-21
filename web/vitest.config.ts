@@ -12,6 +12,7 @@ export default defineConfig({
         "server/utils/rotation/**/*.ts",
         "server/utils/auth-constants.ts",
         "server/utils/api-key.ts",
+        "server/utils/webhook.ts",
         "app/lib/utils.ts",
       ],
       exclude: ["server/utils/rotation/index.ts"],

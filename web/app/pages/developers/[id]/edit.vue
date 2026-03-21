@@ -61,7 +61,7 @@ async function submit() {
       <!-- Header (matches profile page) -->
       <div class="flex items-start justify-between">
         <div class="flex items-center gap-4">
-          <button class="text-muted-foreground hover:text-foreground" @click="goBack">
+          <button type="button" class="text-muted-foreground hover:text-foreground" @click="goBack">
             <ArrowLeft class="size-5" />
           </button>
           <UIAvatar class="size-12">
@@ -111,7 +111,7 @@ async function submit() {
           <UIButton type="submit" :disabled="submitting">
             {{ submitting ? "Saving..." : "Save Changes" }}
           </UIButton>
-          <UIButton variant="ghost" @click.prevent="goBack"> Cancel </UIButton>
+          <UIButton type="button" variant="ghost" @click.prevent="goBack"> Cancel </UIButton>
         </div>
       </form>
     </template>

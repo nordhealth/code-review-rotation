@@ -172,6 +172,20 @@ export const rotationAssignments = sqliteTable("rotation_assignments", {
     .$defaultFn(() => new Date()),
 });
 
+export const webhooks = sqliteTable("webhooks", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  secret: text("secret").notNull(),
+  events: text("events").notNull().default("rotation.created"),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const apiKeys = sqliteTable("api_keys", {
   id: text("id")
     .primaryKey()

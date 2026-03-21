@@ -22,6 +22,13 @@
       "when": 1774112080721,
       "tag": "0002_cool_karnak",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1774112575998,
+      "tag": "0003_late_fenris",
+      "breakpoints": true
     }
   ]
 }

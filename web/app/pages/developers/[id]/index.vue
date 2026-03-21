@@ -310,6 +310,7 @@ function toggleRotation(rotationId: string) {
           <button
             v-for="opt in viewOptions"
             :key="opt.value"
+            type="button"
             class="rounded-md px-3 py-1.5 text-sm font-medium transition-all"
             :class="
               activeView === opt.value
@@ -390,6 +391,7 @@ function toggleRotation(rotationId: string) {
               class="overflow-hidden rounded-lg border"
             >
               <button
+                type="button"
                 class="flex w-full items-center gap-3 bg-muted/30 px-4 py-2.5 text-left transition-colors hover:bg-muted/50"
                 @click="toggleHistory(`reviewers-${teamGroup.teamSlug}`)"
               >
@@ -411,6 +413,7 @@ function toggleRotation(rotationId: string) {
               <div v-if="expandedHistory.has(`reviewers-${teamGroup.teamSlug}`)">
                 <div v-for="rotation in teamGroup.past" :key="rotation.rotationId">
                   <button
+                    type="button"
                     class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
                     @click="toggleRotation(rotation.rotationId)"
                   >
@@ -529,6 +532,7 @@ function toggleRotation(rotationId: string) {
               class="overflow-hidden rounded-lg border"
             >
               <button
+                type="button"
                 class="flex w-full items-center gap-3 bg-muted/30 px-4 py-2.5 text-left transition-colors hover:bg-muted/50"
                 @click="toggleHistory(`reviews-${teamGroup.teamSlug}`)"
               >
@@ -550,6 +554,7 @@ function toggleRotation(rotationId: string) {
               <div v-if="expandedHistory.has(`reviews-${teamGroup.teamSlug}`)">
                 <div v-for="rotation in teamGroup.past" :key="rotation.rotationId">
                   <button
+                    type="button"
                     class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
                     @click="toggleRotation(rotation.rotationId)"
                   >

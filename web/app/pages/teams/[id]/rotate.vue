@@ -68,6 +68,7 @@ async function runRotation() {
           <UILabel class="mb-2">Mode</UILabel>
           <div class="flex gap-1 rounded-lg bg-muted p-1 w-fit">
             <button
+              type="button"
               class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
               :class="
                 mode === 'devs'
@@ -79,6 +80,7 @@ async function runRotation() {
               Developers
             </button>
             <button
+              type="button"
               class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
               :class="
                 mode === 'teams'
@@ -109,7 +111,7 @@ async function runRotation() {
           </p>
         </div>
 
-        <UIButton :disabled="submitting" @click="runRotation">
+        <UIButton type="button" :disabled="submitting" @click="runRotation">
           <Play class="size-4" />
           {{ submitting ? "Running..." : "Run Rotation" }}
         </UIButton>
@@ -164,6 +166,7 @@ async function runRotation() {
           </NuxtLink>
         </UIButton>
         <UIButton
+          type="button"
           variant="ghost"
           @click="
             result = null;

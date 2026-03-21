@@ -4,6 +4,7 @@ import {
   rotationAssignmentReviewers,
   developers,
   squads,
+  teams,
 } from "../../db/schema";
 
 export async function queryRotations(
@@ -188,12 +189,25 @@ export async function createRotation(data: {
   }
 
   const devNameMap = new Map<string, string>();
+  const devDetailMap = new Map<
+    string,
+    { firstName: string; lastName: string; slackId: string | null; gitlabId: string | null }
+  >();
   if (allDevIds.size > 0) {
     const devRows = await db
-      .select({ id: developers.id, firstName: developers.firstName, lastName: developers.lastName })
+      .select({
+        id: developers.id,
+        firstName: developers.firstName,
+        lastName: developers.lastName,
+        slackId: developers.slackId,
+        gitlabId: developers.gitlabId,
+      })
       .from(developers)
       .where(inArray(developers.id, [...allDevIds]));
-    for (const d of devRows) devNameMap.set(d.id, `${d.firstName} ${d.lastName}`);
+    for (const d of devRows) {
+      devNameMap.set(d.id, `${d.firstName} ${d.lastName}`);
+      devDetailMap.set(d.id, d);
+    }
   }
 
   const squadNameMap = new Map<string, string>();
@@ -233,6 +247,46 @@ export async function createRotation(data: {
       );
     }
   }
+
+  // Fire webhooks in the background (don't block the response)
+  const teamRow = await db
+    .select({ name: teams.name })
+    .from(teams)
+    .where(eq(teams.id, data.teamId))
+    .then((rows) => rows[0]);
+
+  fireWebhooks("rotation.created", {
+    rotationId: rotation.id,
+    teamId: data.teamId,
+    teamName: teamRow?.name ?? data.teamId,
+    date: data.date.toISOString(),
+    mode: data.mode,
+    isManual: data.isManual,
+    assignments: data.assignments.map((assignment) => {
+      const detail = devDetailMap.get(assignment.targetId);
+      return {
+        targetType: assignment.targetType,
+        targetId: assignment.targetId,
+        targetName:
+          assignment.targetName ??
+          (assignment.targetType === "developer"
+            ? devNameMap.get(assignment.targetId)
+            : squadNameMap.get(assignment.targetId)) ??
+          null,
+        reviewers: assignment.reviewerDeveloperIds.map((devId) => {
+          const reviewerDetail = devDetailMap.get(devId);
+          return {
+            id: devId,
+            name: devNameMap.get(devId) ?? null,
+            slackId: reviewerDetail?.slackId ?? null,
+            gitlabId: reviewerDetail?.gitlabId ?? null,
+          };
+        }),
+      };
+    }),
+  }).catch((webhookError) => {
+    console.error("[webhook] Error firing rotation.created webhooks:", webhookError);
+  });
 
   return rotation;
 }

@@ -83,17 +83,11 @@ function onHiddenInput(e: Event) {
 }
 
 // Poll for autofill (some browsers don't fire input events)
-let pollTimer: ReturnType<typeof setInterval> | null = null;
-onMounted(() => {
-  pollTimer = setInterval(() => {
-    if (hiddenEmailRef.value?.value && hiddenEmailRef.value.value !== fullEmail.value) {
-      parseEmail(hiddenEmailRef.value.value);
-    }
-  }, 500);
-});
-onUnmounted(() => {
-  if (pollTimer) clearInterval(pollTimer);
-});
+const { pause: pauseAutofillPoll } = useIntervalFn(() => {
+  if (hiddenEmailRef.value?.value && hiddenEmailRef.value.value !== fullEmail.value) {
+    parseEmail(hiddenEmailRef.value.value);
+  }
+}, 500);
 </script>
 
 <template>
