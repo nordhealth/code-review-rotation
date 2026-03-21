@@ -39,6 +39,29 @@ poetry run coverage run -m pytest tests/ && poetry run coverage report -m  # Wit
 - Lint + fix: `poetry run ruff check --fix .`
 - Pre-commit hooks handle all formatting: `poetry run pre-commit run --all-files`
 
+## Web App (`web/`)
+
+- **Framework:** Nuxt 4, Vue 3 Composition API, TypeScript
+- **DB:** SQLite via NuxtHub, Drizzle ORM
+- **UI:** shadcn-vue (prefix `UI`), Tailwind CSS v4
+- **Tests:** Vitest with 100% coverage on rotation logic
+- **Linting + Formatting:** `@antfu/eslint-config` (ESLint handles both). Do **NOT** use Prettier, oxlint, or oxfmt. Do not run `npx oxfmt` on files in this repo.
+- **Lint:** `cd web && pnpm lint` (check) / `pnpm lint:fix` (auto-fix)
+- **Pre-commit:** Husky + lint-staged runs ESLint fix on staged JS/TS/Vue files, ruff on staged Python files
+- **Run dev:** `cd web && pnpm dev` (or `pnpm dev:fresh` to reset DB)
+- **Run tests:** `cd web && pnpm vitest run --coverage`
+- **Generate migrations:** `cd web && pnpm db:generate`
+
+## TypeScript Rules
+
+- **`any` is forbidden.** The ESLint rule `ts/no-explicit-any` is enforced as an error. Never use `any` in new or modified code.
+- **Type everything explicitly.** Function parameters, return types, refs, reactive objects, and useFetch generics must all have proper types. Prefer interfaces from `~/types` over inline types.
+- **Type assertions (`as X`) are a last resort.** Before casting, try: narrowing with type guards, generic type parameters, `satisfies`, or `Partial<typeof table.$inferInsert>` for Drizzle updates.
+- **Catch blocks use `unknown`.** Access error properties via inline cast: `(error as { data?: { message?: string } })?.data?.message`. Never `catch (e: any)`.
+- **Prefer `undefined` over `null`** for optional refs and default values, unless the API or schema explicitly uses `null`.
+- **No type assertions to bypass problems.** If the type system resists, fix the underlying type rather than silencing it with `as`.
+- **Use Drizzle's inferred types** for database operations: `typeof table.$inferInsert`, `typeof table.$inferSelect` instead of hand-written types that drift from the schema.
+
 ## Key Conventions
 
 - Google Sheets API accessed via **gspread** + **oauth2client**

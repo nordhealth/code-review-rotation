@@ -1,148 +1,158 @@
 <script setup lang="ts">
+import type { Developer, Rotation, Settings, Team, TeamMember } from '~/types'
 import {
+  CalendarClock,
+  Check,
   ChevronDown,
   ChevronRight,
-  X,
-  Check,
   ChevronsUpDown,
-  CalendarClock,
-} from "lucide-vue-next";
-import type { Settings, Team } from "~/types";
+  X,
+} from 'lucide-vue-next'
 
 const props = defineProps<{
-  teamId: string;
-  mode: "devs" | "teams";
-}>();
+  teamId: string
+  mode: 'devs' | 'teams'
+}>()
 
-const { data: rotations, refresh: refreshRotations } = await useFetch(
+const { data: rotations, refresh: refreshRotations } = await useFetch<Rotation[]>(
   `/api/teams/${props.teamId}/rotations`,
-);
-const { data: members } = await useFetch(`/api/teams/${props.teamId}/members`);
-const { data: team } = await useFetch<Team>(`/api/teams/${props.teamId}`);
-const { data: globalSettings } = await useFetch<Settings>("/api/settings");
+)
+const { data: members } = await useFetch<TeamMember[]>(`/api/teams/${props.teamId}/members`)
+const { data: team } = await useFetch<Team>(`/api/teams/${props.teamId}`)
+const { data: globalSettings } = await useFetch<Settings>('/api/settings')
 
 const filteredRotations = computed(() => {
-  if (!rotations.value) return [];
-  return rotations.value.filter((r: any) => r.mode === props.mode);
-});
+  if (!rotations.value)
+    return []
+  return rotations.value.filter(rotation => rotation.mode === props.mode)
+})
 
-const activeRotation = computed(() => filteredRotations.value[0] ?? null);
-const pastRotations = computed(() => filteredRotations.value.slice(1));
+const activeRotation = computed(() => filteredRotations.value[0] ?? null)
+const pastRotations = computed(() => filteredRotations.value.slice(1))
 
-const expandedRotations = ref<Set<string>>(new Set());
-const historyOpen = ref(false);
+const expandedRotations = ref<Set<string>>(new Set())
+const historyOpen = ref(false)
 
-const isEditing = ref(false);
-const editState = ref<Map<string, string[]>>(new Map());
-const openPopoverId = ref<string | null>(null);
-const saving = ref(false);
+const isEditing = ref(false)
+const editState = ref<Map<string, string[]>>(new Map())
+const openPopoverId = ref<string | null>(null)
+const saving = ref(false)
 
 function startEditing() {
-  if (!activeRotation.value) return;
-  isEditing.value = true;
-  editState.value = new Map();
+  if (!activeRotation.value)
+    return
+  isEditing.value = true
+  editState.value = new Map()
   for (const a of activeRotation.value.assignments ?? []) {
     editState.value.set(
       a.id,
-      a.reviewers.map((r: any) => r.developer.id),
-    );
+      a.reviewers.map(reviewer => reviewer.developer.id),
+    )
   }
 }
 
 function cancelEditing() {
-  isEditing.value = false;
-  editState.value = new Map();
-  openPopoverId.value = null;
+  isEditing.value = false
+  editState.value = new Map()
+  openPopoverId.value = null
 }
 
 watch(
   () => props.mode,
   () => cancelEditing(),
-);
+)
 
 function getEditReviewerIds(assignmentId: string): string[] {
-  return editState.value.get(assignmentId) ?? [];
+  return editState.value.get(assignmentId) ?? []
 }
 
 function toggleReviewer(assignmentId: string, developerId: string) {
-  const ids = [...(editState.value.get(assignmentId) ?? [])];
-  const idx = ids.indexOf(developerId);
+  const ids = [...(editState.value.get(assignmentId) ?? [])]
+  const idx = ids.indexOf(developerId)
   if (idx >= 0) {
-    ids.splice(idx, 1);
-  } else {
-    ids.push(developerId);
+    ids.splice(idx, 1)
   }
-  editState.value.set(assignmentId, ids);
+  else {
+    ids.push(developerId)
+  }
+  editState.value.set(assignmentId, ids)
 }
 
 async function saveAll() {
-  if (!activeRotation.value) return;
-  saving.value = true;
+  if (!activeRotation.value)
+    return
+  saving.value = true
   try {
     for (const assignment of activeRotation.value.assignments ?? []) {
-      const newIds = editState.value.get(assignment.id);
-      if (!newIds) continue;
-      const oldIds = assignment.reviewers.map((r: any) => r.developer.id).sort();
-      const sortedNew = [...newIds].sort();
+      const newIds = editState.value.get(assignment.id)
+      if (!newIds)
+        continue
+      const oldIds = assignment.reviewers.map(reviewer => reviewer.developer.id).sort()
+      const sortedNew = [...newIds].sort()
       if (JSON.stringify(oldIds) !== JSON.stringify(sortedNew)) {
         await $fetch(
           `/api/teams/${props.teamId}/rotations/${assignment.rotationId}/assignments/${assignment.id}`,
-          { method: "PUT", body: { reviewerDeveloperIds: newIds } },
-        );
+          { method: 'PUT', body: { reviewerDeveloperIds: newIds } },
+        )
       }
     }
-    await refreshRotations();
-    cancelEditing();
-  } catch (err) {
-    console.error("Failed to update reviewers:", err);
-  } finally {
-    saving.value = false;
+    await refreshRotations()
+    cancelEditing()
+  }
+  catch (err) {
+    console.error('Failed to update reviewers:', err)
+  }
+  finally {
+    saving.value = false
   }
 }
 
 function toggleExpanded(rotationId: string) {
   if (expandedRotations.value.has(rotationId)) {
-    expandedRotations.value.delete(rotationId);
-  } else {
-    expandedRotations.value.add(rotationId);
+    expandedRotations.value.delete(rotationId)
+  }
+  else {
+    expandedRotations.value.add(rotationId)
   }
 }
 
 function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 
 function getInitials(firstName: string, lastName: string) {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 }
 
 const allDevelopers = computed(() => {
-  if (!members.value) return [];
+  if (!members.value)
+    return []
   return members.value
-    .map((m: any) => m.developer)
-    .sort((a: any, b: any) =>
+    .map(member => member.developer)
+    .sort((a: Developer, b: Developer) =>
       `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`),
-    );
-});
+    )
+})
 
 function devName(devId: string) {
-  const d = allDevelopers.value.find((d: any) => d.id === devId);
-  return d ? `${d.firstName} ${d.lastName}` : "?";
+  const d = allDevelopers.value.find(developer => developer.id === devId)
+  return d ? `${d.firstName} ${d.lastName}` : '?'
 }
 
 function devInitials(devId: string) {
-  const d = allDevelopers.value.find((d: any) => d.id === devId);
-  return d ? getInitials(d.firstName, d.lastName) : "??";
+  const d = allDevelopers.value.find(developer => developer.id === devId)
+  return d ? getInitials(d.firstName, d.lastName) : '??'
 }
 
 const reviewerCountLabel = computed(() => {
-  if (!team.value) return "";
-  return `${team.value.defaultReviewerCount} reviewer${team.value.defaultReviewerCount !== 1 ? "s" : ""} each`;
-});
+  if (!team.value)
+    return ''
+  return `${team.value.defaultReviewerCount} reviewer${team.value.defaultReviewerCount !== 1 ? 's' : ''} each`
+})
 
 const DAY_INDEX: Record<string, number> = {
   sunday: 0,
@@ -152,46 +162,46 @@ const DAY_INDEX: Record<string, number> = {
   thursday: 4,
   friday: 5,
   saturday: 6,
-};
+}
 
 const nextRotationDate = computed(() => {
-  if (!team.value || !globalSettings.value) return null;
+  if (!team.value || !globalSettings.value)
+    return null
 
-  const intervalDays =
-    team.value.rotationIntervalDays ?? globalSettings.value.defaultRotationIntervalDays;
-  const targetDay = team.value.rotationDay ?? globalSettings.value.defaultRotationDay;
-  const targetTime = team.value.rotationTime ?? globalSettings.value.defaultRotationTime;
-  const timezone = team.value.rotationTimezone ?? globalSettings.value.defaultRotationTimezone;
+  const intervalDays
+    = team.value.rotationIntervalDays ?? globalSettings.value.defaultRotationIntervalDays
+  const targetDay = team.value.rotationDay ?? globalSettings.value.defaultRotationDay
+  const timezone = team.value.rotationTimezone ?? globalSettings.value.defaultRotationTimezone
 
-  const lastRotation = filteredRotations.value[0];
-  if (!lastRotation) return null;
+  const lastRotation = filteredRotations.value[0]
+  if (!lastRotation)
+    return null
 
-  const lastDate = new Date(lastRotation.date);
-  const candidate = new Date(lastDate.getTime() + intervalDays * 24 * 60 * 60 * 1000);
+  const lastDate = new Date(lastRotation.date)
+  const candidate = new Date(lastDate.getTime() + intervalDays * 24 * 60 * 60 * 1000)
 
   // Align to the target day of week
-  const targetDayIndex = DAY_INDEX[targetDay] ?? 3;
-  const candidateDay = candidate.getDay();
-  const dayDifference = (targetDayIndex - candidateDay + 7) % 7;
+  const targetDayIndex = DAY_INDEX[targetDay] ?? 3
+  const candidateDay = candidate.getDay()
+  const dayDifference = (targetDayIndex - candidateDay + 7) % 7
   if (dayDifference > 0) {
-    candidate.setDate(candidate.getDate() + dayDifference);
+    candidate.setDate(candidate.getDate() + dayDifference)
   }
 
-  // Set target time
-  const [hours, minutes] = targetTime.split(":").map(Number);
-  candidate.setHours(hours, minutes, 0, 0);
+  // Hardcoded rotation time: 04:00
+  candidate.setHours(4, 0, 0, 0)
 
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
     timeZone: timezone,
-    timeZoneName: "short",
-  }).format(candidate);
-});
+    timeZoneName: 'short',
+  }).format(candidate)
+})
 </script>
 
 <template>
@@ -269,7 +279,9 @@ const nextRotationDate = computed(() => {
           <div class="w-48 shrink-0 text-xs font-medium text-muted-foreground">
             {{ mode === "devs" ? "Developer" : "Target" }}
           </div>
-          <div class="text-xs font-medium text-muted-foreground">Reviewers</div>
+          <div class="text-xs font-medium text-muted-foreground">
+            Reviewers
+          </div>
         </div>
 
         <div
@@ -300,8 +312,7 @@ const nextRotationDate = computed(() => {
                   :to="
                     reviewer.developer.slug ? `/developers/${reviewer.developer.slug}` : undefined
                   "
-                  :class="[
-                    'inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2 py-1 text-xs font-medium shadow-sm',
+                  class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2 py-1 text-xs font-medium shadow-sm" :class="[
                     reviewer.developer.slug
                       ? 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
                       : '',
@@ -334,8 +345,7 @@ const nextRotationDate = computed(() => {
                   <UIAvatarFallback
                     class="!text-[8px] !font-semibold !leading-none"
                     :label="devInitials(devId)"
-                    >{{ devInitials(devId) }}</UIAvatarFallback
-                  >
+                  >{{ devInitials(devId) }}</UIAvatarFallback>
                 </UIAvatar>
                 {{ devName(devId) }}
                 <button
@@ -399,7 +409,9 @@ const nextRotationDate = computed(() => {
           </div>
         </div>
       </div>
-      <p v-else class="px-5 py-4 text-sm text-muted-foreground">No assignments for this rotation</p>
+      <p v-else class="px-5 py-4 text-sm text-muted-foreground">
+        No assignments for this rotation
+      </p>
     </div>
 
     <!-- Past rotations -->
@@ -456,7 +468,9 @@ const nextRotationDate = computed(() => {
                 <div class="w-44 shrink-0 text-xs font-medium text-muted-foreground">
                   {{ mode === "devs" ? "Developer" : "Target" }}
                 </div>
-                <div class="text-xs font-medium text-muted-foreground">Reviewers</div>
+                <div class="text-xs font-medium text-muted-foreground">
+                  Reviewers
+                </div>
               </div>
 
               <div
@@ -520,7 +534,9 @@ const nextRotationDate = computed(() => {
       No {{ mode === "devs" ? "developer" : "team" }} rotations yet
     </p>
     <NuxtLink :to="`/teams/${teamId}/rotate`">
-      <UIButton size="sm" class="mt-3">Run your first rotation</UIButton>
+      <UIButton size="sm" class="mt-3">
+        Run your first rotation
+      </UIButton>
     </NuxtLink>
   </div>
 </template>

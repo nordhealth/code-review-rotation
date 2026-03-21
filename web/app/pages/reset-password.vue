@@ -1,34 +1,38 @@
 <script setup lang="ts">
-definePageMeta({ layout: "auth" });
+definePageMeta({ layout: 'auth' })
 
-const route = useRoute();
-const password = ref("");
-const confirmPassword = ref("");
-const loading = ref(false);
-const errorMessage = ref("");
-const success = ref(false);
+const route = useRoute()
+const password = ref('')
+const confirmPassword = ref('')
+const loading = ref(false)
+const errorMessage = ref('')
+const success = ref(false)
 
-const token = computed(() => (route.query.token as string) || "");
+const token = computed(() => (route.query.token as string) || '')
 
 async function onSubmit() {
-  if (!token.value || !password.value) return;
+  if (!token.value || !password.value)
+    return
   if (password.value !== confirmPassword.value) {
-    errorMessage.value = "Passwords do not match";
-    return;
+    errorMessage.value = 'Passwords do not match'
+    return
   }
-  loading.value = true;
-  errorMessage.value = "";
+  loading.value = true
+  errorMessage.value = ''
 
   try {
-    await $fetch("/api/auth/reset-password", {
-      method: "POST",
+    await $fetch('/api/auth/reset-password', {
+      method: 'POST',
       body: { token: token.value, password: password.value },
-    });
-    success.value = true;
-  } catch (err: any) {
-    errorMessage.value = err?.data?.statusMessage || "Password reset failed";
-  } finally {
-    loading.value = false;
+    })
+    success.value = true
+  }
+  catch (error) {
+    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
+    errorMessage.value = message || 'Password reset failed'
+  }
+  finally {
+    loading.value = false
   }
 }
 </script>
@@ -36,8 +40,12 @@ async function onSubmit() {
 <template>
   <div class="w-full max-w-md space-y-6 rounded-xl border bg-card p-8 shadow-md">
     <div class="space-y-1 text-center">
-      <h1 class="text-2xl font-semibold tracking-tight">Reset password</h1>
-      <p class="text-sm text-muted-foreground">Enter your new password</p>
+      <h1 class="text-2xl font-semibold tracking-tight">
+        Reset password
+      </h1>
+      <p class="text-sm text-muted-foreground">
+        Enter your new password
+      </p>
     </div>
 
     <div v-if="!token" class="space-y-4">
@@ -47,7 +55,9 @@ async function onSubmit() {
         Missing reset token. Please use the link from your email.
       </div>
       <UIButton as-child variant="outline" class="w-full">
-        <NuxtLink to="/forgot-password">Request new reset link</NuxtLink>
+        <NuxtLink to="/forgot-password">
+          Request new reset link
+        </NuxtLink>
       </UIButton>
     </div>
 
@@ -58,7 +68,9 @@ async function onSubmit() {
         Password updated successfully!
       </div>
       <UIButton as-child class="w-full">
-        <NuxtLink to="/login">Sign in</NuxtLink>
+        <NuxtLink to="/login">
+          Sign in
+        </NuxtLink>
       </UIButton>
     </div>
 
@@ -71,7 +83,9 @@ async function onSubmit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="reset-password">New password</UILabel>
+        <UILabel for="reset-password">
+          New password
+        </UILabel>
         <UIInput
           id="reset-password"
           v-model="password"
@@ -84,7 +98,9 @@ async function onSubmit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="reset-confirm">Confirm password</UILabel>
+        <UILabel for="reset-confirm">
+          Confirm password
+        </UILabel>
         <UIInput
           id="reset-confirm"
           v-model="confirmPassword"

@@ -1,34 +1,38 @@
 <script setup lang="ts">
-import { ArrowRight, Play, ArrowLeft } from "lucide-vue-next";
+import type { Rotation } from '~/types'
+import { ArrowLeft, ArrowRight, Play } from 'lucide-vue-next'
 
-const route = useRoute();
-const teamId = route.params.id as string;
+const route = useRoute()
+const teamId = route.params.id as string
 
-const { data: team } = await useFetch(`/api/teams/${teamId}`);
+const { data: team } = await useFetch(`/api/teams/${teamId}`)
 
-const mode = ref<"devs" | "teams">("devs");
-const isManual = ref(false);
-const submitting = ref(false);
-const error = ref("");
-const result = ref<any>(null);
+const mode = ref<'devs' | 'teams'>('devs')
+const isManual = ref(false)
+const submitting = ref(false)
+const error = ref('')
+const result = ref<Rotation | null>(null)
 
 async function runRotation() {
-  submitting.value = true;
-  error.value = "";
-  result.value = null;
+  submitting.value = true
+  error.value = ''
+  result.value = null
   try {
     const data = await $fetch(`/api/teams/${teamId}/rotations`, {
-      method: "POST",
+      method: 'POST',
       body: {
         mode: mode.value,
         isManual: isManual.value,
       },
-    });
-    result.value = data;
-  } catch (e: any) {
-    error.value = e.data?.message || "Failed to run rotation";
-  } finally {
-    submitting.value = false;
+    })
+    result.value = data
+  }
+  catch (caughtError: unknown) {
+    const message = (caughtError as { data?: { message?: string } })?.data?.message
+    error.value = message || 'Failed to run rotation'
+  }
+  finally {
+    submitting.value = false
   }
 }
 </script>
@@ -39,7 +43,9 @@ async function runRotation() {
 
     <div v-if="!result" class="max-w-lg space-y-6">
       <div>
-        <h2 class="text-lg font-medium">Run Rotation</h2>
+        <h2 class="text-lg font-medium">
+          Run Rotation
+        </h2>
         <p class="text-sm text-muted-foreground">
           Trigger a new code review rotation for {{ team?.name ?? "this team" }}
         </p>
@@ -50,14 +56,20 @@ async function runRotation() {
       </div>
 
       <div class="rounded-lg border bg-muted/30 p-4">
-        <h3 class="text-sm font-medium">Team Info</h3>
+        <h3 class="text-sm font-medium">
+          Team Info
+        </h3>
         <dl class="mt-2 space-y-1 text-sm">
           <div class="flex gap-2">
-            <dt class="text-muted-foreground">Team:</dt>
+            <dt class="text-muted-foreground">
+              Team:
+            </dt>
             <dd>{{ team?.name ?? "-" }}</dd>
           </div>
           <div class="flex gap-2">
-            <dt class="text-muted-foreground">Default reviewers:</dt>
+            <dt class="text-muted-foreground">
+              Default reviewers:
+            </dt>
             <dd>{{ team?.defaultReviewerCount ?? "-" }}</dd>
           </div>
         </dl>
@@ -65,7 +77,9 @@ async function runRotation() {
 
       <div class="space-y-4">
         <div>
-          <UILabel class="mb-2">Mode</UILabel>
+          <UILabel class="mb-2">
+            Mode
+          </UILabel>
           <div class="flex gap-1 rounded-lg bg-muted p-1 w-fit">
             <button
               type="button"
@@ -122,14 +136,18 @@ async function runRotation() {
       <div
         class="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20"
       >
-        <h2 class="font-medium text-green-800 dark:text-green-300">Rotation Complete</h2>
+        <h2 class="font-medium text-green-800 dark:text-green-300">
+          Rotation Complete
+        </h2>
         <p class="mt-1 text-sm text-green-700 dark:text-green-400">
           The rotation has been run successfully.
         </p>
       </div>
 
       <div v-if="result.assignments?.length" class="space-y-2">
-        <h3 class="text-sm font-medium">Assignments</h3>
+        <h3 class="text-sm font-medium">
+          Assignments
+        </h3>
         <div class="overflow-hidden rounded-lg border">
           <div
             v-for="assignment in result.assignments"
@@ -144,10 +162,10 @@ async function runRotation() {
               <template v-if="assignment.reviewers?.length">
                 {{
                   assignment.reviewers
-                    .map((r: any) =>
-                      r.developer
-                        ? `${r.developer.firstName} ${r.developer.lastName}`
-                        : r.reviewerDeveloperId,
+                    .map((reviewer) =>
+                      reviewer.developer
+                        ? `${reviewer.developer.firstName} ${reviewer.developer.lastName}`
+                        : reviewer.reviewerDeveloperId,
                     )
                     .join(", ")
                 }}

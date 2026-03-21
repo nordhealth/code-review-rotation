@@ -12,7 +12,8 @@ A self-contained Nuxt web application with its own database, UI, and built-in sc
 
 - **Stack:** Nuxt 4, SQLite (via NuxtHub/Cloudflare D1), Drizzle ORM, shadcn-vue
 - **Scheduling:** Internal hourly cron checks each team's configured schedule
-- **Configuration:** Admin UI for global defaults and per-team overrides (interval, day, time, timezone)
+- **Configuration:** Admin UI for global defaults and per-team overrides (interval, day, timezone)
+- **Integrations:** Per-user API keys for external access, webhook notifications (HMAC-signed) on rotation events
 - **Deployment:** Cloudflare Pages + D1 via NuxtHub
 
 ### [`scripts/`](scripts/) + [`lib/`](lib/) — Google Sheets + GitHub Actions

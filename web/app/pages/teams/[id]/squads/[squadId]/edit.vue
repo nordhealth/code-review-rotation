@@ -1,50 +1,55 @@
 <script setup lang="ts">
-import { ArrowLeft } from "lucide-vue-next";
+import { ArrowLeft } from 'lucide-vue-next'
 
-const route = useRoute();
-const router = useRouter();
-const teamId = route.params.id as string;
-const squadId = route.params.squadId as string;
+const route = useRoute()
+const router = useRouter()
+const teamId = route.params.id as string
+const squadId = route.params.squadId as string
 
-const { data: team } = await useFetch(`/api/teams/${teamId}`);
-const { data: squad } = await useFetch(`/api/teams/${teamId}/squads/${squadId}`);
-const { data: members } = useFetch(`/api/teams/${teamId}/members`);
+const { data: team } = await useFetch(`/api/teams/${teamId}`)
+const { data: squad } = await useFetch(`/api/teams/${teamId}/squads/${squadId}`)
+const { data: members } = useFetch(`/api/teams/${teamId}/members`)
 
 const form = reactive({
-  name: squad.value?.name ?? "",
+  name: squad.value?.name ?? '',
   reviewerCount: squad.value?.reviewerCount ?? 2,
-  memberDeveloperIds: squad.value?.members?.map((m: any) => m.developer.id) ?? ([] as string[]),
-});
-const submitting = ref(false);
-const error = ref("");
+  memberDeveloperIds: squad.value?.members?.map(member => member.developer.id) ?? ([] as string[]),
+})
+const submitting = ref(false)
+const error = ref('')
 
 function toggleMember(devId: string) {
-  const idx = form.memberDeveloperIds.indexOf(devId);
+  const idx = form.memberDeveloperIds.indexOf(devId)
   if (idx >= 0) {
-    form.memberDeveloperIds.splice(idx, 1);
-  } else {
-    form.memberDeveloperIds.push(devId);
+    form.memberDeveloperIds.splice(idx, 1)
+  }
+  else {
+    form.memberDeveloperIds.push(devId)
   }
 }
 
 async function submit() {
-  if (!form.name) return;
-  submitting.value = true;
-  error.value = "";
+  if (!form.name)
+    return
+  submitting.value = true
+  error.value = ''
   try {
     await $fetch(`/api/teams/${teamId}/squads/${squadId}`, {
-      method: "PUT",
+      method: 'PUT',
       body: {
         name: form.name,
         reviewerCount: form.reviewerCount,
         memberDeveloperIds: form.memberDeveloperIds,
       },
-    });
-    router.push(`/teams/${teamId}/squads`);
-  } catch (e: any) {
-    error.value = e.data?.message || "Failed to update squad";
-  } finally {
-    submitting.value = false;
+    })
+    router.push(`/teams/${teamId}/squads`)
+  }
+  catch (caughtError: unknown) {
+    const message = (caughtError as { data?: { message?: string } })?.data?.message
+    error.value = message || 'Failed to update squad'
+  }
+  finally {
+    submitting.value = false
   }
 }
 </script>
@@ -56,14 +61,18 @@ async function submit() {
         <ArrowLeft class="size-5" />
       </NuxtLink>
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Edit Squad</h1>
+        <h1 class="text-2xl font-semibold tracking-tight">
+          Edit Squad
+        </h1>
         <p class="text-sm text-muted-foreground">
           {{ squad?.name ?? "Squad" }} · {{ team?.name ?? "Team" }}
         </p>
       </div>
     </div>
 
-    <div v-if="!squad" class="py-12 text-center text-sm text-muted-foreground">Squad not found</div>
+    <div v-if="!squad" class="py-12 text-center text-sm text-muted-foreground">
+      Squad not found
+    </div>
 
     <template v-else>
       <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -72,12 +81,16 @@ async function submit() {
 
       <form class="space-y-4" @submit.prevent="submit">
         <div class="space-y-2">
-          <UILabel for="squad-name">Name *</UILabel>
+          <UILabel for="squad-name">
+            Name *
+          </UILabel>
           <UIInput id="squad-name" v-model="form.name" type="text" required />
         </div>
 
         <div class="space-y-2">
-          <UILabel for="squad-count">Reviewer Count</UILabel>
+          <UILabel for="squad-count">
+            Reviewer Count
+          </UILabel>
           <UINumberField v-model="form.reviewerCount" :min="1">
             <UINumberFieldContent>
               <UINumberFieldDecrement />
@@ -117,7 +130,9 @@ async function submit() {
             {{ submitting ? "Saving..." : "Save Changes" }}
           </UIButton>
           <UIButton as-child variant="ghost">
-            <NuxtLink :to="`/teams/${teamId}/squads`">Cancel</NuxtLink>
+            <NuxtLink :to="`/teams/${teamId}/squads`">
+              Cancel
+            </NuxtLink>
           </UIButton>
         </div>
       </form>

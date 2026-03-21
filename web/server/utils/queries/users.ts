@@ -1,4 +1,4 @@
-import { users } from "../../db/schema";
+import { users } from '../../db/schema'
 
 export async function queryAllUsers() {
   return db
@@ -12,10 +12,10 @@ export async function queryAllUsers() {
       createdAt: users.createdAt,
     })
     .from(users)
-    .orderBy(users.createdAt);
+    .orderBy(users.createdAt)
 }
 
-export async function updateUserRole(userId: string, role: "admin" | "developer") {
+export async function updateUserRole(userId: string, role: 'admin' | 'developer') {
   const [updated] = await db
     .update(users)
     .set({ role, updatedAt: new Date() })
@@ -26,32 +26,32 @@ export async function updateUserRole(userId: string, role: "admin" | "developer"
       firstName: users.firstName,
       lastName: users.lastName,
       role: users.role,
-    });
-  return updated;
+    })
+  return updated
 }
 
 export async function queryUserByEmail(email: string) {
-  return db.select().from(users).where(eq(users.email, email)).get();
+  return db.select().from(users).where(eq(users.email, email)).get()
 }
 
 export async function queryUserByConfirmationToken(token: string) {
-  return db.select().from(users).where(eq(users.confirmationToken, token)).get();
+  return db.select().from(users).where(eq(users.confirmationToken, token)).get()
 }
 
 export async function queryUserByResetToken(token: string) {
-  return db.select().from(users).where(eq(users.resetPasswordToken, token)).get();
+  return db.select().from(users).where(eq(users.resetPasswordToken, token)).get()
 }
 
 export async function createUser(data: {
-  email: string;
-  passwordHash: string;
-  firstName: string;
-  lastName: string;
-  confirmationToken: string;
-  confirmationTokenExpiresAt: Date;
+  email: string
+  passwordHash: string
+  firstName: string
+  lastName: string
+  confirmationToken: string
+  confirmationTokenExpiresAt: Date
 }) {
-  const [user] = await db.insert(users).values(data).returning();
-  return user;
+  const [user] = await db.insert(users).values(data).returning()
+  return user
 }
 
 export async function confirmUser(userId: string) {
@@ -63,7 +63,7 @@ export async function confirmUser(userId: string) {
       confirmationTokenExpiresAt: null,
       updatedAt: new Date(),
     })
-    .where(eq(users.id, userId));
+    .where(eq(users.id, userId))
 }
 
 export async function setResetToken(userId: string, token: string, expiresAt: Date) {
@@ -74,7 +74,7 @@ export async function setResetToken(userId: string, token: string, expiresAt: Da
       resetPasswordTokenExpiresAt: expiresAt,
       updatedAt: new Date(),
     })
-    .where(eq(users.id, userId));
+    .where(eq(users.id, userId))
 }
 
 export async function updateUserPassword(userId: string, passwordHash: string) {
@@ -86,5 +86,5 @@ export async function updateUserPassword(userId: string, passwordHash: string) {
       resetPasswordTokenExpiresAt: null,
       updatedAt: new Date(),
     })
-    .where(eq(users.id, userId));
+    .where(eq(users.id, userId))
 }

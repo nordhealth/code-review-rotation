@@ -1,48 +1,53 @@
 <script setup lang="ts">
-import { ArrowLeft } from "lucide-vue-next";
+import { ArrowLeft } from 'lucide-vue-next'
 
-const route = useRoute();
-const router = useRouter();
-const teamId = route.params.id as string;
+const route = useRoute()
+const router = useRouter()
+const teamId = route.params.id as string
 
-const { data: team } = await useFetch(`/api/teams/${teamId}`);
-const { data: members } = useFetch(`/api/teams/${teamId}/members`);
+const { data: team } = await useFetch(`/api/teams/${teamId}`)
+const { data: members } = useFetch(`/api/teams/${teamId}/members`)
 
 const form = reactive({
-  name: "",
+  name: '',
   reviewerCount: 2,
   memberDeveloperIds: [] as string[],
-});
-const submitting = ref(false);
-const error = ref("");
+})
+const submitting = ref(false)
+const error = ref('')
 
 function toggleMember(devId: string) {
-  const idx = form.memberDeveloperIds.indexOf(devId);
+  const idx = form.memberDeveloperIds.indexOf(devId)
   if (idx >= 0) {
-    form.memberDeveloperIds.splice(idx, 1);
-  } else {
-    form.memberDeveloperIds.push(devId);
+    form.memberDeveloperIds.splice(idx, 1)
+  }
+  else {
+    form.memberDeveloperIds.push(devId)
   }
 }
 
 async function submit() {
-  if (!form.name) return;
-  submitting.value = true;
-  error.value = "";
+  if (!form.name)
+    return
+  submitting.value = true
+  error.value = ''
   try {
     await $fetch(`/api/teams/${teamId}/squads`, {
-      method: "POST",
+      method: 'POST',
       body: {
         name: form.name,
         reviewerCount: form.reviewerCount,
         memberDeveloperIds: form.memberDeveloperIds,
       },
-    });
-    router.push(`/teams/${teamId}/squads`);
-  } catch (e: any) {
-    error.value = e.data?.message || "Failed to create squad";
-  } finally {
-    submitting.value = false;
+    })
+    router.push(`/teams/${teamId}/squads`)
+  }
+  catch (caughtError: unknown) {
+    const message = (caughtError as { data?: { message?: string } })?.data?.message
+    error.value = message || 'Failed to create squad'
+  }
+  finally {
+    submitting.value = false
   }
 }
 </script>
@@ -54,7 +59,9 @@ async function submit() {
         <ArrowLeft class="size-5" />
       </NuxtLink>
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">New Squad</h1>
+        <h1 class="text-2xl font-semibold tracking-tight">
+          New Squad
+        </h1>
         <p class="text-sm text-muted-foreground">
           Create a new squad for {{ team?.name ?? "this team" }}
         </p>
@@ -67,12 +74,16 @@ async function submit() {
 
     <form class="space-y-4" @submit.prevent="submit">
       <div class="space-y-2">
-        <UILabel for="squad-name">Name *</UILabel>
+        <UILabel for="squad-name">
+          Name *
+        </UILabel>
         <UIInput id="squad-name" v-model="form.name" type="text" required />
       </div>
 
       <div class="space-y-2">
-        <UILabel for="squad-count">Reviewer Count</UILabel>
+        <UILabel for="squad-count">
+          Reviewer Count
+        </UILabel>
         <UINumberField v-model="form.reviewerCount" :min="1">
           <UINumberFieldContent>
             <UINumberFieldDecrement />
@@ -115,7 +126,9 @@ async function submit() {
           {{ submitting ? "Creating..." : "Create Squad" }}
         </UIButton>
         <UIButton as-child variant="ghost">
-          <NuxtLink :to="`/teams/${teamId}/squads`">Cancel</NuxtLink>
+          <NuxtLink :to="`/teams/${teamId}/squads`">
+            Cancel
+          </NuxtLink>
         </UIButton>
       </div>
     </form>

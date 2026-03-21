@@ -1,116 +1,130 @@
 <script setup lang="ts">
-import { Plus, Trash2, Check, ChevronsUpDown, X } from "lucide-vue-next";
+import type { TeamMember } from '~/types'
+import { Check, ChevronsUpDown, Plus, Trash2, X } from 'lucide-vue-next'
 
-const route = useRoute();
-const teamId = route.params.id as string;
+const route = useRoute()
+const teamId = route.params.id as string
 
-const { data: team } = await useFetch(`/api/teams/${teamId}`);
-const { data: members, refresh: refreshMembers } = useFetch(`/api/teams/${teamId}/members`);
-const { data: allDevelopers } = useFetch("/api/developers");
+const { data: team } = await useFetch(`/api/teams/${teamId}`)
+const { data: members, refresh: refreshMembers } = useFetch(`/api/teams/${teamId}/members`)
+const { data: allDevelopers } = useFetch('/api/developers')
 
-const showAddForm = ref(false);
-const selectedDeveloperId = ref("");
-const addingMember = ref(false);
+const showAddForm = ref(false)
+const selectedDeveloperId = ref('')
+const addingMember = ref(false)
 
-const editDialogOpen = ref(false);
-const editingMember = ref<any>(null);
+const editDialogOpen = ref(false)
+const editingMember = ref<TeamMember | null>(null)
 const editForm = reactive({
   reviewerCount: null as number | null,
   isExperienced: true,
   preferableReviewerIds: [] as string[],
-});
+})
 
 const availableDevelopers = computed(() => {
-  if (!allDevelopers.value || !members.value) return [];
-  const memberDevIds = new Set(members.value.map((m) => m.developerId));
-  return allDevelopers.value.filter((d) => !memberDevIds.has(d.id));
-});
+  if (!allDevelopers.value || !members.value)
+    return []
+  const memberDevIds = new Set(members.value.map(m => m.developerId))
+  return allDevelopers.value.filter(d => !memberDevIds.has(d.id))
+})
 
 async function addMember() {
-  if (!selectedDeveloperId.value) return;
-  addingMember.value = true;
+  if (!selectedDeveloperId.value)
+    return
+  addingMember.value = true
   try {
     await $fetch(`/api/teams/${teamId}/members`, {
-      method: "POST",
+      method: 'POST',
       body: { developerId: selectedDeveloperId.value },
-    });
-    showAddForm.value = false;
-    selectedDeveloperId.value = "";
-    await refreshMembers();
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to add member");
-  } finally {
-    addingMember.value = false;
+    })
+    showAddForm.value = false
+    selectedDeveloperId.value = ''
+    await refreshMembers()
+  }
+  catch (error: unknown) {
+    const message = (error as { data?: { message?: string } })?.data?.message
+    alert(message || 'Failed to add member')
+  }
+  finally {
+    addingMember.value = false
   }
 }
 
-function openEditDialog(member: any) {
-  editingMember.value = member;
-  editForm.reviewerCount = member.reviewerCount ?? team.value?.defaultReviewerCount ?? 2;
-  editForm.isExperienced = member.isExperienced === true || member.isExperienced === 1;
-  editForm.preferableReviewerIds =
-    member.preferableReviewers?.map((p: any) => p.preferredDeveloperId) ?? [];
-  reviewersPopoverOpen.value = false;
-  editDialogOpen.value = true;
+const reviewersPopoverOpen = ref(false)
+
+function openEditDialog(member: TeamMember) {
+  editingMember.value = member
+  editForm.reviewerCount = member.reviewerCount ?? team.value?.defaultReviewerCount ?? 2
+  editForm.isExperienced = member.isExperienced === true
+  editForm.preferableReviewerIds
+    = member.preferableReviewers?.map(preference => preference.preferredDeveloperId) ?? []
+  reviewersPopoverOpen.value = false
+  editDialogOpen.value = true
 }
 
 async function saveEdit() {
-  if (!editingMember.value) return;
+  if (!editingMember.value)
+    return
   try {
     await $fetch(`/api/teams/${teamId}/members/${editingMember.value.id}`, {
-      method: "PUT",
+      method: 'PUT',
       body: {
         reviewerCount: editForm.reviewerCount,
         isExperienced: editForm.isExperienced,
         preferableReviewerIds: editForm.preferableReviewerIds,
       },
-    });
-    editDialogOpen.value = false;
-    editingMember.value = null;
-    await refreshMembers();
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to update member");
+    })
+    editDialogOpen.value = false
+    editingMember.value = null
+    await refreshMembers()
+  }
+  catch (error: unknown) {
+    const message = (error as { data?: { message?: string } })?.data?.message
+    alert(message || 'Failed to update member')
   }
 }
 
 async function removeMember(memberId: string, name: string) {
-  if (!window.confirm(`Remove ${name} from this team?`)) return;
+  if (!window.confirm(`Remove ${name} from this team?`))
+    return
   try {
-    await $fetch(`/api/teams/${teamId}/members/${memberId}`, { method: "DELETE" });
-    await refreshMembers();
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to remove member");
+    await $fetch(`/api/teams/${teamId}/members/${memberId}`, { method: 'DELETE' })
+    await refreshMembers()
+  }
+  catch (error: unknown) {
+    const message = (error as { data?: { message?: string } })?.data?.message
+    alert(message || 'Failed to remove member')
   }
 }
 
-const reviewersPopoverOpen = ref(false);
-
 function togglePreferableReviewer(devId: string) {
-  const idx = editForm.preferableReviewerIds.indexOf(devId);
+  const idx = editForm.preferableReviewerIds.indexOf(devId)
   if (idx >= 0) {
-    editForm.preferableReviewerIds.splice(idx, 1);
-  } else {
-    editForm.preferableReviewerIds.push(devId);
+    editForm.preferableReviewerIds.splice(idx, 1)
+  }
+  else {
+    editForm.preferableReviewerIds.push(devId)
   }
 }
 
 function getOtherMembers(currentMemberId: string) {
-  return members.value?.filter((m) => m.id !== currentMemberId) ?? [];
+  return members.value?.filter(m => m.id !== currentMemberId) ?? []
 }
 
 function getMemberName(developerId: string): string {
-  const m = members.value?.find((m) => m.developerId === developerId);
-  return m ? `${m.developer.firstName} ${m.developer.lastName}` : "?";
+  const m = members.value?.find(m => m.developerId === developerId)
+  return m ? `${m.developer.firstName} ${m.developer.lastName}` : '?'
 }
 
-function getPreferableNames(member: any): string {
-  if (!member.preferableReviewers?.length) return "-";
+function getPreferableNames(member: TeamMember): string {
+  if (!member.preferableReviewers?.length)
+    return '-'
   return member.preferableReviewers
-    .map((pref: any) => {
-      const m = members.value?.find((m) => m.developerId === pref.preferredDeveloperId);
-      return m ? `${m.developer.firstName} ${m.developer.lastName}` : "?";
+    .map((preference) => {
+      const matched = members.value?.find(m => m.developerId === preference.preferredDeveloperId)
+      return matched ? `${matched.developer.firstName} ${matched.developer.lastName}` : '?'
     })
-    .join(", ");
+    .join(', ')
 }
 </script>
 
@@ -128,7 +142,9 @@ function getPreferableNames(member: any): string {
     <div v-if="showAddForm" class="rounded-lg border bg-muted/30 p-4">
       <div class="flex items-end gap-3">
         <div class="flex-1 space-y-2">
-          <UILabel for="add-member-dev">Developer</UILabel>
+          <UILabel for="add-member-dev">
+            Developer
+          </UILabel>
           <UISelect v-model="selectedDeveloperId">
             <UISelectTrigger id="add-member-dev">
               <UISelectValue placeholder="Select a developer..." />
@@ -143,7 +159,9 @@ function getPreferableNames(member: any): string {
         <UIButton type="button" :disabled="!selectedDeveloperId || addingMember" @click="addMember">
           {{ addingMember ? "Adding..." : "Add" }}
         </UIButton>
-        <UIButton variant="ghost" type="button" @click="showAddForm = false"> Cancel </UIButton>
+        <UIButton variant="ghost" type="button" @click="showAddForm = false">
+          Cancel
+        </UIButton>
       </div>
       <p v-if="availableDevelopers.length === 0" class="mt-2 text-xs text-muted-foreground">
         All developers are already members of this team.
@@ -241,7 +259,9 @@ function getPreferableNames(member: any): string {
       v-else
       class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
     >
-      <p class="text-sm text-muted-foreground">No members yet</p>
+      <p class="text-sm text-muted-foreground">
+        No members yet
+      </p>
       <UIButton size="sm" type="button" class="mt-3" @click="showAddForm = true">
         <Plus class="size-4" />
         Add your first member
@@ -259,7 +279,9 @@ function getPreferableNames(member: any): string {
 
         <div class="space-y-6 py-4">
           <div>
-            <UILabel for="edit-reviewer-count" class="mb-2 block">Reviewer Count</UILabel>
+            <UILabel for="edit-reviewer-count" class="mb-2 block">
+              Reviewer Count
+            </UILabel>
             <UINumberField
               :model-value="editForm.reviewerCount ?? undefined"
               :min="1"
@@ -278,11 +300,15 @@ function getPreferableNames(member: any): string {
 
           <div class="flex items-center gap-3">
             <UICheckbox id="edit-experienced" v-model="editForm.isExperienced" />
-            <UILabel for="edit-experienced">Experienced developer</UILabel>
+            <UILabel for="edit-experienced">
+              Experienced developer
+            </UILabel>
           </div>
 
           <div>
-            <UILabel class="mb-2 block">Preferable Reviewers</UILabel>
+            <UILabel class="mb-2 block">
+              Preferable Reviewers
+            </UILabel>
             <template v-if="editingMember && getOtherMembers(editingMember.id).length">
               <UIPopover v-model:open="reviewersPopoverOpen">
                 <UIPopoverTrigger as-child>
@@ -348,7 +374,9 @@ function getPreferableNames(member: any): string {
                 </span>
               </div>
             </template>
-            <p v-else class="text-xs text-muted-foreground">No other members to select.</p>
+            <p v-else class="text-xs text-muted-foreground">
+              No other members to select.
+            </p>
           </div>
         </div>
 
@@ -356,7 +384,9 @@ function getPreferableNames(member: any): string {
           <UIButton variant="ghost" type="button" @click="editDialogOpen = false">
             Cancel
           </UIButton>
-          <UIButton type="button" @click="saveEdit"> Save </UIButton>
+          <UIButton type="button" @click="saveEdit">
+            Save
+          </UIButton>
         </UIDialogFooter>
       </UIDialogContent>
     </UIDialog>

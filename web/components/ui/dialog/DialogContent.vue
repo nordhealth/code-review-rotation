@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import type { DialogContentEmits, DialogContentProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
-import { reactiveOmit } from "@vueuse/core"
-import { X } from "lucide-vue-next"
+import type { DialogContentEmits, DialogContentProps } from "reka-ui";
+import type { HTMLAttributes } from "vue";
+import { reactiveOmit } from "@vueuse/core";
+import { X } from "lucide-vue-next";
 import {
   DialogClose,
   DialogContent,
   DialogOverlay,
   DialogPortal,
   useForwardPropsEmits,
-} from "reka-ui"
-import { cn } from "@/lib/utils"
+} from "reka-ui";
+import { cn } from "@/lib/utils";
 
-const props = defineProps<DialogContentProps & { class?: HTMLAttributes["class"] }>()
-const emits = defineEmits<DialogContentEmits>()
+const props = defineProps<DialogContentProps & { class?: HTMLAttributes["class"] }>();
+const emits = defineEmits<DialogContentEmits>();
 
-const delegatedProps = reactiveOmit(props, "class")
+const delegatedProps = reactiveOmit(props, "class");
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>
 
 <template>
@@ -36,7 +36,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
       <slot />
 
       <DialogClose
-        class=absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-neutral-100 data-[state=open]:text-neutral-500 dark:ring-offset-neutral-950 dark:focus:ring-neutral-300 dark:data-[state=open]:bg-neutral-800 dark:data-[state=open]:text-neutral-400
+        class="absolute" right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 disabled:pointer-events-none data-[state="open]:bg-neutral-100" data-[state="open]:text-neutral-500" dark:ring-offset-neutral-950 dark:focus:ring-neutral-300 dark:data-[state="open]:bg-neutral-800" dark:data-[state="open]:text-neutral-400"
       >
         <X class="w-4 h-4" />
         <span class="sr-only">Close</span>

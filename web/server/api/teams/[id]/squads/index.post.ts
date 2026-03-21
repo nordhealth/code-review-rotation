@@ -10,7 +10,8 @@ export default defineEventHandler(async (event) => {
   await requireAdmin(event)
   const slugOrId = getRouterParam(event, 'id')!
   const team = await resolveTeam(slugOrId)
-  if (!team) throw createError({ statusCode: 404, statusMessage: 'Team not found' })
+  if (!team)
+    throw createError({ statusCode: 404, statusMessage: 'Team not found' })
   const body = await readValidatedBody(event, schema.parse)
   return createSquad({ teamId: team.id, ...body })
 })

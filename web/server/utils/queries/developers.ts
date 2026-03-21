@@ -1,83 +1,87 @@
-import { aliasedTable } from "drizzle-orm";
+import { aliasedTable } from 'drizzle-orm'
 import {
   developers,
-  rotationAssignments,
   rotationAssignmentReviewers,
+  rotationAssignments,
   rotations,
   teamDevelopers,
   teams,
-} from "../../db/schema";
+} from '../../db/schema'
+
+const NON_WORD_REGEX = /[^\w\s-]/g
+const WHITESPACE_UNDERSCORE_REGEX = /[\s_]+/g
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_]+/g, "-");
+    .replace(NON_WORD_REGEX, '')
+    .replace(WHITESPACE_UNDERSCORE_REGEX, '-')
 }
 
 export async function queryDevelopers() {
-  return db.select().from(developers).orderBy(asc(developers.firstName));
+  return db.select().from(developers).orderBy(asc(developers.firstName))
 }
 
 export async function queryDeveloperById(id: string) {
-  const [developer] = await db.select().from(developers).where(eq(developers.id, id));
-  return developer ?? null;
+  const [developer] = await db.select().from(developers).where(eq(developers.id, id))
+  return developer ?? null
 }
 
 export async function queryDeveloperBySlug(slug: string) {
-  const [developer] = await db.select().from(developers).where(eq(developers.slug, slug));
-  return developer ?? null;
+  const [developer] = await db.select().from(developers).where(eq(developers.slug, slug))
+  return developer ?? null
 }
 
 export async function resolveDeveloper(slugOrId: string) {
-  const bySlug = await queryDeveloperBySlug(slugOrId);
-  if (bySlug) return bySlug;
-  return queryDeveloperById(slugOrId);
+  const bySlug = await queryDeveloperBySlug(slugOrId)
+  if (bySlug)
+    return bySlug
+  return queryDeveloperById(slugOrId)
 }
 
 export async function createDeveloper(data: {
-  firstName: string;
-  lastName: string;
-  slackId?: string;
-  gitlabId?: string;
+  firstName: string
+  lastName: string
+  slackId?: string
+  gitlabId?: string
 }) {
-  const slug = slugify(`${data.firstName} ${data.lastName}`);
+  const slug = slugify(`${data.firstName} ${data.lastName}`)
   const [developer] = await db
     .insert(developers)
     .values({ ...data, slug })
-    .returning();
-  return developer;
+    .returning()
+  return developer
 }
 
 export async function updateDeveloper(
   id: string,
   data: Partial<{
-    firstName: string;
-    lastName: string;
-    slackId: string | null;
-    gitlabId: string | null;
+    firstName: string
+    lastName: string
+    slackId: string | null
+    gitlabId: string | null
   }>,
 ) {
-  const updates: Record<string, any> = { ...data, updatedAt: new Date() };
+  const updates: Partial<typeof developers.$inferInsert> = { ...data, updatedAt: new Date() }
   if (data.firstName || data.lastName) {
-    const current = await queryDeveloperById(id);
+    const current = await queryDeveloperById(id)
     if (current) {
-      const firstName = data.firstName ?? current.firstName;
-      const lastName = data.lastName ?? current.lastName;
-      updates.slug = slugify(`${firstName} ${lastName}`);
+      const firstName = data.firstName ?? current.firstName
+      const lastName = data.lastName ?? current.lastName
+      updates.slug = slugify(`${firstName} ${lastName}`)
     }
   }
   const [developer] = await db
     .update(developers)
     .set(updates)
     .where(eq(developers.id, id))
-    .returning();
-  return developer ?? null;
+    .returning()
+  return developer ?? null
 }
 
 export async function deleteDeveloper(id: string) {
-  await db.delete(developers).where(eq(developers.id, id));
+  await db.delete(developers).where(eq(developers.id, id))
 }
 
 /**
@@ -112,10 +116,10 @@ export async function queryDeveloperAssociations(developerId: string) {
     )
     .leftJoin(developers, eq(rotationAssignmentReviewers.reviewerDeveloperId, developers.id))
     .where(eq(rotationAssignments.targetId, developerId))
-    .orderBy(desc(rotations.date));
+    .orderBy(desc(rotations.date))
 
   // 2. Assignments where this developer is a REVIEWER (whose code they review)
-  const targetDevelopers = aliasedTable(developers, "targetDevelopers");
+  const targetDevelopers = aliasedTable(developers, 'targetDevelopers')
   const reviewingOthers = await db
     .select({
       assignmentId: rotationAssignments.id,
@@ -139,7 +143,7 @@ export async function queryDeveloperAssociations(developerId: string) {
     .innerJoin(teams, eq(rotations.teamId, teams.id))
     .leftJoin(targetDevelopers, eq(rotationAssignments.targetId, targetDevelopers.id))
     .where(eq(rotationAssignmentReviewers.reviewerDeveloperId, developerId))
-    .orderBy(desc(rotations.date));
+    .orderBy(desc(rotations.date))
 
   // 3. Teams this developer belongs to
   const memberOf = await db
@@ -151,7 +155,7 @@ export async function queryDeveloperAssociations(developerId: string) {
     })
     .from(teamDevelopers)
     .innerJoin(teams, eq(teamDevelopers.teamId, teams.id))
-    .where(eq(teamDevelopers.developerId, developerId));
+    .where(eq(teamDevelopers.developerId, developerId))
 
-  return { assignedToMe, reviewingOthers, memberOf };
+  return { assignedToMe, reviewingOthers, memberOf }
 }

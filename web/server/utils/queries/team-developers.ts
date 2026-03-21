@@ -1,7 +1,6 @@
-import { teamDevelopers, developers, preferableReviewers } from '../../db/schema'
+import { developers, preferableReviewers, teamDevelopers } from '../../db/schema'
 
 export async function queryTeamMembers(teamId: string) {
-
   const members = await db
     .select({
       id: teamDevelopers.id,
@@ -22,9 +21,10 @@ export async function queryTeamMembers(teamId: string) {
     .innerJoin(developers, eq(teamDevelopers.developerId, developers.id))
     .where(eq(teamDevelopers.teamId, teamId))
 
-  if (members.length === 0) return []
+  if (members.length === 0)
+    return []
 
-  const memberIds = members.map((m) => m.id)
+  const memberIds = members.map(m => m.id)
   const prefs = await db
     .select({
       id: preferableReviewers.id,
@@ -41,9 +41,9 @@ export async function queryTeamMembers(teamId: string) {
     prefsByMember.set(pref.teamDeveloperId, existing)
   }
 
-  return members.map((m) => ({
+  return members.map(m => ({
     ...m,
-    preferableReviewers: (prefsByMember.get(m.id) ?? []).map((p) => ({
+    preferableReviewers: (prefsByMember.get(m.id) ?? []).map(p => ({
       id: p.id,
       preferredDeveloperId: p.preferredDeveloperId,
     })),
@@ -62,7 +62,7 @@ export async function addTeamMember(data: {
 
 export async function updateTeamMember(
   memberId: string,
-  data: Partial<{ reviewerCount: number | null; isExperienced: boolean }>,
+  data: Partial<{ reviewerCount: number | null, isExperienced: boolean }>,
 ) {
   const [member] = await db
     .update(teamDevelopers)
@@ -84,16 +84,16 @@ export async function setPreferableReviewers(
   teamDeveloperId: string,
   preferredDeveloperIds: string[],
 ) {
-
   await db
     .delete(preferableReviewers)
     .where(eq(preferableReviewers.teamDeveloperId, teamDeveloperId))
 
-  if (preferredDeveloperIds.length === 0) return []
+  if (preferredDeveloperIds.length === 0)
+    return []
 
   const rows = await db
     .insert(preferableReviewers)
-    .values(preferredDeveloperIds.map((devId) => ({ teamDeveloperId, preferredDeveloperId: devId })))
+    .values(preferredDeveloperIds.map(devId => ({ teamDeveloperId, preferredDeveloperId: devId })))
     .returning()
 
   return rows

@@ -1,27 +1,31 @@
 <script setup lang="ts">
-definePageMeta({ layout: "auth" });
+definePageMeta({ layout: 'auth' })
 
-const email = ref("");
-const password = ref("");
-const loading = ref(false);
-const errorMessage = ref("");
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
+const errorMessage = ref('')
 
 async function onSubmit() {
-  if (!email.value || !password.value) return;
-  loading.value = true;
-  errorMessage.value = "";
+  if (!email.value || !password.value)
+    return
+  loading.value = true
+  errorMessage.value = ''
 
   try {
-    await $fetch("/api/auth/login", {
-      method: "POST",
+    await $fetch('/api/auth/login', {
+      method: 'POST',
       body: { email: email.value, password: password.value },
-    });
-    await useUserSession().fetch();
-    await navigateTo("/");
-  } catch (err: any) {
-    errorMessage.value = err?.data?.statusMessage || "Sign in failed";
-  } finally {
-    loading.value = false;
+    })
+    await useUserSession().fetch()
+    await navigateTo('/')
+  }
+  catch (error) {
+    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
+    errorMessage.value = message || 'Sign in failed'
+  }
+  finally {
+    loading.value = false
   }
 }
 </script>
@@ -48,8 +52,12 @@ async function onSubmit() {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       </div>
-      <h1 class="text-2xl font-semibold tracking-tight">ReviewLeash</h1>
-      <p class="text-sm text-muted-foreground">Sign in to your account</p>
+      <h1 class="text-2xl font-semibold tracking-tight">
+        ReviewLeash
+      </h1>
+      <p class="text-sm text-muted-foreground">
+        Sign in to your account
+      </p>
     </div>
 
     <form class="space-y-4" @submit.prevent="onSubmit">
@@ -61,7 +69,9 @@ async function onSubmit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="login-email">Email</UILabel>
+        <UILabel for="login-email">
+          Email
+        </UILabel>
         <EmailInput
           id="login-email"
           v-model="email"
@@ -72,7 +82,9 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <div class="flex items-center justify-between">
-          <UILabel for="login-password">Password</UILabel>
+          <UILabel for="login-password">
+            Password
+          </UILabel>
           <NuxtLink
             to="/forgot-password"
             class="text-sm text-muted-foreground hover:text-primary"

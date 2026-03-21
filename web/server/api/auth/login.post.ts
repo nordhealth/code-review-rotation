@@ -1,34 +1,34 @@
-import { z } from "zod";
+import { z } from 'zod'
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+})
 
 export default defineEventHandler(async (event) => {
-  const body = await readValidatedBody(event, loginSchema.parse);
+  const body = await readValidatedBody(event, loginSchema.parse)
 
-  const user = await queryUserByEmail(body.email);
+  const user = await queryUserByEmail(body.email)
   if (!user) {
     throw createError({
       statusCode: 401,
-      statusMessage: "Invalid email or password",
-    });
+      statusMessage: 'Invalid email or password',
+    })
   }
 
-  const valid = await verifyPassword(user.passwordHash, body.password);
+  const valid = await verifyPassword(user.passwordHash, body.password)
   if (!valid) {
     throw createError({
       statusCode: 401,
-      statusMessage: "Invalid email or password",
-    });
+      statusMessage: 'Invalid email or password',
+    })
   }
 
   if (!user.emailConfirmed) {
     throw createError({
       statusCode: 403,
-      statusMessage: "Please confirm your email before signing in",
-    });
+      statusMessage: 'Please confirm your email before signing in',
+    })
   }
 
   await setUserSession(event, {
@@ -36,12 +36,12 @@ export default defineEventHandler(async (event) => {
       id: user.id,
       email: user.email,
       name: `${user.firstName} ${user.lastName}`.trim(),
-      firstName: user.firstName ?? "",
-      lastName: user.lastName ?? "",
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
       avatarUrl: user.avatarUrl,
-      role: user.role as "admin" | "developer",
+      role: user.role as 'admin' | 'developer',
     },
-  });
+  })
 
   return {
     user: {
@@ -49,5 +49,5 @@ export default defineEventHandler(async (event) => {
       email: user.email,
       name: `${user.firstName} ${user.lastName}`.trim(),
     },
-  };
-});
+  }
+})

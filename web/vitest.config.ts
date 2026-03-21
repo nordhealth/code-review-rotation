@@ -1,21 +1,21 @@
-import { defineConfig } from "vitest/config";
-import { resolve } from "path";
+import { resolve } from 'node:path'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
     globals: true,
     coverage: {
-      provider: "v8",
-      reporter: ["text", "lcov", "json-summary"],
-      reportsDirectory: "./coverage",
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'json-summary'],
+      reportsDirectory: './coverage',
       include: [
-        "server/utils/rotation/**/*.ts",
-        "server/utils/auth-constants.ts",
-        "server/utils/api-key.ts",
-        "server/utils/webhook.ts",
-        "app/lib/utils.ts",
+        'server/utils/rotation/**/*.ts',
+        'server/utils/auth-constants.ts',
+        'server/utils/api-key.ts',
+        'server/utils/webhook.ts',
+        'app/lib/utils.ts',
       ],
-      exclude: ["server/utils/rotation/index.ts"],
+      exclude: ['server/utils/rotation/index.ts'],
       thresholds: {
         statements: 100,
         branches: 100,
@@ -26,8 +26,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "~": resolve(__dirname),
-      "@": resolve(__dirname, "app"),
+      '~': resolve(__dirname),
+      '@': resolve(__dirname, 'app'),
     },
   },
-});
+})

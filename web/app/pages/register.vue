@@ -1,39 +1,43 @@
 <script setup lang="ts">
-definePageMeta({ layout: "auth" });
+definePageMeta({ layout: 'auth' })
 
-const email = ref("");
-const password = ref("");
-const firstName = ref("");
-const lastName = ref("");
-const loading = ref(false);
-const errorMessage = ref("");
-const success = ref(false);
-const devConfirmToken = ref("");
+const email = ref('')
+const password = ref('')
+const firstName = ref('')
+const lastName = ref('')
+const loading = ref(false)
+const errorMessage = ref('')
+const success = ref(false)
+const devConfirmToken = ref('')
 
 async function onSubmit() {
-  if (!email.value || !password.value || !firstName.value || !lastName.value) return;
-  loading.value = true;
-  errorMessage.value = "";
+  if (!email.value || !password.value || !firstName.value || !lastName.value)
+    return
+  loading.value = true
+  errorMessage.value = ''
 
   try {
-    const result = await $fetch("/api/auth/register", {
-      method: "POST",
+    const result = await $fetch('/api/auth/register', {
+      method: 'POST',
       body: {
         email: email.value,
         password: password.value,
         firstName: firstName.value,
         lastName: lastName.value,
       },
-    });
-    success.value = true;
+    })
+    success.value = true
     // In dev mode, the API returns the confirmation token for convenience
-    if ("confirmationToken" in result) {
-      devConfirmToken.value = (result as any).confirmationToken;
+    if ('confirmationToken' in result) {
+      devConfirmToken.value = (result as { confirmationToken: string }).confirmationToken
     }
-  } catch (err: any) {
-    errorMessage.value = err?.data?.statusMessage || "Registration failed";
-  } finally {
-    loading.value = false;
+  }
+  catch (error) {
+    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
+    errorMessage.value = message || 'Registration failed'
+  }
+  finally {
+    loading.value = false
   }
 }
 </script>
@@ -60,8 +64,12 @@ async function onSubmit() {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       </div>
-      <h1 class="text-2xl font-semibold tracking-tight">Create account</h1>
-      <p class="text-sm text-muted-foreground">Only @nordhealth.com and @provet.com emails</p>
+      <h1 class="text-2xl font-semibold tracking-tight">
+        Create account
+      </h1>
+      <p class="text-sm text-muted-foreground">
+        Only @nordhealth.com and @provet.com emails
+      </p>
     </div>
 
     <!-- Success state -->
@@ -69,8 +77,12 @@ async function onSubmit() {
       <div
         class="rounded-md border border-green-300 bg-green-50 p-4 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200"
       >
-        <p class="font-medium">Account created!</p>
-        <p class="mt-1">Please check the server console for the confirmation link.</p>
+        <p class="font-medium">
+          Account created!
+        </p>
+        <p class="mt-1">
+          Please check the server console for the confirmation link.
+        </p>
       </div>
 
       <UIButton v-if="devConfirmToken" as-child class="w-full">
@@ -80,7 +92,9 @@ async function onSubmit() {
       </UIButton>
 
       <UIButton as-child variant="outline" class="w-full">
-        <NuxtLink to="/login">Back to sign in</NuxtLink>
+        <NuxtLink to="/login">
+          Back to sign in
+        </NuxtLink>
       </UIButton>
     </div>
 
@@ -95,7 +109,9 @@ async function onSubmit() {
 
       <div class="grid grid-cols-2 gap-3">
         <div class="space-y-2">
-          <UILabel for="register-firstname">First name</UILabel>
+          <UILabel for="register-firstname">
+            First name
+          </UILabel>
           <UIInput
             id="register-firstname"
             v-model="firstName"
@@ -106,7 +122,9 @@ async function onSubmit() {
           />
         </div>
         <div class="space-y-2">
-          <UILabel for="register-lastname">Last name</UILabel>
+          <UILabel for="register-lastname">
+            Last name
+          </UILabel>
           <UIInput
             id="register-lastname"
             v-model="lastName"
@@ -119,7 +137,9 @@ async function onSubmit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="register-email">Email</UILabel>
+        <UILabel for="register-email">
+          Email
+        </UILabel>
         <EmailInput
           id="register-email"
           v-model="email"
@@ -129,7 +149,9 @@ async function onSubmit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="register-password">Password</UILabel>
+        <UILabel for="register-password">
+          Password
+        </UILabel>
         <UIInput
           id="register-password"
           v-model="password"
@@ -152,7 +174,9 @@ async function onSubmit() {
 
     <p v-if="!success" class="text-center text-sm text-muted-foreground">
       Already have an account?
-      <NuxtLink to="/login" class="font-medium text-primary hover:underline"> Sign in </NuxtLink>
+      <NuxtLink to="/login" class="font-medium text-primary hover:underline">
+        Sign in
+      </NuxtLink>
     </p>
   </div>
 </template>

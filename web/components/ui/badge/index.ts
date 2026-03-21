@@ -1,7 +1,7 @@
-import type { VariantProps } from "class-variance-authority"
-import { cva } from "class-variance-authority"
+import type { VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 
-export { default as Badge } from "./Badge.vue"
+export { default as Badge } from './Badge.vue'
 
 export const badgeVariants = cva(
   'inline-flex gap-1 items-center rounded-full border border-neutral-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 dark:border-neutral-800 dark:focus:ring-neutral-300',
@@ -18,7 +18,7 @@ export const badgeVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: 'default',
     },
   },
 )

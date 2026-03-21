@@ -1,193 +1,202 @@
 <script setup lang="ts">
-import { ChevronDown, ChevronRight, Pencil, Users, ArrowLeft } from "lucide-vue-next";
+import { ArrowLeft, ChevronDown, ChevronRight, Pencil, Users } from 'lucide-vue-next'
 
-const NuxtLink = resolveComponent("NuxtLink");
-const route = useRoute();
-const router = useRouter();
-const devSlug = route.params.id as string;
+const NuxtLink = resolveComponent('NuxtLink')
+const route = useRoute()
+const router = useRouter()
+const devSlug = route.params.id as string
 
-type ViewFilter = "all" | "reviewers" | "reviewing";
-const viewOptions: { value: ViewFilter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "reviewers", label: "Assigned reviewers" },
-  { value: "reviewing", label: "Reviewing" },
-];
+type ViewFilter = 'all' | 'reviewers' | 'reviewing'
+const viewOptions: { value: ViewFilter, label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'reviewers', label: 'Assigned reviewers' },
+  { value: 'reviewing', label: 'Reviewing' },
+]
 const activeView = computed<ViewFilter>({
   get: () => {
-    const q = route.query.view as string;
-    return q === "reviewers" || q === "reviewing" ? q : "all";
+    const q = route.query.view as string
+    return q === 'reviewers' || q === 'reviewing' ? q : 'all'
   },
   set: (val) => {
-    const query = { ...route.query };
-    if (val === "all") delete query.view;
-    else query.view = val;
-    router.replace({ query });
+    const query = { ...route.query }
+    if (val === 'all')
+      delete query.view
+    else query.view = val
+    router.replace({ query })
   },
-});
+})
 
 const showHistory = computed({
-  get: () => route.query.history === "1",
+  get: () => route.query.history === '1',
   set: (val) => {
-    const query = { ...route.query };
-    if (val) query.history = "1";
-    else delete query.history;
-    router.replace({ query });
+    const query = { ...route.query }
+    if (val)
+      query.history = '1'
+    else delete query.history
+    router.replace({ query })
   },
-});
+})
 
-const { data: developer } = await useFetch(`/api/developers/${devSlug}`);
-const { data: associations } = await useFetch(`/api/developers/${devSlug}/associations`);
+const { data: developer } = await useFetch(`/api/developers/${devSlug}`)
+const { data: associations } = await useFetch(`/api/developers/${devSlug}/associations`)
 
 function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 
 function getInitials(firstName: string, lastName?: string) {
-  return `${firstName.charAt(0)}${(lastName ?? "").charAt(0) || ""}`.toUpperCase();
+  return `${firstName.charAt(0)}${(lastName ?? '').charAt(0) || ''}`.toUpperCase()
 }
 
 interface RotationGroup {
-  rotationId: string;
-  date: Date;
-  people: { name: string; id: string | null; slug: string | null }[];
+  rotationId: string
+  date: Date
+  people: { name: string, id: string | null, slug: string | null }[]
 }
 
 interface TeamGroup {
-  teamName: string;
-  teamSlug: string;
-  active: RotationGroup | null;
-  past: RotationGroup[];
+  teamName: string
+  teamSlug: string
+  active: RotationGroup | null
+  past: RotationGroup[]
 }
 
 // Group "assigned to me" by team, then split active/past per team
 const reviewersByTeam = computed<TeamGroup[]>(() => {
-  if (!associations.value?.assignedToMe) return [];
+  if (!associations.value?.assignedToMe)
+    return []
 
   // First group by rotationId to collect reviewers per rotation
   const rotationMap = new Map<
     string,
     {
-      date: Date;
-      teamName: string;
-      teamSlug: string;
-      reviewers: { name: string; id: string | null }[];
+      date: Date
+      teamName: string
+      teamSlug: string
+      reviewers: { name: string, id: string | null }[]
     }
-  >();
+  >()
   for (const row of associations.value.assignedToMe) {
-    if (row.mode !== "devs") continue;
+    if (row.mode !== 'devs')
+      continue
     if (!rotationMap.has(row.rotationId)) {
       rotationMap.set(row.rotationId, {
         date: row.date,
         teamName: row.teamName,
         teamSlug: row.teamSlug,
         reviewers: [],
-      });
+      })
     }
     const name = row.reviewerFirstName
-      ? `${row.reviewerFirstName} ${row.reviewerLastName ?? ""}`.trim()
-      : (row.reviewerName ?? "Deleted");
+      ? `${row.reviewerFirstName} ${row.reviewerLastName ?? ''}`.trim()
+      : (row.reviewerName ?? 'Deleted')
     rotationMap
       .get(row.rotationId)!
-      .reviewers.push({ name, id: row.reviewerId, slug: row.reviewerSlug });
+      .reviewers
+      .push({ name, id: row.reviewerId, slug: row.reviewerSlug })
   }
 
   // Now group rotations by team
   const teamMap = new Map<
     string,
-    { teamName: string; teamSlug: string; rotations: RotationGroup[] }
-  >();
+    { teamName: string, teamSlug: string, rotations: RotationGroup[] }
+  >()
   for (const [rotationId, r] of rotationMap) {
     if (!teamMap.has(r.teamSlug)) {
-      teamMap.set(r.teamSlug, { teamName: r.teamName, teamSlug: r.teamSlug, rotations: [] });
+      teamMap.set(r.teamSlug, { teamName: r.teamName, teamSlug: r.teamSlug, rotations: [] })
     }
     teamMap.get(r.teamSlug)!.rotations.push({
       rotationId,
       date: r.date,
       people: r.reviewers,
-    });
+    })
   }
 
-  return [...teamMap.values()].map((t) => ({
+  return Array.from(teamMap.values(), t => ({
     teamName: t.teamName,
     teamSlug: t.teamSlug,
     active: t.rotations[0] ?? null,
     past: t.rotations.slice(1),
-  }));
-});
+  }))
+})
 
 // Group "reviewing others" by team, then split active/past per team
 const reviewsByTeam = computed<TeamGroup[]>(() => {
-  if (!associations.value?.reviewingOthers) return [];
+  if (!associations.value?.reviewingOthers)
+    return []
 
   const rotationMap = new Map<
     string,
     {
-      date: Date;
-      teamName: string;
-      teamSlug: string;
-      targets: { name: string; id: string | null }[];
+      date: Date
+      teamName: string
+      teamSlug: string
+      targets: { name: string, id: string | null }[]
     }
-  >();
+  >()
   for (const row of associations.value.reviewingOthers) {
-    if (row.mode !== "devs") continue;
+    if (row.mode !== 'devs')
+      continue
     if (!rotationMap.has(row.rotationId)) {
       rotationMap.set(row.rotationId, {
         date: row.date,
         teamName: row.teamName,
         teamSlug: row.teamSlug,
         targets: [],
-      });
+      })
     }
     rotationMap.get(row.rotationId)!.targets.push({
       name: row.targetName ?? row.targetId,
       id: row.targetId,
       slug: row.targetSlug ?? null,
-    });
+    })
   }
 
   const teamMap = new Map<
     string,
-    { teamName: string; teamSlug: string; rotations: RotationGroup[] }
-  >();
+    { teamName: string, teamSlug: string, rotations: RotationGroup[] }
+  >()
   for (const [rotationId, r] of rotationMap) {
     if (!teamMap.has(r.teamSlug)) {
-      teamMap.set(r.teamSlug, { teamName: r.teamName, teamSlug: r.teamSlug, rotations: [] });
+      teamMap.set(r.teamSlug, { teamName: r.teamName, teamSlug: r.teamSlug, rotations: [] })
     }
     teamMap.get(r.teamSlug)!.rotations.push({
       rotationId,
       date: r.date,
       people: r.targets,
-    });
+    })
   }
 
-  return [...teamMap.values()].map((t) => ({
+  return Array.from(teamMap.values(), t => ({
     teamName: t.teamName,
     teamSlug: t.teamSlug,
     active: t.rotations[0] ?? null,
     past: t.rotations.slice(1),
-  }));
-});
+  }))
+})
 
-const expandedHistory = ref<Set<string>>(new Set());
-const expandedRotations = ref<Set<string>>(new Set());
+const expandedHistory = ref<Set<string>>(new Set())
+const expandedRotations = ref<Set<string>>(new Set())
 
 function toggleHistory(key: string) {
   if (expandedHistory.value.has(key)) {
-    expandedHistory.value.delete(key);
-  } else {
-    expandedHistory.value.add(key);
+    expandedHistory.value.delete(key)
+  }
+  else {
+    expandedHistory.value.add(key)
   }
 }
 
 function toggleRotation(rotationId: string) {
   if (expandedRotations.value.has(rotationId)) {
-    expandedRotations.value.delete(rotationId);
-  } else {
-    expandedRotations.value.add(rotationId);
+    expandedRotations.value.delete(rotationId)
+  }
+  else {
+    expandedRotations.value.add(rotationId)
   }
 }
 </script>
@@ -263,9 +272,7 @@ function toggleRotation(rotationId: string) {
                 </svg>
                 {{ developer.gitlabId }}
               </span>
-              <span v-if="!developer.slackId && !developer.gitlabId"
-                >No integrations configured</span
-              >
+              <span v-if="!developer.slackId && !developer.gitlabId">No integrations configured</span>
             </div>
           </div>
         </div>
@@ -279,7 +286,9 @@ function toggleRotation(rotationId: string) {
 
       <!-- Teams -->
       <div v-if="associations?.memberOf?.length" class="space-y-3">
-        <h2 class="text-base font-semibold">Teams</h2>
+        <h2 class="text-base font-semibold">
+          Teams
+        </h2>
         <div class="flex flex-wrap gap-2">
           <NuxtLink
             v-for="team in associations.memberOf"
@@ -331,7 +340,9 @@ function toggleRotation(rotationId: string) {
       <!-- Reviewers section -->
       <div v-show="activeView === 'all' || activeView === 'reviewers'" class="space-y-3">
         <div>
-          <h2 class="text-base font-semibold">Assigned reviewers</h2>
+          <h2 class="text-base font-semibold">
+            Assigned reviewers
+          </h2>
           <p class="text-sm text-muted-foreground">
             Who reviews {{ developer.firstName }}'s pull requests
           </p>
@@ -442,8 +453,8 @@ function toggleRotation(rotationId: string) {
                         :to="person.slug ? `/developers/${person.slug}` : undefined"
                         class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-background px-2 py-1 text-xs font-medium shadow-sm"
                         :class="
-                          person.slug &&
-                          'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
+                          person.slug
+                            && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
                         "
                       >
                         <UIAvatar class="size-5">
@@ -466,13 +477,17 @@ function toggleRotation(rotationId: string) {
           </div>
         </template>
 
-        <p v-else class="text-sm text-muted-foreground">No rotation history yet.</p>
+        <p v-else class="text-sm text-muted-foreground">
+          No rotation history yet.
+        </p>
       </div>
 
       <!-- Reviews section -->
       <div v-show="activeView === 'all' || activeView === 'reviewing'" class="space-y-3">
         <div>
-          <h2 class="text-base font-semibold">Reviewing</h2>
+          <h2 class="text-base font-semibold">
+            Reviewing
+          </h2>
           <p class="text-sm text-muted-foreground">
             Pull requests {{ developer.firstName }} is assigned to review
           </p>
@@ -583,8 +598,8 @@ function toggleRotation(rotationId: string) {
                         :to="person.slug ? `/developers/${person.slug}` : undefined"
                         class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-background px-2 py-1 text-xs font-medium shadow-sm"
                         :class="
-                          person.slug &&
-                          'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
+                          person.slug
+                            && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
                         "
                       >
                         <UIAvatar class="size-5">
@@ -607,7 +622,9 @@ function toggleRotation(rotationId: string) {
           </div>
         </template>
 
-        <p v-else class="text-sm text-muted-foreground">No rotation history yet.</p>
+        <p v-else class="text-sm text-muted-foreground">
+          No rotation history yet.
+        </p>
       </div>
     </template>
   </div>

@@ -1,30 +1,34 @@
 <script setup lang="ts">
-definePageMeta({ layout: "auth" });
+definePageMeta({ layout: 'auth' })
 
-const email = ref("");
-const loading = ref(false);
-const errorMessage = ref("");
-const success = ref(false);
-const devResetToken = ref("");
+const email = ref('')
+const loading = ref(false)
+const errorMessage = ref('')
+const success = ref(false)
+const devResetToken = ref('')
 
 async function onSubmit() {
-  if (!email.value) return;
-  loading.value = true;
-  errorMessage.value = "";
+  if (!email.value)
+    return
+  loading.value = true
+  errorMessage.value = ''
 
   try {
-    const result = await $fetch("/api/auth/forgot-password", {
-      method: "POST",
+    const result = await $fetch('/api/auth/forgot-password', {
+      method: 'POST',
       body: { email: email.value },
-    });
-    success.value = true;
-    if ("resetToken" in result) {
-      devResetToken.value = (result as any).resetToken;
+    })
+    success.value = true
+    if ('resetToken' in result) {
+      devResetToken.value = (result as { resetToken: string }).resetToken
     }
-  } catch (err: any) {
-    errorMessage.value = err?.data?.statusMessage || "Something went wrong";
-  } finally {
-    loading.value = false;
+  }
+  catch (error) {
+    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
+    errorMessage.value = message || 'Something went wrong'
+  }
+  finally {
+    loading.value = false
   }
 }
 </script>
@@ -49,8 +53,12 @@ async function onSubmit() {
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       </div>
-      <h1 class="text-2xl font-semibold tracking-tight">Forgot password</h1>
-      <p class="text-sm text-muted-foreground">Enter your email and we'll send you a reset link</p>
+      <h1 class="text-2xl font-semibold tracking-tight">
+        Forgot password
+      </h1>
+      <p class="text-sm text-muted-foreground">
+        Enter your email and we'll send you a reset link
+      </p>
     </div>
 
     <div v-if="success" class="space-y-4">
@@ -58,7 +66,9 @@ async function onSubmit() {
         class="rounded-md border border-green-300 bg-green-50 p-4 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200"
       >
         <p>If an account exists with that email, a reset link has been sent.</p>
-        <p class="mt-1 text-xs">Check the server console for the link (dev mode).</p>
+        <p class="mt-1 text-xs">
+          Check the server console for the link (dev mode).
+        </p>
       </div>
 
       <UIButton v-if="devResetToken" as-child class="w-full">
@@ -68,7 +78,9 @@ async function onSubmit() {
       </UIButton>
 
       <UIButton as-child variant="outline" class="w-full">
-        <NuxtLink to="/login">Back to sign in</NuxtLink>
+        <NuxtLink to="/login">
+          Back to sign in
+        </NuxtLink>
       </UIButton>
     </div>
 
@@ -81,7 +93,9 @@ async function onSubmit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="forgot-email">Email</UILabel>
+        <UILabel for="forgot-email">
+          Email
+        </UILabel>
         <EmailInput
           id="forgot-email"
           v-model="email"

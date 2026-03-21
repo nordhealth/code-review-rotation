@@ -9,7 +9,8 @@ const submitting = ref(false)
 const error = ref('')
 
 async function submit() {
-  if (!form.name) return
+  if (!form.name)
+    return
   submitting.value = true
   error.value = ''
   try {
@@ -21,9 +22,12 @@ async function submit() {
       },
     })
     router.push('/')
-  } catch (e: any) {
-    error.value = e.data?.message || 'Failed to create team'
-  } finally {
+  }
+  catch (error) {
+    const message = (error as { data?: { message?: string } })?.data?.message
+    error.value = message || 'Failed to create team'
+  }
+  finally {
     submitting.value = false
   }
 }
@@ -32,8 +36,12 @@ async function submit() {
 <template>
   <div class="max-w-lg space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold tracking-tight">New Team</h1>
-      <p class="text-sm text-muted-foreground">Create a new code review rotation team</p>
+      <h1 class="text-2xl font-semibold tracking-tight">
+        New Team
+      </h1>
+      <p class="text-sm text-muted-foreground">
+        Create a new code review rotation team
+      </p>
     </div>
 
     <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -42,7 +50,9 @@ async function submit() {
 
     <form class="space-y-4" @submit.prevent="submit">
       <div class="space-y-2">
-        <UILabel for="new-team-name">Team Name *</UILabel>
+        <UILabel for="new-team-name">
+          Team Name *
+        </UILabel>
         <UIInput
           id="new-team-name"
           v-model="form.name"
@@ -52,7 +62,9 @@ async function submit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="new-team-count">Default Reviewer Count</UILabel>
+        <UILabel for="new-team-count">
+          Default Reviewer Count
+        </UILabel>
         <UINumberField v-model="form.defaultReviewerCount" :min="1">
           <UINumberFieldContent>
             <UINumberFieldDecrement />
@@ -60,7 +72,9 @@ async function submit() {
             <UINumberFieldIncrement />
           </UINumberFieldContent>
         </UINumberField>
-        <p class="text-xs text-muted-foreground">Number of reviewers assigned per rotation</p>
+        <p class="text-xs text-muted-foreground">
+          Number of reviewers assigned per rotation
+        </p>
       </div>
 
       <div class="flex items-center gap-3 pt-2">
@@ -68,7 +82,9 @@ async function submit() {
           {{ submitting ? 'Creating...' : 'Create Team' }}
         </UIButton>
         <UIButton as-child variant="ghost">
-          <NuxtLink to="/">Cancel</NuxtLink>
+          <NuxtLink to="/">
+            Cancel
+          </NuxtLink>
         </UIButton>
       </div>
     </form>

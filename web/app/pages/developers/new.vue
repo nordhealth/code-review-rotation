@@ -11,7 +11,8 @@ const submitting = ref(false)
 const error = ref('')
 
 async function submit() {
-  if (!form.firstName || !form.lastName) return
+  if (!form.firstName || !form.lastName)
+    return
   submitting.value = true
   error.value = ''
   try {
@@ -25,9 +26,12 @@ async function submit() {
       },
     })
     router.push(`/developers/${created.slug}`)
-  } catch (e: any) {
-    error.value = e.data?.message || 'Failed to create developer'
-  } finally {
+  }
+  catch (error) {
+    const message = (error as { data?: { message?: string } })?.data?.message
+    error.value = message || 'Failed to create developer'
+  }
+  finally {
     submitting.value = false
   }
 }
@@ -36,8 +40,12 @@ async function submit() {
 <template>
   <div class="max-w-lg space-y-6">
     <div>
-      <h1 class="text-2xl font-semibold tracking-tight">New Developer</h1>
-      <p class="text-sm text-muted-foreground">Add a new developer to the system</p>
+      <h1 class="text-2xl font-semibold tracking-tight">
+        New Developer
+      </h1>
+      <p class="text-sm text-muted-foreground">
+        Add a new developer to the system
+      </p>
     </div>
 
     <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -47,7 +55,9 @@ async function submit() {
     <form class="space-y-4" @submit.prevent="submit">
       <div class="grid gap-4 sm:grid-cols-2">
         <div class="space-y-2">
-          <UILabel for="new-dev-firstname">First Name *</UILabel>
+          <UILabel for="new-dev-firstname">
+            First Name *
+          </UILabel>
           <UIInput
             id="new-dev-firstname"
             v-model="form.firstName"
@@ -56,7 +66,9 @@ async function submit() {
           />
         </div>
         <div class="space-y-2">
-          <UILabel for="new-dev-lastname">Last Name *</UILabel>
+          <UILabel for="new-dev-lastname">
+            Last Name *
+          </UILabel>
           <UIInput
             id="new-dev-lastname"
             v-model="form.lastName"
@@ -67,7 +79,9 @@ async function submit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="new-dev-slack">Slack ID</UILabel>
+        <UILabel for="new-dev-slack">
+          Slack ID
+        </UILabel>
         <UIInput
           id="new-dev-slack"
           v-model="form.slackId"
@@ -77,7 +91,9 @@ async function submit() {
       </div>
 
       <div class="space-y-2">
-        <UILabel for="new-dev-gitlab">GitLab ID</UILabel>
+        <UILabel for="new-dev-gitlab">
+          GitLab ID
+        </UILabel>
         <UIInput
           id="new-dev-gitlab"
           v-model="form.gitlabId"
@@ -90,7 +106,9 @@ async function submit() {
           {{ submitting ? 'Creating...' : 'Create Developer' }}
         </UIButton>
         <UIButton as-child variant="ghost">
-          <NuxtLink to="/developers">Cancel</NuxtLink>
+          <NuxtLink to="/developers">
+            Cancel
+          </NuxtLink>
         </UIButton>
       </div>
     </form>

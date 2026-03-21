@@ -1,39 +1,39 @@
 export default defineEventHandler(async (event) => {
-  await requireApiKey(event);
+  await requireApiKey(event)
 
-  const query = getQuery(event);
-  const teamId = query.teamId as string | undefined;
-  const developerId = query.developerId as string | undefined;
-  const squadId = query.squadId as string | undefined;
-  const mode = query.mode as "devs" | "teams" | undefined;
+  const query = getQuery(event)
+  const teamId = query.teamId as string | undefined
+  const developerId = query.developerId as string | undefined
+  const squadId = query.squadId as string | undefined
+  const mode = query.mode as 'devs' | 'teams' | undefined
 
-  const allLatest = await queryLatestRotations();
+  const allLatest = await queryLatestRotations()
 
-  let filtered = allLatest;
+  let filtered = allLatest
 
   if (teamId) {
-    filtered = filtered.filter((rotation) => rotation.teamId === teamId);
+    filtered = filtered.filter(rotation => rotation.teamId === teamId)
   }
 
   if (mode) {
-    filtered = filtered.filter((rotation) => rotation.mode === mode);
+    filtered = filtered.filter(rotation => rotation.mode === mode)
   }
 
   const result = filtered.map((rotation) => {
-    let assignments = rotation.assignments ?? [];
+    let assignments = rotation.assignments ?? []
 
     if (developerId) {
       assignments = assignments.filter(
-        (assignment) =>
-          (assignment.targetType === "developer" && assignment.targetId === developerId) ||
-          assignment.reviewers.some((reviewer) => reviewer.developer?.id === developerId),
-      );
+        assignment =>
+          (assignment.targetType === 'developer' && assignment.targetId === developerId)
+          || assignment.reviewers.some(reviewer => reviewer.developer?.id === developerId),
+      )
     }
 
     if (squadId) {
       assignments = assignments.filter(
-        (assignment) => assignment.targetType === "squad" && assignment.targetId === squadId,
-      );
+        assignment => assignment.targetType === 'squad' && assignment.targetId === squadId,
+      )
     }
 
     return {
@@ -41,11 +41,11 @@ export default defineEventHandler(async (event) => {
       teamId: rotation.teamId,
       date: rotation.date,
       mode: rotation.mode,
-      assignments: assignments.map((assignment) => ({
+      assignments: assignments.map(assignment => ({
         targetType: assignment.targetType,
         targetId: assignment.targetId,
         targetName: assignment.targetName,
-        reviewers: assignment.reviewers.map((reviewer) => ({
+        reviewers: assignment.reviewers.map(reviewer => ({
           id: reviewer.developer?.id,
           name: reviewer.developer
             ? `${reviewer.developer.firstName} ${reviewer.developer.lastName}`
@@ -54,8 +54,8 @@ export default defineEventHandler(async (event) => {
           gitlabId: reviewer.developer?.gitlabId ?? null,
         })),
       })),
-    };
-  });
+    }
+  })
 
-  return result.filter((rotation) => rotation.assignments.length > 0);
-});
+  return result.filter(rotation => rotation.assignments.length > 0)
+})

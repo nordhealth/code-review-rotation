@@ -1,52 +1,57 @@
 <script setup lang="ts">
-import { ArrowLeft } from "lucide-vue-next";
+import { ArrowLeft } from 'lucide-vue-next'
 
-const route = useRoute();
-const router = useRouter();
-const devSlug = route.params.id as string;
+const route = useRoute()
+const router = useRouter()
+const devSlug = route.params.id as string
 
-const { data: developer } = await useFetch(`/api/developers/${devSlug}`);
+const { data: developer } = await useFetch(`/api/developers/${devSlug}`)
 
 const form = reactive({
-  firstName: developer.value?.firstName ?? "",
-  lastName: developer.value?.lastName ?? "",
-  slackId: developer.value?.slackId ?? "",
-  gitlabId: developer.value?.gitlabId ?? "",
-});
-const submitting = ref(false);
-const error = ref("");
+  firstName: developer.value?.firstName ?? '',
+  lastName: developer.value?.lastName ?? '',
+  slackId: developer.value?.slackId ?? '',
+  gitlabId: developer.value?.gitlabId ?? '',
+})
+const submitting = ref(false)
+const error = ref('')
 
 function getInitials(firstName: string, lastName?: string) {
-  return `${firstName.charAt(0)}${(lastName ?? "").charAt(0) || ""}`.toUpperCase();
+  return `${firstName.charAt(0)}${(lastName ?? '').charAt(0) || ''}`.toUpperCase()
 }
 
 function goBack() {
   if (window.history.length > 1) {
-    router.back();
-  } else {
-    router.push(`/developers/${devSlug}`);
+    router.back()
+  }
+  else {
+    router.push(`/developers/${devSlug}`)
   }
 }
 
 async function submit() {
-  if (!form.firstName || !form.lastName) return;
-  submitting.value = true;
-  error.value = "";
+  if (!form.firstName || !form.lastName)
+    return
+  submitting.value = true
+  error.value = ''
   try {
     const updated = await $fetch(`/api/developers/${devSlug}`, {
-      method: "PUT",
+      method: 'PUT',
       body: {
         firstName: form.firstName,
         lastName: form.lastName,
         slackId: form.slackId || null,
         gitlabId: form.gitlabId || null,
       },
-    });
-    router.push(`/developers/${updated.slug}`);
-  } catch (e: any) {
-    error.value = e.data?.message || "Failed to update developer";
-  } finally {
-    submitting.value = false;
+    })
+    router.push(`/developers/${updated.slug}`)
+  }
+  catch (error) {
+    const message = (error as { data?: { message?: string } })?.data?.message
+    error.value = message || 'Failed to update developer'
+  }
+  finally {
+    submitting.value = false
   }
 }
 </script>
@@ -76,7 +81,9 @@ async function submit() {
             <h1 class="text-2xl font-semibold tracking-tight">
               Edit {{ developer.firstName }} {{ developer.lastName }}
             </h1>
-            <p class="text-sm text-muted-foreground">Update developer details</p>
+            <p class="text-sm text-muted-foreground">
+              Update developer details
+            </p>
           </div>
         </div>
       </div>
@@ -88,22 +95,30 @@ async function submit() {
       <form class="max-w-lg space-y-4" @submit.prevent="submit">
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="space-y-2">
-            <UILabel for="edit-dev-firstname">First Name *</UILabel>
+            <UILabel for="edit-dev-firstname">
+              First Name *
+            </UILabel>
             <UIInput id="edit-dev-firstname" v-model="form.firstName" type="text" required />
           </div>
           <div class="space-y-2">
-            <UILabel for="edit-dev-lastname">Last Name *</UILabel>
+            <UILabel for="edit-dev-lastname">
+              Last Name *
+            </UILabel>
             <UIInput id="edit-dev-lastname" v-model="form.lastName" type="text" required />
           </div>
         </div>
 
         <div class="space-y-2">
-          <UILabel for="edit-dev-slack">Slack ID</UILabel>
+          <UILabel for="edit-dev-slack">
+            Slack ID
+          </UILabel>
           <UIInput id="edit-dev-slack" v-model="form.slackId" type="text" placeholder="U0..." />
         </div>
 
         <div class="space-y-2">
-          <UILabel for="edit-dev-gitlab">GitLab ID</UILabel>
+          <UILabel for="edit-dev-gitlab">
+            GitLab ID
+          </UILabel>
           <UIInput id="edit-dev-gitlab" v-model="form.gitlabId" type="text" />
         </div>
 
@@ -111,7 +126,9 @@ async function submit() {
           <UIButton type="submit" :disabled="submitting">
             {{ submitting ? "Saving..." : "Save Changes" }}
           </UIButton>
-          <UIButton type="button" variant="ghost" @click.prevent="goBack"> Cancel </UIButton>
+          <UIButton type="button" variant="ghost" @click.prevent="goBack">
+            Cancel
+          </UIButton>
         </div>
       </form>
     </template>

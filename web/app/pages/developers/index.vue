@@ -1,22 +1,25 @@
 <script setup lang="ts">
-import { Plus, Trash2, Search } from "lucide-vue-next";
+import { Plus, Search, Trash2 } from 'lucide-vue-next'
 
-const { data: developers, refresh } = useFetch("/api/developers");
-const search = ref("");
+const { data: developers, refresh } = useFetch('/api/developers')
+const search = ref('')
 
 const filteredDevelopers = computed(() => {
-  if (!developers.value) return [];
-  if (!search.value) return developers.value;
-  const q = search.value.toLowerCase();
+  if (!developers.value)
+    return []
+  if (!search.value)
+    return developers.value
+  const q = search.value.toLowerCase()
   return developers.value.filter(
-    (d) => d.firstName.toLowerCase().includes(q) || d.lastName.toLowerCase().includes(q),
-  );
-});
+    d => d.firstName.toLowerCase().includes(q) || d.lastName.toLowerCase().includes(q),
+  )
+})
 
 async function deleteDeveloper(slug: string, name: string) {
-  if (!window.confirm(`Are you sure you want to delete ${name}?`)) return;
-  await $fetch(`/api/developers/${slug}`, { method: "DELETE" });
-  await refresh();
+  if (!window.confirm(`Are you sure you want to delete ${name}?`))
+    return
+  await $fetch(`/api/developers/${slug}`, { method: 'DELETE' })
+  await refresh()
 }
 </script>
 
@@ -24,7 +27,9 @@ async function deleteDeveloper(slug: string, name: string) {
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Developers</h1>
+        <h1 class="text-2xl font-semibold tracking-tight">
+          Developers
+        </h1>
         <p class="text-sm text-muted-foreground">
           Manage developers available for code review rotation
         </p>
@@ -46,7 +51,9 @@ async function deleteDeveloper(slug: string, name: string) {
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b bg-muted/50">
-            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Name</th>
+            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+              Name
+            </th>
             <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
               Slack ID
             </th>
@@ -69,12 +76,18 @@ async function deleteDeveloper(slug: string, name: string) {
                 {{ dev.firstName }} {{ dev.lastName }}
               </NuxtLink>
             </td>
-            <td class="px-4 py-3 text-muted-foreground">{{ dev.slackId || "-" }}</td>
-            <td class="px-4 py-3 text-muted-foreground">{{ dev.gitlabId || "-" }}</td>
+            <td class="px-4 py-3 text-muted-foreground">
+              {{ dev.slackId || "-" }}
+            </td>
+            <td class="px-4 py-3 text-muted-foreground">
+              {{ dev.gitlabId || "-" }}
+            </td>
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-1">
                 <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
-                  <NuxtLink :to="`/developers/${dev.slug}/edit`"> Edit </NuxtLink>
+                  <NuxtLink :to="`/developers/${dev.slug}/edit`">
+                    Edit
+                  </NuxtLink>
                 </UIButton>
                 <UIButton
                   type="button"
@@ -97,7 +110,9 @@ async function deleteDeveloper(slug: string, name: string) {
       v-else-if="developers?.length === 0"
       class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
     >
-      <p class="text-sm text-muted-foreground">No developers yet</p>
+      <p class="text-sm text-muted-foreground">
+        No developers yet
+      </p>
       <UIButton as-child size="sm" class="mt-3">
         <NuxtLink to="/developers/new" class="gap-1.5">
           <Plus class="size-4" />

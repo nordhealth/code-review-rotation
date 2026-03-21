@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { Plus, Users, Settings, History } from 'lucide-vue-next'
+import { History, Plus, Settings, Users } from 'lucide-vue-next'
 
-const { data: teams, refresh } = useFetch('/api/teams')
+const { data: teams } = useFetch('/api/teams')
 </script>
 
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Teams</h1>
-        <p class="text-sm text-muted-foreground">Manage code review rotation teams</p>
+        <h1 class="text-2xl font-semibold tracking-tight">
+          Teams
+        </h1>
+        <p class="text-sm text-muted-foreground">
+          Manage code review rotation teams
+        </p>
       </div>
       <NuxtLink
         to="/teams/new"
@@ -29,7 +33,9 @@ const { data: teams, refresh } = useFetch('/api/teams')
       >
         <div class="mb-4 flex items-start justify-between">
           <div>
-            <h3 class="font-semibold">{{ team.name }}</h3>
+            <h3 class="font-semibold">
+              {{ team.name }}
+            </h3>
             <p class="text-sm text-muted-foreground">
               {{ team.memberCount }} member{{ team.memberCount !== 1 ? 's' : '' }}
               · {{ team.defaultReviewerCount }} reviewers
@@ -68,7 +74,9 @@ const { data: teams, refresh } = useFetch('/api/teams')
 
     <div v-else class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
       <Users class="mb-3 size-10 text-muted-foreground/50" />
-      <p class="text-sm text-muted-foreground">No teams yet</p>
+      <p class="text-sm text-muted-foreground">
+        No teams yet
+      </p>
       <NuxtLink
         to="/teams/new"
         class="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"

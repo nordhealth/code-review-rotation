@@ -1,37 +1,42 @@
 <script setup lang="ts">
-definePageMeta({ layout: "auth" });
+definePageMeta({ layout: 'auth' })
 
-const route = useRoute();
-const loading = ref(true);
-const errorMessage = ref("");
-const confirmed = ref(false);
+const route = useRoute()
+const loading = ref(true)
+const errorMessage = ref('')
+const confirmed = ref(false)
 
 onMounted(async () => {
-  const token = route.query.token as string;
+  const token = route.query.token as string
   if (!token) {
-    errorMessage.value = "Missing confirmation token";
-    loading.value = false;
-    return;
+    errorMessage.value = 'Missing confirmation token'
+    loading.value = false
+    return
   }
 
   try {
-    await $fetch("/api/auth/confirm", {
-      method: "POST",
+    await $fetch('/api/auth/confirm', {
+      method: 'POST',
       body: { token },
-    });
-    confirmed.value = true;
-  } catch (err: any) {
-    errorMessage.value = err?.data?.statusMessage || "Confirmation failed";
-  } finally {
-    loading.value = false;
+    })
+    confirmed.value = true
   }
-});
+  catch (error) {
+    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
+    errorMessage.value = message || 'Confirmation failed'
+  }
+  finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>
   <div class="w-full max-w-md space-y-6 rounded-xl border bg-card p-8 shadow-md">
     <div class="space-y-1 text-center">
-      <h1 class="text-2xl font-semibold tracking-tight">Confirm account</h1>
+      <h1 class="text-2xl font-semibold tracking-tight">
+        Confirm account
+      </h1>
     </div>
 
     <div v-if="loading" class="py-4 text-center text-sm text-muted-foreground">
@@ -45,7 +50,9 @@ onMounted(async () => {
         Email confirmed successfully! You can now sign in.
       </div>
       <UIButton as-child class="w-full">
-        <NuxtLink to="/login">Sign in</NuxtLink>
+        <NuxtLink to="/login">
+          Sign in
+        </NuxtLink>
       </UIButton>
     </div>
 
@@ -56,7 +63,9 @@ onMounted(async () => {
         {{ errorMessage }}
       </div>
       <UIButton as-child variant="outline" class="w-full">
-        <NuxtLink to="/register">Back to register</NuxtLink>
+        <NuxtLink to="/register">
+          Back to register
+        </NuxtLink>
       </UIButton>
     </div>
   </div>

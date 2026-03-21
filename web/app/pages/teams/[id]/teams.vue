@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Play } from "lucide-vue-next";
+import { Play } from 'lucide-vue-next'
 
-const route = useRoute();
-const teamId = route.params.id as string;
+const route = useRoute()
+const teamId = route.params.id as string
 
-const { data: team } = await useFetch(`/api/teams/${teamId}`);
+const { data: team } = await useFetch(`/api/teams/${teamId}`)
 </script>
 
 <template>

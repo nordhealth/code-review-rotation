@@ -1,70 +1,75 @@
 <script setup lang="ts">
-import { Plus, Trash2 } from "lucide-vue-next";
+import { Plus, Trash2 } from 'lucide-vue-next'
 
-const route = useRoute();
-const teamId = route.params.id as string;
+const route = useRoute()
+const teamId = route.params.id as string
 
-const { data: team } = await useFetch(`/api/teams/${teamId}`);
-const { data: squads, refresh: refreshSquads } = useFetch(`/api/teams/${teamId}/squads`);
+const { data: team } = await useFetch(`/api/teams/${teamId}`)
+const { data: squads, refresh: refreshSquads } = useFetch(`/api/teams/${teamId}/squads`)
 
 // --- 2-row clamp ---
-const visibleCounts = reactive<Record<string, number>>({});
-const measureRefs = new Map<string, HTMLElement>();
+const visibleCounts = reactive<Record<string, number>>({})
+const measureRefs = new Map<string, HTMLElement>()
 
-function measureMembers(el: any, squadId: string, total: number) {
-  if (!el) {
-    measureRefs.delete(squadId);
-    return;
+function measureMembers(element: HTMLElement | null, squadId: string, total: number) {
+  if (!element) {
+    measureRefs.delete(squadId)
+    return
   }
-  measureRefs.set(squadId, el as HTMLElement);
-  computeVisible(el as HTMLElement, squadId, total);
+  measureRefs.set(squadId, element)
+  computeVisible(element, squadId, total)
 }
 
 function computeVisible(container: HTMLElement, squadId: string, total: number) {
   nextTick(() => {
-    const badges = Array.from(container.querySelectorAll("[data-member]")) as HTMLElement[];
-    if (badges.length === 0) return;
+    const badges = Array.from(container.querySelectorAll('[data-member]')) as HTMLElement[]
+    if (badges.length === 0)
+      return
 
-    const firstTop = badges[0].offsetTop;
-    const rowHeight = badges[0].offsetHeight;
-    const gap = 4;
-    const maxBottom = firstTop + rowHeight * 2 + gap;
+    const firstTop = badges[0].offsetTop
+    const rowHeight = badges[0].offsetHeight
+    const gap = 4
+    const maxBottom = firstTop + rowHeight * 2 + gap
 
-    let count = 0;
+    let count = 0
     for (const badge of badges) {
       if (badge.offsetTop + badge.offsetHeight <= maxBottom) {
-        count++;
-      } else {
-        break;
+        count++
+      }
+      else {
+        break
       }
     }
 
     if (count < total) {
-      count = Math.max(1, count - 1);
+      count = Math.max(1, count - 1)
     }
 
-    visibleCounts[squadId] = count;
-  });
+    visibleCounts[squadId] = count
+  })
 }
 
 if (import.meta.client) {
-  useEventListener("resize", () => {
+  useEventListener('resize', () => {
     for (const [squadId, el] of measureRefs) {
-      const squad = squads.value?.find((s) => s.id === squadId);
+      const squad = squads.value?.find(s => s.id === squadId)
       if (squad?.members) {
-        computeVisible(el, squadId, squad.members.length);
+        computeVisible(el, squadId, squad.members.length)
       }
     }
-  });
+  })
 }
 
 async function deleteSquad(squadId: string, name: string) {
-  if (!window.confirm(`Delete squad "${name}"?`)) return;
+  if (!window.confirm(`Delete squad "${name}"?`))
+    return
   try {
-    await $fetch(`/api/teams/${teamId}/squads/${squadId}`, { method: "DELETE" });
-    await refreshSquads();
-  } catch (e: any) {
-    alert(e.data?.message || "Failed to delete squad");
+    await $fetch(`/api/teams/${teamId}/squads/${squadId}`, { method: 'DELETE' })
+    await refreshSquads()
+  }
+  catch (caughtError: unknown) {
+    const message = (caughtError as { data?: { message?: string } })?.data?.message
+    alert(message || 'Failed to delete squad')
   }
 }
 </script>
@@ -90,12 +95,18 @@ async function deleteSquad(squadId: string, name: string) {
       >
         <div class="mb-3 flex items-start justify-between">
           <div>
-            <h3 class="font-semibold">{{ squad.name }}</h3>
-            <p class="text-sm text-muted-foreground">{{ squad.reviewerCount }} reviewers</p>
+            <h3 class="font-semibold">
+              {{ squad.name }}
+            </h3>
+            <p class="text-sm text-muted-foreground">
+              {{ squad.reviewerCount }} reviewers
+            </p>
           </div>
           <div class="flex items-center gap-1">
             <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
-              <NuxtLink :to="`/teams/${teamId}/squads/${squad.id}/edit`"> Edit </NuxtLink>
+              <NuxtLink :to="`/teams/${teamId}/squads/${squad.id}/edit`">
+                Edit
+              </NuxtLink>
             </UIButton>
             <UIButton
               type="button"
@@ -112,7 +123,7 @@ async function deleteSquad(squadId: string, name: string) {
         <div v-if="squad.members?.length">
           <!-- Hidden measurement container -->
           <div
-            :ref="(el) => measureMembers(el, squad.id, squad.members?.length ?? 0)"
+            :ref="(element) => measureMembers(element as HTMLElement | null, squad.id, squad.members?.length ?? 0)"
             class="pointer-events-none invisible absolute flex flex-wrap gap-1"
             :style="{ width: 'calc(100% - 2.5rem)' }"
             aria-hidden="true"
@@ -166,7 +177,9 @@ async function deleteSquad(squadId: string, name: string) {
             </UIPopover>
           </div>
         </div>
-        <p v-else class="text-sm text-muted-foreground">No members</p>
+        <p v-else class="text-sm text-muted-foreground">
+          No members
+        </p>
       </div>
     </div>
 
@@ -174,7 +187,9 @@ async function deleteSquad(squadId: string, name: string) {
       v-else
       class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
     >
-      <p class="text-sm text-muted-foreground">No squads yet</p>
+      <p class="text-sm text-muted-foreground">
+        No squads yet
+      </p>
       <UIButton as-child size="sm" class="mt-3">
         <NuxtLink :to="`/teams/${teamId}/squads/new`">
           <Plus class="size-4" />

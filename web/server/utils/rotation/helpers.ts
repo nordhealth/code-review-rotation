@@ -14,7 +14,8 @@ export function selectBalanced(
   count: number,
   assignmentCounts: Map<string, number>,
 ): string[] {
-  if (count >= candidates.length) return [...candidates]
+  if (count >= candidates.length)
+    return [...candidates]
   const shuffled = shuffleArray(candidates)
   shuffled.sort((a, b) => (assignmentCounts.get(a) ?? 0) - (assignmentCounts.get(b) ?? 0))
   return shuffled.slice(0, count)

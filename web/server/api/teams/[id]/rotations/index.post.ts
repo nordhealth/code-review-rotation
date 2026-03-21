@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
   }
 
   // Run rotation algorithm via orchestrator
-  const rawAssignments =
-    body.mode === 'devs'
+  const rawAssignments
+    = body.mode === 'devs'
       ? await executeDevRotation(team.id)
       : await executeTeamRotation(team.id)
 
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     date: new Date(),
     isManual: body.isManual,
     mode: body.mode,
-    assignments: rawAssignments.map((a) => ({
+    assignments: rawAssignments.map(a => ({
       targetType: body.mode === 'devs' ? 'developer' as const : 'squad' as const,
       targetId: a.targetId,
       reviewerDeveloperIds: a.reviewerIds,

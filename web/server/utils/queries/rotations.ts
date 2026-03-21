@@ -1,17 +1,17 @@
 import {
-  rotations,
-  rotationAssignments,
-  rotationAssignmentReviewers,
   developers,
+  rotationAssignmentReviewers,
+  rotationAssignments,
+  rotations,
   squads,
   teams,
-} from "../../db/schema";
+} from '../../db/schema'
 
 export async function queryRotations(
   teamId: string,
-  options: { limit?: number; offset?: number } = {},
+  options: { limit?: number, offset?: number } = {},
 ) {
-  const { limit = 20, offset = 0 } = options;
+  const { limit = 20, offset = 0 } = options
 
   const teamRotations = await db
     .select()
@@ -19,29 +19,30 @@ export async function queryRotations(
     .where(eq(rotations.teamId, teamId))
     .orderBy(desc(rotations.date))
     .limit(limit)
-    .offset(offset);
+    .offset(offset)
 
-  if (teamRotations.length === 0) return [];
+  if (teamRotations.length === 0)
+    return []
 
-  const rotationIds = teamRotations.map((r) => r.id);
+  const rotationIds = teamRotations.map(r => r.id)
 
   const assignments = await db
     .select()
     .from(rotationAssignments)
-    .where(inArray(rotationAssignments.rotationId, rotationIds));
+    .where(inArray(rotationAssignments.rotationId, rotationIds))
 
   if (assignments.length === 0) {
-    return teamRotations.map((r) => ({ ...r, assignments: [] }));
+    return teamRotations.map(r => ({ ...r, assignments: [] }))
   }
 
   // Resolve target names (developer or squad)
   const devTargetIds = assignments
-    .filter((a) => a.targetType === "developer")
-    .map((a) => a.targetId);
-  const squadTargetIds = assignments.filter((a) => a.targetType === "squad").map((a) => a.targetId);
+    .filter(a => a.targetType === 'developer')
+    .map(a => a.targetId)
+  const squadTargetIds = assignments.filter(a => a.targetType === 'squad').map(a => a.targetId)
 
-  const targetNameMap = new Map<string, string>();
-  const targetSlugMap = new Map<string, string>();
+  const targetNameMap = new Map<string, string>()
+  const targetSlugMap = new Map<string, string>()
 
   if (devTargetIds.length > 0) {
     const devRows = await db
@@ -52,10 +53,10 @@ export async function queryRotations(
         slug: developers.slug,
       })
       .from(developers)
-      .where(inArray(developers.id, devTargetIds));
+      .where(inArray(developers.id, devTargetIds))
     for (const d of devRows) {
-      targetNameMap.set(d.id, `${d.firstName} ${d.lastName}`);
-      targetSlugMap.set(d.id, d.slug);
+      targetNameMap.set(d.id, `${d.firstName} ${d.lastName}`)
+      targetSlugMap.set(d.id, d.slug)
     }
   }
 
@@ -63,13 +64,13 @@ export async function queryRotations(
     const squadRows = await db
       .select({ id: squads.id, name: squads.name })
       .from(squads)
-      .where(inArray(squads.id, squadTargetIds));
+      .where(inArray(squads.id, squadTargetIds))
     for (const s of squadRows) {
-      targetNameMap.set(s.id, s.name);
+      targetNameMap.set(s.id, s.name)
     }
   }
 
-  const assignmentIds = assignments.map((a) => a.id);
+  const assignmentIds = assignments.map(a => a.id)
 
   const reviewerRows = await db
     .select({
@@ -88,48 +89,48 @@ export async function queryRotations(
     })
     .from(rotationAssignmentReviewers)
     .leftJoin(developers, eq(rotationAssignmentReviewers.reviewerDeveloperId, developers.id))
-    .where(inArray(rotationAssignmentReviewers.assignmentId, assignmentIds));
+    .where(inArray(rotationAssignmentReviewers.assignmentId, assignmentIds))
 
-  const reviewers = reviewerRows.map((r) => ({
+  const reviewers = reviewerRows.map(r => ({
     ...r,
     developer: r.developer.id
       ? r.developer
       : {
           id: r.reviewerDeveloperId,
-          firstName: r.reviewerName ?? "Deleted",
-          lastName: "",
+          firstName: r.reviewerName ?? 'Deleted',
+          lastName: '',
           slug: null,
           slackId: null,
           gitlabId: null,
         },
-  }));
+  }))
 
-  const reviewersByAssignment = new Map<string, typeof reviewers>();
+  const reviewersByAssignment = new Map<string, typeof reviewers>()
   for (const r of reviewers) {
-    const existing = reviewersByAssignment.get(r.assignmentId) ?? [];
-    existing.push(r);
-    reviewersByAssignment.set(r.assignmentId, existing);
+    const existing = reviewersByAssignment.get(r.assignmentId) ?? []
+    existing.push(r)
+    reviewersByAssignment.set(r.assignmentId, existing)
   }
 
   const assignmentsByRotation = new Map<
     string,
-    ((typeof assignments)[number] & { targetName: string; reviewers: typeof reviewers })[]
-  >();
+    ((typeof assignments)[number] & { targetName: string, reviewers: typeof reviewers })[]
+  >()
   for (const a of assignments) {
-    const existing = assignmentsByRotation.get(a.rotationId) ?? [];
+    const existing = assignmentsByRotation.get(a.rotationId) ?? []
     existing.push({
       ...a,
       targetName: targetNameMap.get(a.targetId) ?? a.targetName ?? a.targetId,
       targetSlug: targetSlugMap.get(a.targetId) ?? null,
       reviewers: reviewersByAssignment.get(a.id) ?? [],
-    });
-    assignmentsByRotation.set(a.rotationId, existing);
+    })
+    assignmentsByRotation.set(a.rotationId, existing)
   }
 
-  return teamRotations.map((r) => ({
+  return teamRotations.map(r => ({
     ...r,
     assignments: assignmentsByRotation.get(r.id) ?? [],
-  }));
+  }))
 }
 
 export async function updateAssignmentReviewers(
@@ -138,36 +139,36 @@ export async function updateAssignmentReviewers(
 ) {
   await db
     .delete(rotationAssignmentReviewers)
-    .where(eq(rotationAssignmentReviewers.assignmentId, assignmentId));
+    .where(eq(rotationAssignmentReviewers.assignmentId, assignmentId))
 
   if (reviewerDeveloperIds.length > 0) {
     const devRows = await db
       .select({ id: developers.id, firstName: developers.firstName, lastName: developers.lastName })
       .from(developers)
-      .where(inArray(developers.id, reviewerDeveloperIds));
-    const nameMap = new Map(devRows.map((d) => [d.id, `${d.firstName} ${d.lastName}`]));
+      .where(inArray(developers.id, reviewerDeveloperIds))
+    const nameMap = new Map(devRows.map(d => [d.id, `${d.firstName} ${d.lastName}`]))
 
     await db.insert(rotationAssignmentReviewers).values(
-      reviewerDeveloperIds.map((devId) => ({
+      reviewerDeveloperIds.map(devId => ({
         assignmentId,
         reviewerDeveloperId: devId,
         reviewerName: nameMap.get(devId) ?? null,
       })),
-    );
+    )
   }
 }
 
 export async function createRotation(data: {
-  teamId: string;
-  date: Date;
-  isManual: boolean;
-  mode: "devs" | "teams";
+  teamId: string
+  date: Date
+  isManual: boolean
+  mode: 'devs' | 'teams'
   assignments: {
-    targetType: "developer" | "squad";
-    targetId: string;
-    targetName?: string;
-    reviewerDeveloperIds: string[];
-  }[];
+    targetType: 'developer' | 'squad'
+    targetId: string
+    targetName?: string
+    reviewerDeveloperIds: string[]
+  }[]
 }) {
   const [rotation] = await db
     .insert(rotations)
@@ -177,22 +178,24 @@ export async function createRotation(data: {
       isManual: data.isManual,
       mode: data.mode,
     })
-    .returning();
+    .returning()
 
   // Resolve names for all targets and reviewers upfront
-  const allDevIds = new Set<string>();
-  const allSquadIds = new Set<string>();
+  const allDevIds = new Set<string>()
+  const allSquadIds = new Set<string>()
   for (const a of data.assignments) {
-    if (a.targetType === "developer") allDevIds.add(a.targetId);
-    if (a.targetType === "squad") allSquadIds.add(a.targetId);
-    for (const devId of a.reviewerDeveloperIds) allDevIds.add(devId);
+    if (a.targetType === 'developer')
+      allDevIds.add(a.targetId)
+    if (a.targetType === 'squad')
+      allSquadIds.add(a.targetId)
+    for (const devId of a.reviewerDeveloperIds) allDevIds.add(devId)
   }
 
-  const devNameMap = new Map<string, string>();
+  const devNameMap = new Map<string, string>()
   const devDetailMap = new Map<
     string,
-    { firstName: string; lastName: string; slackId: string | null; gitlabId: string | null }
-  >();
+    { firstName: string, lastName: string, slackId: string | null, gitlabId: string | null }
+  >()
   if (allDevIds.size > 0) {
     const devRows = await db
       .select({
@@ -203,29 +206,29 @@ export async function createRotation(data: {
         gitlabId: developers.gitlabId,
       })
       .from(developers)
-      .where(inArray(developers.id, [...allDevIds]));
+      .where(inArray(developers.id, [...allDevIds]))
     for (const d of devRows) {
-      devNameMap.set(d.id, `${d.firstName} ${d.lastName}`);
-      devDetailMap.set(d.id, d);
+      devNameMap.set(d.id, `${d.firstName} ${d.lastName}`)
+      devDetailMap.set(d.id, d)
     }
   }
 
-  const squadNameMap = new Map<string, string>();
+  const squadNameMap = new Map<string, string>()
   if (allSquadIds.size > 0) {
     const squadRows = await db
       .select({ id: squads.id, name: squads.name })
       .from(squads)
-      .where(inArray(squads.id, [...allSquadIds]));
-    for (const s of squadRows) squadNameMap.set(s.id, s.name);
+      .where(inArray(squads.id, [...allSquadIds]))
+    for (const s of squadRows) squadNameMap.set(s.id, s.name)
   }
 
   for (const assignment of data.assignments) {
-    const targetName =
-      assignment.targetName ??
-      (assignment.targetType === "developer"
-        ? devNameMap.get(assignment.targetId)
-        : squadNameMap.get(assignment.targetId)) ??
-      null;
+    const targetName
+      = assignment.targetName
+        ?? (assignment.targetType === 'developer'
+          ? devNameMap.get(assignment.targetId)
+          : squadNameMap.get(assignment.targetId))
+        ?? null
 
     const [inserted] = await db
       .insert(rotationAssignments)
@@ -235,16 +238,16 @@ export async function createRotation(data: {
         targetId: assignment.targetId,
         targetName,
       })
-      .returning();
+      .returning()
 
     if (assignment.reviewerDeveloperIds.length > 0) {
       await db.insert(rotationAssignmentReviewers).values(
-        assignment.reviewerDeveloperIds.map((devId) => ({
+        assignment.reviewerDeveloperIds.map(devId => ({
           assignmentId: inserted.id,
           reviewerDeveloperId: devId,
           reviewerName: devNameMap.get(devId) ?? null,
         })),
-      );
+      )
     }
   }
 
@@ -253,9 +256,9 @@ export async function createRotation(data: {
     .select({ name: teams.name })
     .from(teams)
     .where(eq(teams.id, data.teamId))
-    .then((rows) => rows[0]);
+    .then(rows => rows[0])
 
-  fireWebhooks("rotation.created", {
+  fireWebhooks('rotation.created', {
     rotationId: rotation.id,
     teamId: data.teamId,
     teamName: teamRow?.name ?? data.teamId,
@@ -263,32 +266,31 @@ export async function createRotation(data: {
     mode: data.mode,
     isManual: data.isManual,
     assignments: data.assignments.map((assignment) => {
-      const detail = devDetailMap.get(assignment.targetId);
       return {
         targetType: assignment.targetType,
         targetId: assignment.targetId,
         targetName:
-          assignment.targetName ??
-          (assignment.targetType === "developer"
+          assignment.targetName
+          ?? (assignment.targetType === 'developer'
             ? devNameMap.get(assignment.targetId)
-            : squadNameMap.get(assignment.targetId)) ??
-          null,
+            : squadNameMap.get(assignment.targetId))
+          ?? null,
         reviewers: assignment.reviewerDeveloperIds.map((devId) => {
-          const reviewerDetail = devDetailMap.get(devId);
+          const reviewerDetail = devDetailMap.get(devId)
           return {
             id: devId,
             name: devNameMap.get(devId) ?? null,
             slackId: reviewerDetail?.slackId ?? null,
             gitlabId: reviewerDetail?.gitlabId ?? null,
-          };
+          }
         }),
-      };
+      }
     }),
   }).catch((webhookError) => {
-    console.error("[webhook] Error firing rotation.created webhooks:", webhookError);
-  });
+    console.error('[webhook] Error firing rotation.created webhooks:', webhookError)
+  })
 
-  return rotation;
+  return rotation
 }
 
 export async function queryLatestRotations() {
@@ -296,11 +298,11 @@ export async function queryLatestRotations() {
     .select({
       teamId: rotations.teamId,
       mode: rotations.mode,
-      maxDate: sql<number>`max(${rotations.date})`.as("max_date"),
+      maxDate: sql<number>`max(${rotations.date})`.as('max_date'),
     })
     .from(rotations)
     .groupBy(rotations.teamId, rotations.mode)
-    .as("latest");
+    .as('latest')
 
   const latestRotations = await db
     .select({
@@ -315,25 +317,26 @@ export async function queryLatestRotations() {
     .innerJoin(
       latestPerTeamMode,
       sql`${rotations.teamId} = ${latestPerTeamMode.teamId} and ${rotations.mode} = ${latestPerTeamMode.mode} and ${rotations.date} = ${latestPerTeamMode.maxDate}`,
-    );
+    )
 
-  if (latestRotations.length === 0) return [];
+  if (latestRotations.length === 0)
+    return []
 
-  const rotationIds = latestRotations.map((r) => r.id);
+  const rotationIds = latestRotations.map(r => r.id)
 
   const assignments = await db
     .select()
     .from(rotationAssignments)
-    .where(inArray(rotationAssignments.rotationId, rotationIds));
+    .where(inArray(rotationAssignments.rotationId, rotationIds))
 
   // Resolve target names
   const devTargetIds = assignments
-    .filter((a) => a.targetType === "developer")
-    .map((a) => a.targetId);
-  const squadTargetIds = assignments.filter((a) => a.targetType === "squad").map((a) => a.targetId);
+    .filter(a => a.targetType === 'developer')
+    .map(a => a.targetId)
+  const squadTargetIds = assignments.filter(a => a.targetType === 'squad').map(a => a.targetId)
 
-  const targetNameMap = new Map<string, string>();
-  const targetSlugMap = new Map<string, string>();
+  const targetNameMap = new Map<string, string>()
+  const targetSlugMap = new Map<string, string>()
 
   if (devTargetIds.length > 0) {
     const devRows = await db
@@ -344,10 +347,10 @@ export async function queryLatestRotations() {
         slug: developers.slug,
       })
       .from(developers)
-      .where(inArray(developers.id, devTargetIds));
+      .where(inArray(developers.id, devTargetIds))
     for (const d of devRows) {
-      targetNameMap.set(d.id, `${d.firstName} ${d.lastName}`);
-      targetSlugMap.set(d.id, d.slug);
+      targetNameMap.set(d.id, `${d.firstName} ${d.lastName}`)
+      targetSlugMap.set(d.id, d.slug)
     }
   }
 
@@ -355,16 +358,16 @@ export async function queryLatestRotations() {
     const squadRows = await db
       .select({ id: squads.id, name: squads.name })
       .from(squads)
-      .where(inArray(squads.id, squadTargetIds));
+      .where(inArray(squads.id, squadTargetIds))
     for (const s of squadRows) {
-      targetNameMap.set(s.id, s.name);
+      targetNameMap.set(s.id, s.name)
     }
   }
 
-  const assignmentIds = assignments.map((a) => a.id);
+  const assignmentIds = assignments.map(a => a.id)
 
-  const reviewerRows =
-    assignmentIds.length > 0
+  const reviewerRows
+    = assignmentIds.length > 0
       ? await db
           .select({
             id: rotationAssignmentReviewers.id,
@@ -383,46 +386,46 @@ export async function queryLatestRotations() {
           .from(rotationAssignmentReviewers)
           .leftJoin(developers, eq(rotationAssignmentReviewers.reviewerDeveloperId, developers.id))
           .where(inArray(rotationAssignmentReviewers.assignmentId, assignmentIds))
-      : [];
+      : []
 
-  const reviewers = reviewerRows.map((r) => ({
+  const reviewers = reviewerRows.map(r => ({
     ...r,
     developer: r.developer.id
       ? r.developer
       : {
           id: r.reviewerDeveloperId,
-          firstName: r.reviewerName ?? "Deleted",
-          lastName: "",
+          firstName: r.reviewerName ?? 'Deleted',
+          lastName: '',
           slug: null,
           slackId: null,
           gitlabId: null,
         },
-  }));
+  }))
 
-  const reviewersByAssignment = new Map<string, typeof reviewers>();
+  const reviewersByAssignment = new Map<string, typeof reviewers>()
   for (const r of reviewers) {
-    const existing = reviewersByAssignment.get(r.assignmentId) ?? [];
-    existing.push(r);
-    reviewersByAssignment.set(r.assignmentId, existing);
+    const existing = reviewersByAssignment.get(r.assignmentId) ?? []
+    existing.push(r)
+    reviewersByAssignment.set(r.assignmentId, existing)
   }
 
   const assignmentsByRotation = new Map<
     string,
-    ((typeof assignments)[number] & { targetName: string; reviewers: typeof reviewers })[]
-  >();
+    ((typeof assignments)[number] & { targetName: string, reviewers: typeof reviewers })[]
+  >()
   for (const a of assignments) {
-    const existing = assignmentsByRotation.get(a.rotationId) ?? [];
+    const existing = assignmentsByRotation.get(a.rotationId) ?? []
     existing.push({
       ...a,
       targetName: targetNameMap.get(a.targetId) ?? a.targetName ?? a.targetId,
       targetSlug: targetSlugMap.get(a.targetId) ?? null,
       reviewers: reviewersByAssignment.get(a.id) ?? [],
-    });
-    assignmentsByRotation.set(a.rotationId, existing);
+    })
+    assignmentsByRotation.set(a.rotationId, existing)
   }
 
-  return latestRotations.map((r) => ({
+  return latestRotations.map(r => ({
     ...r,
     assignments: assignmentsByRotation.get(r.id) ?? [],
-  }));
+  }))
 }
