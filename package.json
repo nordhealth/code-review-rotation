@@ -1,0 +1,11 @@
+{
+  "name": "pvc-code-review-rotation",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd web && pnpm install && cd .. && poetry install",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

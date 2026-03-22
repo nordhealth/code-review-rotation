@@ -1,0 +1,11 @@
+# Web (JS/TS/Vue) — lint-staged via ESLint
+cd web && pnpm lint-staged
+
+# Python — ruff format + lint on staged .py files
+cd ..
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM -- '*.py')
+if [ -n "$STAGED_PY" ]; then
+  poetry run ruff format $STAGED_PY
+  poetry run ruff check --fix $STAGED_PY
+  git add $STAGED_PY
+fi

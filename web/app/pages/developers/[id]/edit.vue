@@ -76,7 +76,7 @@ async function submit() {
             </UIAvatarFallback>
           </UIAvatar>
           <div>
-            <h1 class="text-2xl font-semibold tracking-tight">
+            <h1 class="text-3xl font-semibold tracking-tight">
               Edit {{ developer.firstName }} {{ developer.lastName }}
             </h1>
             <p class="text-sm text-muted-foreground">
@@ -94,13 +94,13 @@ async function submit() {
             <UILabel for="edit-dev-firstname">
               First Name *
             </UILabel>
-            <UIInput id="edit-dev-firstname" v-model="form.firstName" type="text" required />
+            <UIInput id="edit-dev-firstname" v-model="form.firstName" type="text" placeholder="John" required />
           </div>
           <div class="space-y-2">
             <UILabel for="edit-dev-lastname">
               Last Name *
             </UILabel>
-            <UIInput id="edit-dev-lastname" v-model="form.lastName" type="text" required />
+            <UIInput id="edit-dev-lastname" v-model="form.lastName" type="text" placeholder="Doe" required />
           </div>
         </div>
 
@@ -115,14 +115,14 @@ async function submit() {
           <UILabel for="edit-dev-gitlab">
             GitLab ID
           </UILabel>
-          <UIInput id="edit-dev-gitlab" v-model="form.gitlabId" type="text" />
+          <UIInput id="edit-dev-gitlab" v-model="form.gitlabId" type="text" placeholder="john.doe" />
         </div>
 
         <div class="space-y-2">
           <UILabel for="edit-dev-github">
             GitHub ID
           </UILabel>
-          <UIInput id="edit-dev-github" v-model="form.githubId" type="text" />
+          <UIInput id="edit-dev-github" v-model="form.githubId" type="text" placeholder="johndoe" />
         </div>
 
         <div class="flex items-center gap-3 pt-2">

@@ -50,19 +50,19 @@ async function deleteDeveloper(slug: string, name: string) {
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b bg-muted/50">
-            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Name
             </th>
-            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Slack ID
             </th>
-            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               GitLab ID
             </th>
-            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               GitHub ID
             </th>
-            <th class="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">
+            <th class="px-4 py-2.5 text-right text-sm font-medium text-muted-foreground">
               Actions
             </th>
           </tr>

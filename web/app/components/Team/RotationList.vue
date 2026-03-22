@@ -275,10 +275,10 @@ const nextRotationDate = computed(() => {
       <div v-if="activeRotation.assignments?.length">
         <!-- Column headers -->
         <div class="hidden items-center gap-4 border-b bg-muted/50 px-5 py-2 sm:flex">
-          <div class="w-48 shrink-0 text-xs font-medium text-muted-foreground">
+          <div class="w-48 shrink-0 text-sm font-medium text-muted-foreground">
             {{ mode === "devs" ? "Developer" : "Target" }}
           </div>
-          <div class="text-xs font-medium text-muted-foreground">
+          <div class="text-sm font-medium text-muted-foreground">
             Reviewers
           </div>
         </div>
@@ -466,10 +466,10 @@ const nextRotationDate = computed(() => {
             <div v-if="rotation.assignments?.length">
               <!-- Column headers for history -->
               <div class="hidden items-center gap-4 border-t bg-muted px-4 py-2 sm:flex sm:px-8">
-                <div class="w-44 shrink-0 text-xs font-medium text-muted-foreground">
+                <div class="w-44 shrink-0 text-sm font-medium text-muted-foreground">
                   {{ mode === "devs" ? "Developer" : "Target" }}
                 </div>
-                <div class="text-xs font-medium text-muted-foreground">
+                <div class="text-sm font-medium text-muted-foreground">
                   Reviewers
                 </div>
               </div>

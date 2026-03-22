@@ -1,3 +1,52 @@
+defineRouteMeta({
+  openAPI: {
+    summary: 'Trigger scheduled rotation for teams',
+    tags: ['Rotation Tasks'],
+    parameters: [
+      {
+        in: 'query',
+        name: 'teamId',
+        schema: { type: 'string' },
+        description: 'Filter to a specific team',
+      },
+      {
+        in: 'query',
+        name: 'mode',
+        schema: { type: 'string', enum: ['devs', 'teams', 'all'] },
+        description: 'Rotation mode to run',
+      },
+    ],
+    responses: {
+      200: {
+        description: 'Rotation results',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                rotationsCreated: { type: 'integer' },
+                results: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      teamId: { type: 'string' },
+                      teamName: { type: 'string' },
+                      mode: { type: 'string' },
+                      rotationId: { type: 'string' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      401: { description: 'Invalid API key' },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const apiKey = getHeader(event, 'x-api-key')
   const { apiKey: expectedKey } = useRuntimeConfig()

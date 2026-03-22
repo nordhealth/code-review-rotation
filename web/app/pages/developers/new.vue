@@ -55,6 +55,7 @@ async function submit() {
             id="new-dev-firstname"
             v-model="form.firstName"
             type="text"
+            placeholder="John"
             required
           />
         </div>
@@ -66,6 +67,7 @@ async function submit() {
             id="new-dev-lastname"
             v-model="form.lastName"
             type="text"
+            placeholder="Doe"
             required
           />
         </div>
@@ -91,6 +93,7 @@ async function submit() {
           id="new-dev-gitlab"
           v-model="form.gitlabId"
           type="text"
+          placeholder="john.doe"
         />
       </div>
 
@@ -102,6 +105,7 @@ async function submit() {
           id="new-dev-github"
           v-model="form.githubId"
           type="text"
+          placeholder="johndoe"
         />
       </div>
 

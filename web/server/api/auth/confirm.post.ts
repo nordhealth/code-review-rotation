@@ -1,7 +1,44 @@
 import { z } from 'zod'
 
 const confirmSchema = z.object({
-  token: z.string().min(1, 'Confirmation token is required'),
+  token: z.string().min(1, { error: 'Confirmation token is required' }),
+})
+
+defineRouteMeta({
+  openAPI: {
+    summary: 'Confirm email address with token',
+    tags: ['Auth'],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['token'],
+            properties: {
+              token: { type: 'string', minLength: 1 },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: 'Email confirmed',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                message: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+      400: { description: 'Invalid or expired confirmation token' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

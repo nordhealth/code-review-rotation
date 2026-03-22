@@ -53,7 +53,7 @@ async function onSubmit() {
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
       </div>
-      <h1 class="text-2xl font-semibold tracking-tight">
+      <h1 class="text-3xl font-semibold tracking-tight">
         Forgot password
       </h1>
       <p class="text-sm text-muted-foreground">

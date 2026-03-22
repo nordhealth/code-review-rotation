@@ -1,0 +1,24 @@
+{
+  // ESLint - handles both linting and formatting (antfu config)
+  "eslint.run": "onSave",
+  "eslint.validate": ["javascript", "typescript", "vue", "json", "jsonc", "markdown"],
+  // Auto-fix ESLint issues on save (includes formatting)
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // Disable default formatter — ESLint handles formatting
+  "editor.formatOnSave": false,
+  // Use project's TypeScript version
+  "typescript.tsdk": "node_modules/typescript/lib",
+  // Import preferences - prefer ~/ alias (Nuxt convention)
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  // From `antfu.goto-alias` extension:
+  // Cmd+Click goes directly to definition instead of showing a picker
+  "editor.gotoLocation.multipleDefinitions": "goto",
+  // Remove trailing whitespace on save
+  "files.trimTrailingWhitespace": true,
+  "[markdown]": {
+    "diffEditor.ignoreTrimWhitespace": false
+  }
+}

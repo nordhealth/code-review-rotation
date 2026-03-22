@@ -51,7 +51,7 @@ async function onSubmit() {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       </div>
-      <h1 class="text-2xl font-semibold tracking-tight">
+      <h1 class="text-3xl font-semibold tracking-tight">
         Nord Review
       </h1>
       <p class="text-sm text-muted-foreground">
@@ -96,7 +96,7 @@ async function onSubmit() {
           v-model="password"
           autocomplete="current-password"
           :disabled="loading"
-          placeholder="Enter your password"
+          placeholder="Min. 8 characters"
         />
       </div>
 

@@ -18,7 +18,7 @@ export async function queryRotations(
     .select()
     .from(rotations)
     .where(eq(rotations.teamId, teamId))
-    .orderBy(desc(rotations.date))
+    .orderBy(desc(rotations.date), desc(rotations.createdAt))
     .limit(limit)
     .offset(offset)
 

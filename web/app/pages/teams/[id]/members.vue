@@ -174,7 +174,7 @@ function getPreferableNames(member: TeamMember): string {
           Cancel
         </UIButton>
       </div>
-      <p v-if="availableDevelopers.length === 0" class="mt-2 text-xs text-muted-foreground">
+      <p v-if="availableDevelopers.length === 0" class="mt-2 text-sm text-muted-foreground">
         All developers are already members of this team.
       </p>
     </div>
@@ -183,19 +183,19 @@ function getPreferableNames(member: TeamMember): string {
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b bg-muted/50">
-            <th class="w-[25%] px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="w-[25%] px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Developer
             </th>
-            <th class="w-[15%] px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="w-[15%] px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Reviewer Count
             </th>
-            <th class="w-[12%] px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="w-[12%] px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Experienced
             </th>
-            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+            <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Preferable Reviewers
             </th>
-            <th class="w-[12%] px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">
+            <th class="w-[12%] px-4 py-2.5 text-right text-sm font-medium text-muted-foreground">
               Actions
             </th>
           </tr>
@@ -292,7 +292,7 @@ function getPreferableNames(member: TeamMember): string {
                 <UINumberFieldIncrement />
               </UINumberFieldContent>
             </UINumberField>
-            <p class="mt-1.5 text-xs text-muted-foreground">
+            <p class="mt-1.5 text-sm text-muted-foreground">
               Team default is {{ team?.defaultReviewerCount }}.
             </p>
           </div>
@@ -373,7 +373,7 @@ function getPreferableNames(member: TeamMember): string {
                 </span>
               </div>
             </template>
-            <p v-else class="text-xs text-muted-foreground">
+            <p v-else class="text-sm text-muted-foreground">
               No other members to select.
             </p>
           </div>

@@ -64,7 +64,7 @@ async function onSubmit() {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       </div>
-      <h1 class="text-2xl font-semibold tracking-tight">
+      <h1 class="text-3xl font-semibold tracking-tight">
         Create account
       </h1>
       <p class="text-sm text-muted-foreground">
@@ -118,7 +118,7 @@ async function onSubmit() {
             type="text"
             :disabled="loading"
             autocomplete="given-name"
-            placeholder="João"
+            placeholder="John"
           />
         </div>
         <div class="space-y-2">
@@ -131,7 +131,7 @@ async function onSubmit() {
             type="text"
             :disabled="loading"
             autocomplete="family-name"
-            placeholder="Gonçalves"
+            placeholder="Doe"
           />
         </div>
       </div>

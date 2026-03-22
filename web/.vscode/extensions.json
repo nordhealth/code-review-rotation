@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "Vue.volar",
+    "dbaeumer.vscode-eslint",
+    "vitest.explorer",
+    "ms-playwright.playwright",
+    "antfu.goto-alias"
+  ],
+  "unwantedRecommendations": ["esbenp.prettier-vscode", "oxc.oxc-vscode"]
+}

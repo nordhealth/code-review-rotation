@@ -51,6 +51,12 @@ web/                  # Nuxt web application (see web/README.md)
 .github/workflows/    # GitHub Actions (Python tests + rotation cron)
 ```
 
+## AI / MCP Integration
+
+The web app exposes an [MCP](https://modelcontextprotocol.io) (Model Context Protocol) server, allowing AI assistants like Claude Code, Cursor, and Windsurf to query rotation data through natural language. Agents can look up current reviewers, list teams and developers, and answer questions like "who is reviewing my code this week?"
+
+Setup instructions and available tools are documented in the app at `/docs/mcp`. The app also serves a [`/llms.txt`](https://llmstxt.org) file describing its capabilities in a format optimized for LLM consumption. See [`web/README.md`](web/README.md) for details.
+
 ## Getting Started
 
 - **Web app:** See [`web/README.md`](web/README.md)

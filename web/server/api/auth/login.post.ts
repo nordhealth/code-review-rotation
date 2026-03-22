@@ -1,8 +1,54 @@
 import { z } from 'zod'
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email({ error: 'Invalid email address' }),
+  password: z.string().min(1, { error: 'Password is required' }),
+})
+
+defineRouteMeta({
+  openAPI: {
+    summary: 'Sign in with email and password',
+    tags: ['Auth'],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['email', 'password'],
+            properties: {
+              email: { type: 'string', format: 'email' },
+              password: { type: 'string', minLength: 1 },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: 'Login successful',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                user: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    email: { type: 'string', format: 'email' },
+                    name: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      401: { description: 'Invalid email or password' },
+      403: { description: 'Email not confirmed' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

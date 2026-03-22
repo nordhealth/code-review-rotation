@@ -45,7 +45,7 @@ async function runRotation() {
 
     <div v-if="!result" class="max-w-lg space-y-6">
       <div>
-        <h2 class="text-lg font-medium">
+        <h2 class="text-xl font-medium">
           Run Rotation
         </h2>
         <p class="text-sm text-muted-foreground">
@@ -56,7 +56,7 @@ async function runRotation() {
       <ErrorBanner v-if="error" :message="error" />
 
       <div class="rounded-lg border bg-muted/30 p-4">
-        <h3 class="text-sm font-medium">
+        <h3 class="text-base font-medium">
           Team Info
         </h3>
         <dl class="mt-2 space-y-1 text-sm">
@@ -106,7 +106,7 @@ async function runRotation() {
               Squads
             </button>
           </div>
-          <p class="mt-1 text-xs text-muted-foreground">
+          <p class="mt-1 text-sm text-muted-foreground">
             {{
               mode === "devs"
                 ? "Assign reviewers to individual developers"
@@ -120,7 +120,7 @@ async function runRotation() {
             <UICheckbox :checked="isManual" @update:checked="isManual = $event" />
             <span>Manual rotation</span>
           </UILabel>
-          <p class="ml-6 text-xs text-muted-foreground">
+          <p class="ml-6 text-sm text-muted-foreground">
             Update existing column instead of creating a new one
           </p>
         </div>
@@ -145,7 +145,7 @@ async function runRotation() {
       </div>
 
       <div v-if="result.assignments?.length" class="space-y-2">
-        <h3 class="text-sm font-medium">
+        <h3 class="text-base font-medium">
           Assignments
         </h3>
         <div class="overflow-hidden rounded-lg border">

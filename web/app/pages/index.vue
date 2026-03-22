@@ -10,13 +10,12 @@ const { data: teams } = await useFetch('/api/teams')
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <PageHeader title="Teams" description="Manage code review rotation teams" />
-      <NuxtLink
-        to="/teams/new"
-        class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-      >
-        <Plus class="size-4" />
-        <TrimText>New Team</TrimText>
-      </NuxtLink>
+      <UIButton as-child>
+        <NuxtLink to="/teams/new" class="gap-2">
+          <Plus class="size-4" />
+          <TrimText>New Team</TrimText>
+        </NuxtLink>
+      </UIButton>
     </div>
 
     <div v-if="teams?.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -71,13 +70,12 @@ const { data: teams } = await useFetch('/api/teams')
       <template #icon>
         <Users class="mb-3 size-10 text-muted-foreground/50" />
       </template>
-      <NuxtLink
-        to="/teams/new"
-        class="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-      >
-        <Plus class="size-4" />
-        <TrimText>Create your first team</TrimText>
-      </NuxtLink>
+      <UIButton as-child size="sm" class="mt-3">
+        <NuxtLink to="/teams/new" class="gap-1.5">
+          <Plus class="size-4" />
+          <TrimText>Create your first team</TrimText>
+        </NuxtLink>
+      </UIButton>
     </EmptyState>
   </div>
 </template>

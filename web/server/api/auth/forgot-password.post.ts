@@ -2,7 +2,44 @@ import { z } from 'zod'
 import { sendPasswordResetEmail } from '../../utils/email'
 
 const schema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email({ error: 'Invalid email address' }),
+})
+
+defineRouteMeta({
+  openAPI: {
+    summary: 'Request a password reset email',
+    tags: ['Auth'],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['email'],
+            properties: {
+              email: { type: 'string', format: 'email' },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: 'Reset email sent if account exists',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                message: { type: 'string' },
+                resetToken: { type: 'string', description: 'Only returned in development mode' },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

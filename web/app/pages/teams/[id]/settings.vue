@@ -109,7 +109,7 @@ async function deleteTeam() {
           <UILabel for="team-name">
             Team Name *
           </UILabel>
-          <UIInput id="team-name" v-model="form.name" type="text" required />
+          <UIInput id="team-name" v-model="form.name" type="text" placeholder="Clinical Foundation" required />
         </div>
 
         <div class="space-y-2">
@@ -134,7 +134,7 @@ async function deleteTeam() {
       </form>
 
       <div class="border-t pt-6">
-        <h3 class="text-sm font-semibold">
+        <h3 class="text-lg font-semibold">
           Rotation Schedule
         </h3>
         <p class="mt-1 text-sm text-muted-foreground">
@@ -165,7 +165,7 @@ async function deleteTeam() {
                 <UINumberFieldIncrement />
               </UINumberFieldContent>
             </UINumberField>
-            <p v-if="!customInterval" class="text-xs text-muted-foreground">
+            <p v-if="!customInterval" class="text-sm text-muted-foreground">
               Using global default: {{ globalSettings?.defaultRotationIntervalDays ?? 14 }} days
             </p>
           </div>
@@ -191,7 +191,7 @@ async function deleteTeam() {
                 </UISelectItem>
               </UISelectContent>
             </UISelect>
-            <p v-if="!customDay" class="text-xs text-muted-foreground">
+            <p v-if="!customDay" class="text-sm text-muted-foreground">
               Using global default:
               {{ capitalizeFirst(globalSettings?.defaultRotationDay ?? "wednesday") }}
             </p>
@@ -212,9 +212,9 @@ async function deleteTeam() {
               v-model="scheduleForm.rotationTimezone"
               type="text"
               :disabled="!customTimezone"
-              placeholder="e.g. America/New_York"
+              placeholder="America/New_York"
             />
-            <p v-if="!customTimezone" class="text-xs text-muted-foreground">
+            <p v-if="!customTimezone" class="text-sm text-muted-foreground">
               Using global default:
               {{ globalSettings?.defaultRotationTimezone ?? "Europe/Helsinki" }}
             </p>
@@ -230,7 +230,7 @@ async function deleteTeam() {
       </div>
 
       <div class="border-t pt-6">
-        <h3 class="text-sm font-medium text-destructive">
+        <h3 class="text-lg font-medium text-destructive">
           Danger Zone
         </h3>
         <p class="mt-1 text-sm text-muted-foreground">

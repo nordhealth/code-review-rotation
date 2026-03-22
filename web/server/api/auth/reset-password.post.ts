@@ -1,8 +1,46 @@
 import { z } from 'zod'
 
 const schema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  token: z.string().min(1, { error: 'Reset token is required' }),
+  password: z.string().min(8, { error: 'Password must be at least 8 characters' }),
+})
+
+defineRouteMeta({
+  openAPI: {
+    summary: 'Reset password using a reset token',
+    tags: ['Auth'],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['token', 'password'],
+            properties: {
+              token: { type: 'string', minLength: 1 },
+              password: { type: 'string', minLength: 8 },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: 'Password updated',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                message: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+      400: { description: 'Invalid or expired reset token' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

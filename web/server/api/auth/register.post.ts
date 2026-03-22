@@ -2,10 +2,52 @@ import { z } from 'zod'
 import { sendConfirmationEmail } from '../../utils/email'
 
 const registerSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email({ error: 'Invalid email address' }),
+  password: z.string().min(8, { error: 'Password must be at least 8 characters' }),
+  firstName: z.string().min(1, { error: 'First name is required' }),
+  lastName: z.string().min(1, { error: 'Last name is required' }),
+})
+
+defineRouteMeta({
+  openAPI: {
+    summary: 'Register a new user account',
+    tags: ['Auth'],
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['email', 'password', 'firstName', 'lastName'],
+            properties: {
+              email: { type: 'string', format: 'email' },
+              password: { type: 'string', minLength: 8 },
+              firstName: { type: 'string', minLength: 1 },
+              lastName: { type: 'string', minLength: 1 },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: 'Account created, confirmation email sent',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                message: { type: 'string' },
+                confirmationToken: { type: 'string', description: 'Only returned in development mode' },
+              },
+            },
+          },
+        },
+      },
+      400: { description: 'Email domain not allowed' },
+      409: { description: 'Account already exists' },
+    },
+  },
 })
 
 export default defineEventHandler(async (event) => {

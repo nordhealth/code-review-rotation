@@ -50,6 +50,14 @@ export async function queryTeamMembers(teamId: string) {
   }))
 }
 
+export async function queryTeamMemberById(memberId: string) {
+  const [member] = await db
+    .select()
+    .from(teamDevelopers)
+    .where(eq(teamDevelopers.id, memberId))
+  return member ?? null
+}
+
 export async function addTeamMember(data: {
   teamId: string
   developerId: string

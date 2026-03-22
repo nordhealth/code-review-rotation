@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   BookOpen,
+  Bot,
   ChevronDown,
   Key,
   LayoutDashboard,
@@ -31,7 +32,8 @@ const userMenuItems = computed(() => {
     ],
     api: [
       { name: 'API Keys', to: '/api-keys', icon: Key },
-      { name: 'API Docs', to: '/docs/api', icon: BookOpen },
+      { name: 'API Docs', to: '/docs/api', icon: BookOpen, external: true },
+      { name: 'MCP Server', to: '/docs/mcp', icon: Bot },
     ],
   }
 })
@@ -165,6 +167,8 @@ function toggleColorMode() {
                   v-for="item in userMenuItems.api"
                   :key="item.to"
                   :to="item.to"
+                  :external="item.external"
+                  :target="item.external ? '_blank' : undefined"
                 >
                   <UIDropdownMenuItem
                     class="cursor-pointer"

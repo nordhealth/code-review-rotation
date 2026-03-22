@@ -63,7 +63,7 @@ async function submit() {
         <ArrowLeft class="size-5" />
       </NuxtLink>
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
+        <h1 class="text-3xl font-semibold tracking-tight">
           Edit Squad
         </h1>
         <p class="text-sm text-muted-foreground">
@@ -84,7 +84,7 @@ async function submit() {
           <UILabel for="squad-name">
             Name *
           </UILabel>
-          <UIInput id="squad-name" v-model="form.name" type="text" required />
+          <UIInput id="squad-name" v-model="form.name" type="text" placeholder="Bug Sheriff" required />
         </div>
 
         <div class="space-y-2">
@@ -98,7 +98,7 @@ async function submit() {
               <UINumberFieldIncrement />
             </UINumberFieldContent>
           </UINumberField>
-          <p class="text-xs text-muted-foreground">
+          <p class="text-sm text-muted-foreground">
             Number of reviewers assigned to this squad per rotation
           </p>
         </div>
@@ -120,7 +120,7 @@ async function submit() {
               {{ member.developer.firstName }} {{ member.developer.lastName }}
             </UIButton>
           </div>
-          <p v-if="form.memberDeveloperIds.length" class="text-xs text-muted-foreground">
+          <p v-if="form.memberDeveloperIds.length" class="text-sm text-muted-foreground">
             {{ form.memberDeveloperIds.length }} selected
           </p>
         </div>

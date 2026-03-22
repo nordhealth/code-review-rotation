@@ -21,7 +21,7 @@ function isActive(link: { name: string, to: string }) {
 <template>
   <div class="mb-6">
     <div class="mb-4 flex min-h-9 items-center justify-between">
-      <h1 class="text-2xl font-semibold tracking-tight">
+      <h1 class="text-3xl font-semibold tracking-tight">
         {{ teamName }}
       </h1>
       <slot name="actions" />

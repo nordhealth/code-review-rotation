@@ -269,12 +269,11 @@ function toggleRotation(rotationId: string) {
 <template>
   <div class="space-y-8">
     <EmptyState v-if="!developer" message="Developer not found">
-      <NuxtLink
-        to="/developers"
-        class="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-      >
-        <TrimText>Back to developers</TrimText>
-      </NuxtLink>
+      <UIButton as-child size="sm" class="mt-3">
+        <NuxtLink to="/developers">
+          Back to developers
+        </NuxtLink>
+      </UIButton>
     </EmptyState>
 
     <template v-else>
@@ -293,7 +292,7 @@ function toggleRotation(rotationId: string) {
             </UIAvatarFallback>
           </UIAvatar>
           <div>
-            <h1 class="text-2xl font-semibold tracking-tight">
+            <h1 class="text-3xl font-semibold tracking-tight">
               {{ developer.firstName }} {{ developer.lastName }}
             </h1>
             <div class="flex items-center gap-3 text-sm text-muted-foreground">
@@ -362,7 +361,7 @@ function toggleRotation(rotationId: string) {
 
       <!-- Teams -->
       <div v-if="associations?.memberOf?.length" class="space-y-3">
-        <h2 class="text-base font-semibold">
+        <h2 class="text-xl font-semibold">
           Teams
         </h2>
         <div class="flex flex-col gap-2">
@@ -435,7 +434,7 @@ function toggleRotation(rotationId: string) {
       <!-- Reviewers section -->
       <div v-show="activeView === 'all' || activeView === 'reviewers'" class="space-y-3">
         <div>
-          <h2 class="text-base font-semibold">
+          <h2 class="text-xl font-semibold">
             Assigned reviewers
           </h2>
           <p class="text-sm text-muted-foreground">
@@ -580,7 +579,7 @@ function toggleRotation(rotationId: string) {
       <!-- Reviews section -->
       <div v-show="activeView === 'all' || activeView === 'reviewing'" class="space-y-3">
         <div>
-          <h2 class="text-base font-semibold">
+          <h2 class="text-xl font-semibold">
             Reviewing
           </h2>
           <p class="text-sm text-muted-foreground">

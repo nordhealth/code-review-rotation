@@ -49,6 +49,7 @@ async function submit() {
           id="new-team-name"
           v-model="form.name"
           type="text"
+          placeholder="Clinical Foundation"
           required
         />
       </div>
@@ -64,7 +65,7 @@ async function submit() {
             <UINumberFieldIncrement />
           </UINumberFieldContent>
         </UINumberField>
-        <p class="text-xs text-muted-foreground">
+        <p class="text-sm text-muted-foreground">
           Number of reviewers assigned per rotation
         </p>
       </div>

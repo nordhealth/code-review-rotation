@@ -39,7 +39,7 @@ async function onSubmit() {
 <template>
   <div class="w-full max-w-md space-y-6 rounded-xl border bg-card p-8 shadow-md">
     <div class="space-y-1 text-center">
-      <h1 class="text-2xl font-semibold tracking-tight">
+      <h1 class="text-3xl font-semibold tracking-tight">
         Reset password
       </h1>
       <p class="text-sm text-muted-foreground">

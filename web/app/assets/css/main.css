@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'vue-sonner/style.css';
+@plugin '@tailwindcss/typography';
 
 @source inline("group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toast]:text-muted-foreground group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:bg-muted group-[.toast]:text-muted-foreground");
 
@@ -119,7 +120,7 @@ tbody tr:hover {
 
 body {
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.6;
   background-color: var(--color-background);
   color: var(--color-foreground);
