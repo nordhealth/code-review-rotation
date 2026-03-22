@@ -26,7 +26,7 @@ function isActive(link: { name: string, to: string }) {
       </h1>
       <slot name="actions" />
     </div>
-    <nav class="flex gap-1 border-b">
+    <nav class="flex gap-1 overflow-x-auto border-b">
       <NuxtLink
         v-for="link in links"
         :key="link.to"

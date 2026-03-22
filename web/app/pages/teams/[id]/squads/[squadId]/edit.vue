@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft } from 'lucide-vue-next'
 
+useHead({ title: 'Edit Squad | Nord Review' })
+
 const route = useRoute()
 const router = useRouter()
 const teamId = route.params.id as string
@@ -75,9 +77,7 @@ async function submit() {
     </div>
 
     <template v-else>
-      <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-        {{ error }}
-      </div>
+      <ErrorBanner v-if="error" :message="error" />
 
       <form class="space-y-4" @submit.prevent="submit">
         <div class="space-y-2">
@@ -131,7 +131,7 @@ async function submit() {
           </UIButton>
           <UIButton as-child variant="ghost">
             <NuxtLink :to="`/teams/${teamId}/squads`">
-              Cancel
+              <TrimText>Cancel</TrimText>
             </NuxtLink>
           </UIButton>
         </div>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+useHead({ title: 'New Team | Nord Review' })
+
 const router = useRouter()
 
 const form = reactive({
@@ -23,9 +25,8 @@ async function submit() {
     })
     router.push('/')
   }
-  catch (error) {
-    const message = (error as { data?: { message?: string } })?.data?.message
-    error.value = message || 'Failed to create team'
+  catch (submitError) {
+    error.value = extractErrorMessage(submitError, 'Failed to create team')
   }
   finally {
     submitting.value = false
@@ -35,18 +36,9 @@ async function submit() {
 
 <template>
   <div class="max-w-lg space-y-6">
-    <div>
-      <h1 class="text-2xl font-semibold tracking-tight">
-        New Team
-      </h1>
-      <p class="text-sm text-muted-foreground">
-        Create a new code review rotation team
-      </p>
-    </div>
+    <PageHeader title="New Team" description="Create a new code review rotation team" />
 
-    <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-      {{ error }}
-    </div>
+    <ErrorBanner v-if="error" :message="error" />
 
     <form class="space-y-4" @submit.prevent="submit">
       <div class="space-y-2">
@@ -83,7 +75,7 @@ async function submit() {
         </UIButton>
         <UIButton as-child variant="ghost">
           <NuxtLink to="/">
-            Cancel
+            <TrimText>Cancel</TrimText>
           </NuxtLink>
         </UIButton>
       </div>

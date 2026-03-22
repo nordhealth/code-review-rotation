@@ -2,15 +2,7 @@
 import type { Settings } from '~/types'
 import { Save, Trash2 } from 'lucide-vue-next'
 
-const DAYS_OF_WEEK = [
-  { value: 'monday', label: 'Monday' },
-  { value: 'tuesday', label: 'Tuesday' },
-  { value: 'wednesday', label: 'Wednesday' },
-  { value: 'thursday', label: 'Thursday' },
-  { value: 'friday', label: 'Friday' },
-  { value: 'saturday', label: 'Saturday' },
-  { value: 'sunday', label: 'Sunday' },
-]
+useHead({ title: 'Team Settings | Nord Review' })
 
 const route = useRoute()
 const router = useRouter()
@@ -30,9 +22,11 @@ const scheduleForm = reactive({
   rotationTimezone: team.value?.rotationTimezone ?? undefined,
 })
 
-const useGlobalInterval = ref(team.value?.rotationIntervalDays === null)
-const useGlobalDay = ref(team.value?.rotationDay === null)
-const useGlobalTimezone = ref(team.value?.rotationTimezone === null)
+const customInterval = ref(!!team.value?.rotationIntervalDays)
+const customDay = ref(!!team.value?.rotationDay)
+const customTimezone = ref(!!team.value?.rotationTimezone)
+
+const { confirm } = useConfirm()
 
 const submitting = ref(false)
 const scheduleSubmitting = ref(false)
@@ -54,8 +48,7 @@ async function save() {
     router.push(`/teams/${updated.slug}`)
   }
   catch (submitError) {
-    const message = (submitError as { data?: { message?: string } })?.data?.message
-    error.value = message || 'Failed to update team'
+    error.value = extractErrorMessage(submitError, 'Failed to update team')
   }
   finally {
     submitting.value = false
@@ -69,39 +62,37 @@ async function saveSchedule() {
     await $fetch(`/api/teams/${teamId}`, {
       method: 'PUT',
       body: {
-        rotationIntervalDays: useGlobalInterval.value
-          ? null
-          : (scheduleForm.rotationIntervalDays ?? null),
-        rotationDay: useGlobalDay.value ? null : (scheduleForm.rotationDay ?? null),
-        rotationTimezone: useGlobalTimezone.value ? null : (scheduleForm.rotationTimezone ?? null),
+        rotationIntervalDays: customInterval.value
+          ? (scheduleForm.rotationIntervalDays ?? null)
+          : null,
+        rotationDay: customDay.value ? (scheduleForm.rotationDay ?? null) : null,
+        rotationTimezone: customTimezone.value ? (scheduleForm.rotationTimezone ?? null) : null,
       },
     })
   }
   catch (submitError) {
-    const message = (submitError as { data?: { message?: string } })?.data?.message
-    error.value = message || 'Failed to update schedule'
+    error.value = extractErrorMessage(submitError, 'Failed to update schedule')
   }
   finally {
     scheduleSubmitting.value = false
   }
 }
 
-function capitalizeFirst(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1)
-}
-
 async function deleteTeam() {
-  if (
-    !window.confirm(`Are you sure you want to delete "${team.value?.name}"? This cannot be undone.`)
-  )
+  const confirmed = await confirm({
+    title: 'Delete team',
+    description: `Are you sure you want to delete "${team.value?.name}"? This cannot be undone.`,
+    confirmLabel: 'Delete',
+    variant: 'destructive',
+  })
+  if (!confirmed)
     return
   try {
     await $fetch(`/api/teams/${teamId}`, { method: 'DELETE' })
     router.push('/')
   }
   catch (deleteError) {
-    const message = (deleteError as { data?: { message?: string } })?.data?.message
-    error.value = message || 'Failed to delete team'
+    error.value = extractErrorMessage(deleteError, 'Failed to delete team')
   }
 }
 </script>
@@ -111,9 +102,7 @@ async function deleteTeam() {
     <TeamSubNav :team-id="teamId" :team-name="team?.name ?? 'Loading...'" />
 
     <div class="max-w-lg space-y-6">
-      <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-        {{ error }}
-      </div>
+      <ErrorBanner v-if="error" :message="error" />
 
       <form class="space-y-4" @submit.prevent="save">
         <div class="space-y-2">
@@ -157,8 +146,8 @@ async function deleteTeam() {
             <div class="flex items-center gap-2">
               <UICheckbox
                 id="use-custom-interval"
-                :checked="!useGlobalInterval"
-                @update:checked="(value: boolean) => (useGlobalInterval = !value)"
+                :checked="customInterval"
+                @update:checked="customInterval = $event"
               />
               <UILabel for="use-custom-interval">
                 Custom interval
@@ -168,7 +157,7 @@ async function deleteTeam() {
               v-model="scheduleForm.rotationIntervalDays"
               :min="1"
               :max="90"
-              :disabled="useGlobalInterval"
+              :disabled="!customInterval"
             >
               <UINumberFieldContent>
                 <UINumberFieldDecrement />
@@ -176,7 +165,7 @@ async function deleteTeam() {
                 <UINumberFieldIncrement />
               </UINumberFieldContent>
             </UINumberField>
-            <p v-if="useGlobalInterval" class="text-xs text-muted-foreground">
+            <p v-if="!customInterval" class="text-xs text-muted-foreground">
               Using global default: {{ globalSettings?.defaultRotationIntervalDays ?? 14 }} days
             </p>
           </div>
@@ -185,14 +174,14 @@ async function deleteTeam() {
             <div class="flex items-center gap-2">
               <UICheckbox
                 id="use-custom-day"
-                :checked="!useGlobalDay"
-                @update:checked="(value: boolean) => (useGlobalDay = !value)"
+                :checked="customDay"
+                @update:checked="customDay = $event"
               />
               <UILabel for="use-custom-day">
                 Custom day
               </UILabel>
             </div>
-            <UISelect v-model="scheduleForm.rotationDay" :disabled="useGlobalDay">
+            <UISelect v-model="scheduleForm.rotationDay" :disabled="!customDay">
               <UISelectTrigger>
                 <UISelectValue placeholder="Select day" />
               </UISelectTrigger>
@@ -202,7 +191,7 @@ async function deleteTeam() {
                 </UISelectItem>
               </UISelectContent>
             </UISelect>
-            <p v-if="useGlobalDay" class="text-xs text-muted-foreground">
+            <p v-if="!customDay" class="text-xs text-muted-foreground">
               Using global default:
               {{ capitalizeFirst(globalSettings?.defaultRotationDay ?? "wednesday") }}
             </p>
@@ -212,8 +201,8 @@ async function deleteTeam() {
             <div class="flex items-center gap-2">
               <UICheckbox
                 id="use-custom-timezone"
-                :checked="!useGlobalTimezone"
-                @update:checked="(value: boolean) => (useGlobalTimezone = !value)"
+                :checked="customTimezone"
+                @update:checked="customTimezone = $event"
               />
               <UILabel for="use-custom-timezone">
                 Custom timezone
@@ -222,10 +211,10 @@ async function deleteTeam() {
             <UIInput
               v-model="scheduleForm.rotationTimezone"
               type="text"
-              :disabled="useGlobalTimezone"
+              :disabled="!customTimezone"
               placeholder="e.g. America/New_York"
             />
-            <p v-if="useGlobalTimezone" class="text-xs text-muted-foreground">
+            <p v-if="!customTimezone" class="text-xs text-muted-foreground">
               Using global default:
               {{ globalSettings?.defaultRotationTimezone ?? "Europe/Helsinki" }}
             </p>

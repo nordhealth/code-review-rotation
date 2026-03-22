@@ -2,6 +2,8 @@
 import type { Rotation } from '~/types'
 import { ArrowLeft, ArrowRight, Play } from 'lucide-vue-next'
 
+useHead({ title: 'Run Rotation | Nord Review' })
+
 const route = useRoute()
 const teamId = route.params.id as string
 
@@ -51,9 +53,7 @@ async function runRotation() {
         </p>
       </div>
 
-      <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-        {{ error }}
-      </div>
+      <ErrorBanner v-if="error" :message="error" />
 
       <div class="rounded-lg border bg-muted/30 p-4">
         <h3 class="text-sm font-medium">
@@ -180,7 +180,7 @@ async function runRotation() {
         <UIButton as-child variant="secondary">
           <NuxtLink :to="`/teams/${teamId}`" class="gap-2">
             <ArrowLeft class="size-4" />
-            Back to Rotation History
+            <TrimText>Back to Rotation History</TrimText>
           </NuxtLink>
         </UIButton>
         <UIButton

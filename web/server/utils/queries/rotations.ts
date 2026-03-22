@@ -6,6 +6,7 @@ import {
   squads,
   teams,
 } from '../../db/schema'
+import { fireWebhooks } from '../queries/webhooks'
 
 export async function queryRotations(
   teamId: string,

@@ -12,7 +12,7 @@ export async function queryAllUsers() {
       createdAt: users.createdAt,
     })
     .from(users)
-    .orderBy(users.createdAt)
+    .orderBy(asc(users.role), asc(users.createdAt))
 }
 
 export async function updateUserRole(userId: string, role: 'admin' | 'developer') {

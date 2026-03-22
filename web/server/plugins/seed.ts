@@ -56,6 +56,7 @@ export default defineNitroPlugin((nitroApp) => {
       lastName: 'Gonçalves',
       slackId: 'U06KCP2D3AB',
       gitlabId: 'joao.goncalves',
+      githubId: 'jagoncalves14',
     })
     const marko = await createDeveloper({
       firstName: 'Marko',

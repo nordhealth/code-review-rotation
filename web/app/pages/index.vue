@@ -1,26 +1,21 @@
 <script setup lang="ts">
 import { History, Plus, Settings, Users } from 'lucide-vue-next'
 
-const { data: teams } = useFetch('/api/teams')
+useHead({ title: 'Teams | Nord Review' })
+
+const { data: teams } = await useFetch('/api/teams')
 </script>
 
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
-          Teams
-        </h1>
-        <p class="text-sm text-muted-foreground">
-          Manage code review rotation teams
-        </p>
-      </div>
+      <PageHeader title="Teams" description="Manage code review rotation teams" />
       <NuxtLink
         to="/teams/new"
         class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
       >
         <Plus class="size-4" />
-        New Team
+        <TrimText>New Team</TrimText>
       </NuxtLink>
     </div>
 
@@ -29,7 +24,7 @@ const { data: teams } = useFetch('/api/teams')
         v-for="team in teams"
         :key="team.id"
         :to="`/teams/${team.slug}`"
-        class="block rounded-lg border bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+        class="block rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow-md dark:shadow-none dark:hover:border-muted-foreground/20 dark:hover:shadow-[0_0_10px_rgb(255_255_255_/_0.05)]"
       >
         <div class="mb-4 flex items-start justify-between">
           <div>
@@ -50,7 +45,7 @@ const { data: teams } = useFetch('/api/teams')
             @click.stop
           >
             <History class="size-3.5" />
-            Rotations
+            <TrimText>Rotations</TrimText>
           </NuxtLink>
           <NuxtLink
             :to="`/teams/${team.slug}/members`"
@@ -58,7 +53,7 @@ const { data: teams } = useFetch('/api/teams')
             @click.stop
           >
             <Users class="size-3.5" />
-            Members
+            <TrimText>Members</TrimText>
           </NuxtLink>
           <NuxtLink
             :to="`/teams/${team.slug}/settings`"
@@ -66,24 +61,23 @@ const { data: teams } = useFetch('/api/teams')
             @click.stop
           >
             <Settings class="size-3.5" />
-            Settings
+            <TrimText>Settings</TrimText>
           </NuxtLink>
         </div>
       </NuxtLink>
     </div>
 
-    <div v-else class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
-      <Users class="mb-3 size-10 text-muted-foreground/50" />
-      <p class="text-sm text-muted-foreground">
-        No teams yet
-      </p>
+    <EmptyState v-else message="No teams yet">
+      <template #icon>
+        <Users class="mb-3 size-10 text-muted-foreground/50" />
+      </template>
       <NuxtLink
         to="/teams/new"
         class="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
       >
         <Plus class="size-4" />
-        Create your first team
+        <TrimText>Create your first team</TrimText>
       </NuxtLink>
-    </div>
+    </EmptyState>
   </div>
 </template>

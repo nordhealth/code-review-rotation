@@ -5,6 +5,7 @@ export interface Developer {
   slug: string
   slackId: string | null
   gitlabId: string | null
+  githubId: string | null
   createdAt: string
   updatedAt: string
 }

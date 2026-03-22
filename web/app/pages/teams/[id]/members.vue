@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { TeamMember } from '~/types'
 import { Check, ChevronsUpDown, Plus, Trash2, X } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
+
+useHead({ title: 'Team Members | Nord Review' })
 
 const route = useRoute()
 const teamId = route.params.id as string
@@ -8,6 +11,8 @@ const teamId = route.params.id as string
 const { data: team } = await useFetch(`/api/teams/${teamId}`)
 const { data: members, refresh: refreshMembers } = useFetch(`/api/teams/${teamId}/members`)
 const { data: allDevelopers } = useFetch('/api/developers')
+
+const { confirm } = useConfirm()
 
 const showAddForm = ref(false)
 const selectedDeveloperId = ref('')
@@ -43,7 +48,7 @@ async function addMember() {
   }
   catch (error: unknown) {
     const message = (error as { data?: { message?: string } })?.data?.message
-    alert(message || 'Failed to add member')
+    toast.error(message || 'Failed to add member')
   }
   finally {
     addingMember.value = false
@@ -80,12 +85,18 @@ async function saveEdit() {
   }
   catch (error: unknown) {
     const message = (error as { data?: { message?: string } })?.data?.message
-    alert(message || 'Failed to update member')
+    toast.error(message || 'Failed to update member')
   }
 }
 
 async function removeMember(memberId: string, name: string) {
-  if (!window.confirm(`Remove ${name} from this team?`))
+  const confirmed = await confirm({
+    title: 'Remove member',
+    description: `Remove ${name} from this team? This cannot be undone.`,
+    confirmLabel: 'Remove',
+    variant: 'destructive',
+  })
+  if (!confirmed)
     return
   try {
     await $fetch(`/api/teams/${teamId}/members/${memberId}`, { method: 'DELETE' })
@@ -93,7 +104,7 @@ async function removeMember(memberId: string, name: string) {
   }
   catch (error: unknown) {
     const message = (error as { data?: { message?: string } })?.data?.message
-    alert(message || 'Failed to remove member')
+    toast.error(message || 'Failed to remove member')
   }
 }
 
@@ -168,7 +179,7 @@ function getPreferableNames(member: TeamMember): string {
       </p>
     </div>
 
-    <div v-if="members?.length" class="overflow-hidden rounded-lg border">
+    <div v-if="members?.length" class="overflow-x-auto rounded-lg border">
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b bg-muted/50">
@@ -208,16 +219,10 @@ function getPreferableNames(member: TeamMember): string {
               }}
             </td>
             <td class="px-4 py-3">
-              <span
-                class="inline-block rounded-full px-2 py-0.5 text-xs font-medium"
-                :class="
-                  member.isExperienced
-                    ? 'border border-green-200 bg-green-100 text-green-700 dark:border-green-800 dark:bg-green-900/30 dark:text-green-400'
-                    : 'border border-yellow-200 bg-yellow-100 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                "
-              >
-                {{ member.isExperienced ? "Yes" : "No" }}
-              </span>
+              <StatusBadge
+                :label="member.isExperienced ? 'Yes' : 'No'"
+                :color="member.isExperienced ? 'green' : 'yellow'"
+              />
             </td>
             <td class="px-4 py-3 text-muted-foreground">
               {{ getPreferableNames(member) }}
@@ -255,18 +260,12 @@ function getPreferableNames(member: TeamMember): string {
       </table>
     </div>
 
-    <div
-      v-else
-      class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
-    >
-      <p class="text-sm text-muted-foreground">
-        No members yet
-      </p>
+    <EmptyState v-else message="No members yet">
       <UIButton size="sm" type="button" class="mt-3" @click="showAddForm = true">
         <Plus class="size-4" />
         Add your first member
       </UIButton>
-    </div>
+    </EmptyState>
 
     <!-- Edit Member Dialog -->
     <UIDialog v-model:open="editDialogOpen">

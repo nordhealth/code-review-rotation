@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Play } from 'lucide-vue-next'
 
+useHead({ title: 'Developer Rotations | Nord Review' })
+
 const route = useRoute()
 const teamId = route.params.id as string
 
@@ -25,13 +27,13 @@ const { data: team } = await useFetch(`/api/teams/${teamId}`)
         :to="`/teams/${teamId}/developers`"
         class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors bg-background text-foreground shadow-sm"
       >
-        Developers
+        <TrimText>Developers</TrimText>
       </NuxtLink>
       <NuxtLink
         :to="`/teams/${teamId}/teams`"
         class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
       >
-        Squads
+        <TrimText>Squads</TrimText>
       </NuxtLink>
     </div>
 

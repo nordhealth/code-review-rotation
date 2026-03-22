@@ -48,6 +48,7 @@ export const developers = sqliteTable('developers', {
   slug: text('slug').notNull().unique(),
   slackId: text('slack_id'),
   gitlabId: text('gitlab_id'),
+  githubId: text('github_id'),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),

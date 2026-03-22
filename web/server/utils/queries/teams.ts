@@ -1,18 +1,5 @@
 import { teamDevelopers, teams } from '../../db/schema'
 
-const NON_WORD_REGEX = /[^\w\s-]/g
-const WHITESPACE_UNDERSCORE_REGEX = /[\s_]+/g
-const MULTIPLE_DASH_REGEX = /-+/g
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(NON_WORD_REGEX, '')
-    .replace(WHITESPACE_UNDERSCORE_REGEX, '-')
-    .replace(MULTIPLE_DASH_REGEX, '-')
-}
-
 export async function queryTeams() {
   const memberCountSq = db
     .select({
@@ -70,7 +57,7 @@ export async function createTeam(data: {
   rotationDay?: string | null
   rotationTimezone?: string | null
 }) {
-  const slug = slugify(data.name)
+  const slug = makeSlug(data.name)
   const [team] = await db
     .insert(teams)
     .values({ ...data, slug })
@@ -90,7 +77,7 @@ export async function updateTeam(
 ) {
   const updates: Partial<typeof teams.$inferInsert> = { ...data, updatedAt: new Date() }
   if (data.name) {
-    updates.slug = slugify(data.name)
+    updates.slug = makeSlug(data.name)
   }
   const [team] = await db.update(teams).set(updates).where(eq(teams.id, id)).returning()
   return team ?? null

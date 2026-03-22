@@ -1,79 +1,82 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 @import 'vue-sonner/style.css';
 
 @source inline("group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toast]:text-muted-foreground group-[.toast]:bg-primary group-[.toast]:text-primary-foreground group-[.toast]:bg-muted group-[.toast]:text-muted-foreground");
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-
-  /* Brand colors — indigo + emerald */
-  --color-brand-50: oklch(97% 0.01 270);
-  --color-brand-100: oklch(93% 0.03 270);
-  --color-brand-200: oklch(87% 0.06 270);
-  --color-brand-300: oklch(76% 0.1 270);
-  --color-brand-400: oklch(64% 0.15 270);
-  --color-brand-500: oklch(55% 0.18 270);
-  --color-brand-600: oklch(47% 0.18 270);
-  --color-brand-700: oklch(40% 0.16 270);
-  --color-brand-800: oklch(34% 0.12 270);
-  --color-brand-900: oklch(28% 0.08 270);
-
-  --color-emerald-400: oklch(76% 0.15 160);
-  --color-emerald-500: oklch(68% 0.16 160);
-  --color-emerald-600: oklch(60% 0.14 160);
-
-  --radius: 0.5rem;
-
-  --color-background: oklch(98.5% 0.002 270);
-  --color-foreground: oklch(14% 0.02 270);
-  --color-muted: oklch(96% 0.005 270);
-  --color-muted-foreground: oklch(55% 0.02 270);
-  --color-border: oklch(91% 0.01 270);
-  --color-input: oklch(91% 0.01 270);
-  --color-ring: oklch(55% 0.18 270);
-  --color-primary: oklch(42% 0.19 270);
-  --color-primary-foreground: oklch(100% 0 0);
-  --color-secondary: oklch(96% 0.005 270);
-  --color-secondary-foreground: oklch(14% 0.02 270);
-  --color-accent: oklch(96% 0.005 270);
-  --color-accent-foreground: oklch(14% 0.02 270);
-  --color-destructive: oklch(57% 0.2 25);
-  --color-destructive-foreground: oklch(100% 0 0);
-  --color-success: oklch(60% 0.18 145);
-  --color-success-foreground: oklch(100% 0 0);
-  --color-card: oklch(100% 0 0);
-  --color-card-foreground: oklch(14% 0.02 270);
-  --color-popover: oklch(100% 0 0);
-  --color-popover-foreground: oklch(14% 0.02 270);
+/* Nordhealth Sans — variable font, all weights in one file */
+@font-face {
+  font-family: 'Nordhealth Sans';
+  src: url('/fonts/nordhealth-sans.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
+@theme {
+  --font-sans: 'Nordhealth Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --radius: 0.5rem;
+
+  /*
+   * Light theme — Nord Design System
+   * Source: https://nordcdn.net/ds/themes/9.0.2/nord.css
+   */
+  --color-background: oklch(98.5% 0.003 200); /* rgb(250, 251, 251) */
+  --color-foreground: oklch(18.5% 0.06 265); /* rgb(12, 26, 61) */
+  --color-muted: oklch(96.5% 0.005 240); /* rgb(241, 243, 245) */
+  --color-muted-foreground: oklch(55% 0.02 220); /* rgb(102, 118, 128) */
+  --color-border: oklch(90% 0.01 235); /* rgb(216, 222, 228) */
+  --color-input: oklch(90% 0.01 235); /* rgb(216, 222, 228) */
+  --color-ring: oklch(45% 0.17 264); /* rgb(53, 89, 199) */
+  --color-primary: oklch(45% 0.17 264); /* rgb(53, 89, 199) — fills/buttons */
+  --color-primary-text: oklch(45% 0.17 264); /* same in light mode */
+  --color-primary-foreground: oklch(100% 0 0); /* rgb(255, 255, 255) */
+  --color-secondary: oklch(96.5% 0.005 240); /* rgb(241, 243, 245) */
+  --color-secondary-foreground: oklch(18.5% 0.06 265); /* rgb(12, 26, 61) */
+  --color-accent: oklch(96.5% 0.005 240); /* rgb(241, 243, 245) */
+  --color-accent-foreground: oklch(18.5% 0.06 265); /* rgb(12, 26, 61) */
+  --color-destructive: oklch(50% 0.2 25); /* rgb(210, 64, 35) — --n-color-status-danger */
+  --color-destructive-foreground: oklch(100% 0 0); /* rgb(255, 255, 255) */
+  --color-success: oklch(47% 0.15 150); /* rgb(17, 118, 39) */
+  --color-success-foreground: oklch(100% 0 0); /* rgb(255, 255, 255) */
+  --color-card: oklch(100% 0 0); /* rgb(255, 255, 255) */
+  --color-card-foreground: oklch(18.5% 0.06 265); /* rgb(12, 26, 61) */
+  --color-popover: oklch(100% 0 0); /* rgb(255, 255, 255) */
+  --color-popover-foreground: oklch(18.5% 0.06 265); /* rgb(12, 26, 61) */
+}
+
+/*
+ * Dark theme — Nord Design System
+ * Source: https://nordcdn.net/ds/themes/9.0.2/nord-dark.css
+ */
 .dark {
-  --color-background: oklch(14% 0.02 270);
-  --color-foreground: oklch(93% 0.005 270);
-  --color-muted: oklch(20% 0.02 270);
-  --color-muted-foreground: oklch(62% 0.015 270);
-  --color-border: oklch(26% 0.02 270);
-  --color-input: oklch(23% 0.02 270);
-  --color-ring: oklch(64% 0.15 270);
+  --color-background: oklch(19% 0.01 260); /* rgb(24, 27, 32) */
+  --color-foreground: oklch(90.5% 0.003 250); /* rgb(222, 223, 225) */
+  --color-muted: oklch(24.5% 0.01 255); /* rgb(38, 41, 48) */
+  --color-muted-foreground: oklch(66% 0.01 250); /* rgb(143, 148, 158) */
+  --color-border: oklch(29.5% 0.01 250); /* rgb(47, 52, 60) */
+  --color-input: oklch(29.5% 0.01 250); /* rgb(47, 52, 60) */
+  --color-ring: oklch(46.5% 0.17 264); /* #3559C6 */
 
-  --color-primary: oklch(64% 0.15 270);
-  --color-primary-foreground: oklch(100% 0 0);
-  --color-secondary: oklch(20% 0.02 270);
-  --color-secondary-foreground: oklch(93% 0.005 270);
-  --color-accent: oklch(24% 0.02 270);
-  --color-accent-foreground: oklch(93% 0.005 270);
+  --color-primary: oklch(46.5% 0.17 264); /* #3559C6 — fills/buttons */
+  --color-primary-text: oklch(60% 0.17 264); /* #5C82E5 — text on dark bg, 4.75:1 AA */
+  --color-primary-foreground: oklch(100% 0 0); /* rgb(255, 255, 255) */
+  --color-secondary: oklch(24.5% 0.01 255); /* rgb(38, 41, 48) */
+  --color-secondary-foreground: oklch(90.5% 0.003 250); /* rgb(222, 223, 225) */
+  --color-accent: oklch(22% 0.01 255); /* rgb(29, 32, 37) */
+  --color-accent-foreground: oklch(90.5% 0.003 250); /* rgb(222, 223, 225) */
 
-  --color-destructive: oklch(60% 0.2 25);
-  --color-destructive-foreground: oklch(100% 0 0);
-  --color-success: oklch(65% 0.18 145);
-  --color-success-foreground: oklch(100% 0 0);
+  --color-destructive: oklch(49% 0.2 25); /* rgb(203, 58, 29) — --n-color-status-danger */
+  --color-destructive-foreground: oklch(100% 0 0); /* white text on red fill */
+  --color-success: oklch(72% 0.14 148); /* rgb(99, 193, 116) */
+  --color-success-foreground: oklch(19% 0.01 260); /* rgb(24, 27, 32) */
 
-  --color-card: oklch(18% 0.02 270);
-  --color-card-foreground: oklch(93% 0.005 270);
-  --color-popover: oklch(18% 0.02 270);
-  --color-popover-foreground: oklch(93% 0.005 270);
+  --color-card: oklch(22% 0.01 255); /* rgb(29, 32, 37) */
+  --color-card-foreground: oklch(90.5% 0.003 250); /* rgb(222, 223, 225) */
+  --color-popover: oklch(22% 0.01 255); /* rgb(29, 32, 37) */
+  --color-popover-foreground: oklch(90.5% 0.003 250); /* rgb(222, 223, 225) */
 }
 
 @layer base {
@@ -84,12 +87,25 @@
   ::file-selector-button {
     border-color: var(--color-border, currentColor);
   }
+
+  /* Light shadows in dark mode for visibility */
+  .dark {
+    --shadow-sm: 0 1px 3px 0 rgb(255 255 255 / 0.12), 0 1px 2px -1px rgb(255 255 255 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(255 255 255 / 0.12), 0 2px 4px -2px rgb(255 255 255 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(255 255 255 / 0.12), 0 4px 6px -4px rgb(255 255 255 / 0.1);
+  }
 }
 
 button,
 [role='button'],
 a {
   cursor: pointer;
+}
+
+/* Optical text centering — trims half-leading from font metrics */
+.trim-text {
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
 }
 
 body {

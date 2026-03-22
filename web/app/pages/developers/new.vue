@@ -1,4 +1,6 @@
 <script setup lang="ts">
+useHead({ title: 'New Developer | Nord Review' })
+
 const router = useRouter()
 
 const form = reactive({
@@ -6,6 +8,7 @@ const form = reactive({
   lastName: '',
   slackId: '',
   gitlabId: '',
+  githubId: '',
 })
 const submitting = ref(false)
 const error = ref('')
@@ -27,9 +30,8 @@ async function submit() {
     })
     router.push(`/developers/${created.slug}`)
   }
-  catch (error) {
-    const message = (error as { data?: { message?: string } })?.data?.message
-    error.value = message || 'Failed to create developer'
+  catch (submitError) {
+    error.value = extractErrorMessage(submitError, 'Failed to create developer')
   }
   finally {
     submitting.value = false
@@ -39,18 +41,9 @@ async function submit() {
 
 <template>
   <div class="max-w-lg space-y-6">
-    <div>
-      <h1 class="text-2xl font-semibold tracking-tight">
-        New Developer
-      </h1>
-      <p class="text-sm text-muted-foreground">
-        Add a new developer to the system
-      </p>
-    </div>
+    <PageHeader title="New Developer" description="Add a new developer to the system" />
 
-    <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-      {{ error }}
-    </div>
+    <ErrorBanner v-if="error" :message="error" />
 
     <form class="space-y-4" @submit.prevent="submit">
       <div class="grid gap-4 sm:grid-cols-2">
@@ -101,13 +94,24 @@ async function submit() {
         />
       </div>
 
+      <div class="space-y-2">
+        <UILabel for="new-dev-github">
+          GitHub ID
+        </UILabel>
+        <UIInput
+          id="new-dev-github"
+          v-model="form.githubId"
+          type="text"
+        />
+      </div>
+
       <div class="flex items-center gap-3 pt-2">
         <UIButton type="submit" :disabled="submitting">
           {{ submitting ? 'Creating...' : 'Create Developer' }}
         </UIButton>
         <UIButton as-child variant="ghost">
           <NuxtLink to="/developers">
-            Cancel
+            <TrimText>Cancel</TrimText>
           </NuxtLink>
         </UIButton>
       </div>

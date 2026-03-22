@@ -73,13 +73,13 @@ async function onSubmit() {
 
       <UIButton v-if="devResetToken" as-child class="w-full">
         <NuxtLink :to="`/reset-password?token=${devResetToken}`">
-          Reset password (dev shortcut)
+          <TrimText>Reset password (dev shortcut)</TrimText>
         </NuxtLink>
       </UIButton>
 
       <UIButton as-child variant="outline" class="w-full">
         <NuxtLink to="/login">
-          Back to sign in
+          <TrimText>Back to sign in</TrimText>
         </NuxtLink>
       </UIButton>
     </div>

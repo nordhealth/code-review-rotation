@@ -28,8 +28,7 @@ async function onSubmit() {
     success.value = true
   }
   catch (error) {
-    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
-    errorMessage.value = message || 'Password reset failed'
+    errorMessage.value = extractErrorMessage(error, 'Password reset failed')
   }
   finally {
     loading.value = false
@@ -56,7 +55,7 @@ async function onSubmit() {
       </div>
       <UIButton as-child variant="outline" class="w-full">
         <NuxtLink to="/forgot-password">
-          Request new reset link
+          <TrimText>Request new reset link</TrimText>
         </NuxtLink>
       </UIButton>
     </div>
@@ -69,7 +68,7 @@ async function onSubmit() {
       </div>
       <UIButton as-child class="w-full">
         <NuxtLink to="/login">
-          Sign in
+          <TrimText>Sign in</TrimText>
         </NuxtLink>
       </UIButton>
     </div>
@@ -86,11 +85,9 @@ async function onSubmit() {
         <UILabel for="reset-password">
           New password
         </UILabel>
-        <UIInput
+        <PasswordInput
           id="reset-password"
           v-model="password"
-          type="password"
-          name="password"
           autocomplete="new-password"
           :disabled="loading"
           placeholder="Min. 8 characters"
@@ -101,10 +98,9 @@ async function onSubmit() {
         <UILabel for="reset-confirm">
           Confirm password
         </UILabel>
-        <UIInput
+        <PasswordInput
           id="reset-confirm"
           v-model="confirmPassword"
-          type="password"
           autocomplete="new-password"
           :disabled="loading"
           placeholder="Repeat your password"

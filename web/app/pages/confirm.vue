@@ -51,7 +51,7 @@ onMounted(async () => {
       </div>
       <UIButton as-child class="w-full">
         <NuxtLink to="/login">
-          Sign in
+          <TrimText>Sign in</TrimText>
         </NuxtLink>
       </UIButton>
     </div>
@@ -64,7 +64,7 @@ onMounted(async () => {
       </div>
       <UIButton as-child variant="outline" class="w-full">
         <NuxtLink to="/register">
-          Back to register
+          <TrimText>Back to register</TrimText>
         </NuxtLink>
       </UIButton>
     </div>

@@ -11,23 +11,47 @@ const props = defineProps<
   }
 >()
 
-const colorMode = useColorMode()
-
-const colorStyle = computed(() => {
+const avatarColors = computed(() => {
   if (!props.label)
     return undefined
-  const colors = getAvatarColor(props.label)
-  const scheme = colorMode.value === 'dark' ? colors.dark : colors.light
-  return { backgroundColor: scheme.bg, color: scheme.text, borderColor: `${scheme.text}20` }
+  return getAvatarColor(props.label)
+})
+
+const colorVars = computed(() => {
+  if (!avatarColors.value)
+    return undefined
+  const { light, dark } = avatarColors.value
+  return {
+    '--avatar-bg-light': light.bg,
+    '--avatar-text-light': light.text,
+    '--avatar-border-light': `${light.text}20`,
+    '--avatar-bg-dark': dark.bg,
+    '--avatar-text-dark': dark.text,
+    '--avatar-border-dark': `${dark.text}20`,
+  }
 })
 </script>
 
 <template>
   <AvatarFallback
     :delay-ms="props.delayMs"
-    :style="colorStyle"
-    :class="cn('flex size-full items-center justify-center font-semibold border rounded-[inherit]', props.class)"
+    :style="colorVars"
+    :class="cn('avatar-color flex size-full items-center justify-center font-semibold border rounded-[inherit]', props.class)"
   >
-    <slot />
+    <TrimText><slot /></TrimText>
   </AvatarFallback>
 </template>
+
+<style>
+.avatar-color {
+  background-color: var(--avatar-bg-light);
+  color: var(--avatar-text-light);
+  border-color: var(--avatar-border-light);
+}
+
+.dark .avatar-color {
+  background-color: var(--avatar-bg-dark);
+  color: var(--avatar-text-dark);
+  border-color: var(--avatar-border-dark);
+}
+</style>

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { sendPasswordResetEmail } from '../../utils/email'
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -19,14 +20,13 @@ export default defineEventHandler(async (event) => {
   const token = generateToken()
   await setResetToken(user.id, token, tokenExpiresAt())
 
-  // In development, log the reset link
-  if (import.meta.dev) {
-    const baseUrl = getRequestURL(event).origin
-    // eslint-disable-next-line no-console
-    console.log(`\n[auth] Password reset link for ${body.email}:`)
-    // eslint-disable-next-line no-console
-    console.log(`  ${baseUrl}/reset-password?token=${token}\n`)
-  }
+  const baseUrl = getRequestURL(event).origin
+  const resetUrl = `${baseUrl}/reset-password?token=${token}`
+  const name = user.firstName ?? user.email
+
+  sendPasswordResetEmail(user.email, name, resetUrl).catch((emailError) => {
+    console.error('[auth] Failed to send password reset email:', emailError)
+  })
 
   return {
     message: successMessage,

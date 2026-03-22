@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { Plus, Trash2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
+
+useHead({ title: 'Squads | Nord Review' })
 
 const route = useRoute()
 const teamId = route.params.id as string
+
+const { confirm } = useConfirm()
 
 const { data: team } = await useFetch(`/api/teams/${teamId}`)
 const { data: squads, refresh: refreshSquads } = useFetch(`/api/teams/${teamId}/squads`)
@@ -61,7 +66,13 @@ if (import.meta.client) {
 }
 
 async function deleteSquad(squadId: string, name: string) {
-  if (!window.confirm(`Delete squad "${name}"?`))
+  const confirmed = await confirm({
+    title: 'Delete squad',
+    description: `Delete squad "${name}"? This cannot be undone.`,
+    confirmLabel: 'Delete',
+    variant: 'destructive',
+  })
+  if (!confirmed)
     return
   try {
     await $fetch(`/api/teams/${teamId}/squads/${squadId}`, { method: 'DELETE' })
@@ -69,7 +80,7 @@ async function deleteSquad(squadId: string, name: string) {
   }
   catch (caughtError: unknown) {
     const message = (caughtError as { data?: { message?: string } })?.data?.message
-    alert(message || 'Failed to delete squad')
+    toast.error(message || 'Failed to delete squad')
   }
 }
 </script>
@@ -81,7 +92,7 @@ async function deleteSquad(squadId: string, name: string) {
         <UIButton as-child size="sm">
           <NuxtLink :to="`/teams/${teamId}/squads/new`">
             <Plus class="size-4" />
-            New Squad
+            <TrimText>New Squad</TrimText>
           </NuxtLink>
         </UIButton>
       </template>
@@ -99,13 +110,13 @@ async function deleteSquad(squadId: string, name: string) {
               {{ squad.name }}
             </h3>
             <p class="text-sm text-muted-foreground">
-              {{ squad.reviewerCount }} reviewers
+              {{ squad.reviewerCount }} reviewers per rotation
             </p>
           </div>
           <div class="flex items-center gap-1">
             <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
               <NuxtLink :to="`/teams/${teamId}/squads/${squad.id}/edit`">
-                Edit
+                <TrimText>Edit</TrimText>
               </NuxtLink>
             </UIButton>
             <UIButton
@@ -183,19 +194,13 @@ async function deleteSquad(squadId: string, name: string) {
       </div>
     </div>
 
-    <div
-      v-else
-      class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
-    >
-      <p class="text-sm text-muted-foreground">
-        No squads yet
-      </p>
+    <EmptyState v-else message="No squads yet">
       <UIButton as-child size="sm" class="mt-3">
         <NuxtLink :to="`/teams/${teamId}/squads/new`">
           <Plus class="size-4" />
-          Create your first squad
+          <TrimText>Create your first squad</TrimText>
         </NuxtLink>
       </UIButton>
-    </div>
+    </EmptyState>
   </div>
 </template>

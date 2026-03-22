@@ -6,7 +6,7 @@ Automated code review assignment system for development teams. Assigns reviewers
 
 This repository contains two independent systems that solve the same problem in different ways:
 
-### [`web/`](web/) — ReviewLeash Web App
+### [`web/`](web/) — Nord Review Web App
 
 A self-contained Nuxt web application with its own database, UI, and built-in scheduling. Teams, developers, squads, and rotation history are managed through a browser interface. Rotations run automatically via an internal cron job (Nitro scheduled tasks) — no external triggers needed.
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft } from 'lucide-vue-next'
 
+useHead({ title: 'Edit Developer | Nord Review' })
+
 const route = useRoute()
 const router = useRouter()
 const devSlug = route.params.id as string
@@ -12,13 +14,10 @@ const form = reactive({
   lastName: developer.value?.lastName ?? '',
   slackId: developer.value?.slackId ?? '',
   gitlabId: developer.value?.gitlabId ?? '',
+  githubId: developer.value?.githubId ?? '',
 })
 const submitting = ref(false)
 const error = ref('')
-
-function getInitials(firstName: string, lastName?: string) {
-  return `${firstName.charAt(0)}${(lastName ?? '').charAt(0) || ''}`.toUpperCase()
-}
 
 function goBack() {
   if (window.history.length > 1) {
@@ -46,9 +45,8 @@ async function submit() {
     })
     router.push(`/developers/${updated.slug}`)
   }
-  catch (error) {
-    const message = (error as { data?: { message?: string } })?.data?.message
-    error.value = message || 'Failed to update developer'
+  catch (submitError) {
+    error.value = extractErrorMessage(submitError, 'Failed to update developer')
   }
   finally {
     submitting.value = false
@@ -88,9 +86,7 @@ async function submit() {
         </div>
       </div>
 
-      <div v-if="error" class="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-        {{ error }}
-      </div>
+      <ErrorBanner v-if="error" :message="error" />
 
       <form class="max-w-lg space-y-4" @submit.prevent="submit">
         <div class="grid gap-4 sm:grid-cols-2">
@@ -120,6 +116,13 @@ async function submit() {
             GitLab ID
           </UILabel>
           <UIInput id="edit-dev-gitlab" v-model="form.gitlabId" type="text" />
+        </div>
+
+        <div class="space-y-2">
+          <UILabel for="edit-dev-github">
+            GitHub ID
+          </UILabel>
+          <UIInput id="edit-dev-github" v-model="form.githubId" type="text" />
         </div>
 
         <div class="flex items-center gap-3 pt-2">

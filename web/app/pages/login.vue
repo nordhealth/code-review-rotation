@@ -21,8 +21,7 @@ async function onSubmit() {
     await navigateTo('/')
   }
   catch (error) {
-    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
-    errorMessage.value = message || 'Sign in failed'
+    errorMessage.value = extractErrorMessage(error, 'Sign in failed')
   }
   finally {
     loading.value = false
@@ -53,7 +52,7 @@ async function onSubmit() {
         </svg>
       </div>
       <h1 class="text-2xl font-semibold tracking-tight">
-        ReviewLeash
+        Nord Review
       </h1>
       <p class="text-sm text-muted-foreground">
         Sign in to your account
@@ -92,11 +91,9 @@ async function onSubmit() {
             Forgot password?
           </NuxtLink>
         </div>
-        <UIInput
+        <PasswordInput
           id="login-password"
           v-model="password"
-          type="password"
-          name="password"
           autocomplete="current-password"
           :disabled="loading"
           placeholder="Enter your password"

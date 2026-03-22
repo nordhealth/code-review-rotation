@@ -116,18 +116,6 @@ function toggleExpanded(rotationId: string) {
   }
 }
 
-function formatDate(date: string | Date) {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
-function getInitials(firstName: string, lastName: string) {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
-}
-
 const allDevelopers = computed(() => {
   if (!members.value)
     return []
@@ -212,70 +200,74 @@ const nextRotationDate = computed(() => {
       class="flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-2.5"
     >
       <CalendarClock class="size-4 text-muted-foreground" />
-      <span class="text-sm text-muted-foreground">Next rotation:</span>
-      <span class="text-sm font-medium">{{ nextRotationDate }}</span>
+      <TrimText>
+        <span class="text-sm text-muted-foreground">Next rotation: </span>
+        <span class="text-sm font-medium">{{ nextRotationDate }}</span>
+      </TrimText>
     </div>
 
     <!-- Active rotation -->
     <div v-if="activeRotation" class="overflow-hidden rounded-lg border border-primary/30">
-      <div class="flex items-center gap-3 border-b bg-primary/5 px-4 py-3">
-        <span class="relative flex size-2.5">
+      <div class="flex flex-wrap items-center gap-2 border-b bg-primary/5 px-4 py-3 sm:gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <span class="relative flex size-2.5">
+            <span
+              class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"
+            />
+            <span class="relative inline-flex size-2.5 rounded-full bg-green-500" />
+          </span>
+          <span class="text-sm font-semibold">Current Rotation</span>
+          <span class="hidden text-sm text-muted-foreground sm:inline">&mdash;</span>
+          <span class="text-sm font-medium">{{ formatDate(activeRotation.date) }}</span>
           <span
-            class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"
-          />
-          <span class="relative inline-flex size-2.5 rounded-full bg-green-500" />
-        </span>
-        <span class="text-sm font-semibold">Current Rotation</span>
-        <span class="text-sm text-muted-foreground">&mdash;</span>
-        <span class="text-sm font-medium">{{ formatDate(activeRotation.date) }}</span>
-        <span
-          v-if="activeRotation.isManual"
-          class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-        >
-          Manual
-        </span>
-        <span v-if="reviewerCountLabel" class="ml-auto text-xs text-muted-foreground">
-          {{ reviewerCountLabel }}
-        </span>
-
-        <!-- Card-level Edit / Save / Cancel -->
-        <template v-if="!isEditing">
-          <UIButton
-            size="sm"
-            variant="outline"
-            type="button"
-            class="h-7 px-2.5 text-xs"
-            @click="startEditing"
+            v-if="activeRotation.isManual"
+            class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
           >
-            Edit
-          </UIButton>
-        </template>
-        <template v-else>
-          <UIButton
-            size="sm"
-            variant="default"
-            type="button"
-            :disabled="saving"
-            class="h-7 px-2.5 text-xs"
-            @click="saveAll"
-          >
-            {{ saving ? "Saving..." : "Save" }}
-          </UIButton>
-          <UIButton
-            size="sm"
-            variant="ghost"
-            type="button"
-            class="h-7 px-2.5 text-xs"
-            @click="cancelEditing"
-          >
-            Cancel
-          </UIButton>
-        </template>
+            Manual
+          </span>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <span v-if="reviewerCountLabel" class="hidden text-xs text-muted-foreground sm:inline">
+            {{ reviewerCountLabel }}
+          </span>
+          <template v-if="!isEditing">
+            <UIButton
+              size="sm"
+              variant="outline"
+              type="button"
+              class="h-7 px-2.5 text-xs"
+              @click="startEditing"
+            >
+              Edit
+            </UIButton>
+          </template>
+          <template v-else>
+            <UIButton
+              size="sm"
+              variant="default"
+              type="button"
+              :disabled="saving"
+              class="h-7 px-2.5 text-xs"
+              @click="saveAll"
+            >
+              {{ saving ? "Saving..." : "Save" }}
+            </UIButton>
+            <UIButton
+              size="sm"
+              variant="ghost"
+              type="button"
+              class="h-7 px-2.5 text-xs"
+              @click="cancelEditing"
+            >
+              Cancel
+            </UIButton>
+          </template>
+        </div>
       </div>
 
       <div v-if="activeRotation.assignments?.length">
         <!-- Column headers -->
-        <div class="flex items-center gap-4 border-b bg-muted/50 px-5 py-2">
+        <div class="hidden items-center gap-4 border-b bg-muted/50 px-5 py-2 sm:flex">
           <div class="w-48 shrink-0 text-xs font-medium text-muted-foreground">
             {{ mode === "devs" ? "Developer" : "Target" }}
           </div>
@@ -287,9 +279,9 @@ const nextRotationDate = computed(() => {
         <div
           v-for="assignment in activeRotation.assignments"
           :key="assignment.id"
-          class="flex items-start gap-4 border-b px-5 py-3 last:border-b-0"
+          class="flex items-start gap-2 border-b px-5 py-3 last:border-b-0 sm:gap-4"
         >
-          <div class="w-48 shrink-0 pt-0.5">
+          <div class="w-28 shrink-0 pt-0.5 sm:w-48">
             <NuxtLink
               v-if="assignment.targetSlug"
               :to="`/developers/${assignment.targetSlug}`"
@@ -302,7 +294,7 @@ const nextRotationDate = computed(() => {
             </span>
           </div>
 
-          <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          <div class="flex min-w-0 flex-1 flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
             <!-- Read mode -->
             <template v-if="!isEditing">
               <template v-if="assignment.reviewers?.length">
@@ -328,7 +320,7 @@ const nextRotationDate = computed(() => {
                       {{ getInitials(reviewer.developer.firstName, reviewer.developer.lastName) }}
                     </UIAvatarFallback>
                   </UIAvatar>
-                  {{ reviewer.developer.firstName }} {{ reviewer.developer.lastName }}
+                  <TrimText>{{ reviewer.developer.firstName }} {{ reviewer.developer.lastName }}</TrimText>
                 </NuxtLink>
               </template>
               <span v-else class="text-xs text-muted-foreground">No reviewers</span>
@@ -347,7 +339,7 @@ const nextRotationDate = computed(() => {
                     :label="devInitials(devId)"
                   >{{ devInitials(devId) }}</UIAvatarFallback>
                 </UIAvatar>
-                {{ devName(devId) }}
+                <TrimText>{{ devName(devId) }}</TrimText>
                 <button
                   type="button"
                   class="ml-0.5 rounded-full p-0.5 hover:bg-primary/20"
@@ -418,6 +410,7 @@ const nextRotationDate = computed(() => {
     <div v-if="pastRotations.length" class="overflow-hidden rounded-lg border">
       <button
         type="button"
+        :aria-expanded="historyOpen"
         class="flex w-full items-center gap-3 bg-muted/30 px-4 py-3 text-left transition-colors hover:bg-muted/50"
         @click="historyOpen = !historyOpen"
       >
@@ -433,6 +426,7 @@ const nextRotationDate = computed(() => {
         <div v-for="rotation in pastRotations" :key="rotation.id">
           <button
             type="button"
+            :aria-expanded="expandedRotations.has(rotation.id)"
             class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
             @click="toggleExpanded(rotation.id)"
           >
@@ -464,7 +458,7 @@ const nextRotationDate = computed(() => {
           <div v-if="expandedRotations.has(rotation.id)" class="bg-muted/50">
             <div v-if="rotation.assignments?.length">
               <!-- Column headers for history -->
-              <div class="flex items-center gap-4 border-t bg-muted px-8 py-2">
+              <div class="hidden items-center gap-4 border-t bg-muted px-4 py-2 sm:flex sm:px-8">
                 <div class="w-44 shrink-0 text-xs font-medium text-muted-foreground">
                   {{ mode === "devs" ? "Developer" : "Target" }}
                 </div>
@@ -476,9 +470,9 @@ const nextRotationDate = computed(() => {
               <div
                 v-for="assignment in rotation.assignments"
                 :key="assignment.id"
-                class="flex items-start gap-4 border-t px-8 py-2.5"
+                class="flex flex-col gap-1.5 border-t px-4 py-2.5 sm:flex-row sm:items-start sm:gap-4 sm:px-8"
               >
-                <div class="w-44 shrink-0 pt-0.5">
+                <div class="shrink-0 pt-0.5 sm:w-44">
                   <NuxtLink
                     v-if="assignment.targetSlug"
                     :to="`/developers/${assignment.targetSlug}`"
@@ -491,7 +485,7 @@ const nextRotationDate = computed(() => {
                   </span>
                 </div>
 
-                <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                <div class="flex min-w-0 flex-1 flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center">
                   <template v-if="assignment.reviewers?.length">
                     <span
                       v-for="reviewer in assignment.reviewers"
@@ -510,14 +504,14 @@ const nextRotationDate = computed(() => {
                           }}
                         </UIAvatarFallback>
                       </UIAvatar>
-                      {{ reviewer.developer.firstName }} {{ reviewer.developer.lastName }}
+                      <TrimText>{{ reviewer.developer.firstName }} {{ reviewer.developer.lastName }}</TrimText>
                     </span>
                   </template>
                   <span v-else class="text-xs text-muted-foreground">No reviewers</span>
                 </div>
               </div>
             </div>
-            <p v-else class="px-8 py-3 text-sm text-muted-foreground">
+            <p v-else class="px-4 sm:px-8 py-3 text-sm text-muted-foreground">
               No assignments for this rotation
             </p>
           </div>
@@ -526,17 +520,11 @@ const nextRotationDate = computed(() => {
     </div>
   </template>
 
-  <div
-    v-else
-    class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
-  >
-    <p class="text-sm text-muted-foreground">
-      No {{ mode === "devs" ? "developer" : "team" }} rotations yet
-    </p>
+  <EmptyState v-else :message="`No ${mode === 'devs' ? 'developer' : 'team'} rotations yet`">
     <NuxtLink :to="`/teams/${teamId}/rotate`">
       <UIButton size="sm" class="mt-3">
         Run your first rotation
       </UIButton>
     </NuxtLink>
-  </div>
+  </EmptyState>
 </template>

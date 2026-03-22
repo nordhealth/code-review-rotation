@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { Plus, Search, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2 } from 'lucide-vue-next'
 
+useHead({ title: 'Developers | Nord Review' })
+
+const { confirm } = useConfirm()
 const { data: developers, refresh } = useFetch('/api/developers')
 const search = ref('')
 
@@ -16,7 +19,13 @@ const filteredDevelopers = computed(() => {
 })
 
 async function deleteDeveloper(slug: string, name: string) {
-  if (!window.confirm(`Are you sure you want to delete ${name}?`))
+  const confirmed = await confirm({
+    title: 'Delete developer',
+    description: `Are you sure you want to delete ${name}? This cannot be undone.`,
+    confirmLabel: 'Delete',
+    variant: 'destructive',
+  })
+  if (!confirmed)
     return
   await $fetch(`/api/developers/${slug}`, { method: 'DELETE' })
   await refresh()
@@ -26,28 +35,18 @@ async function deleteDeveloper(slug: string, name: string) {
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
-          Developers
-        </h1>
-        <p class="text-sm text-muted-foreground">
-          Manage developers available for code review rotation
-        </p>
-      </div>
+      <PageHeader title="Developers" description="Manage developers available for code review rotation" />
       <UIButton as-child>
         <NuxtLink to="/developers/new" class="gap-2">
           <Plus class="size-4" />
-          New Developer
+          <TrimText>New Developer</TrimText>
         </NuxtLink>
       </UIButton>
     </div>
 
-    <div class="relative">
-      <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-      <UIInput v-model="search" type="text" placeholder="Search by name..." class="pl-10" />
-    </div>
+    <SearchInput v-model="search" placeholder="Search by name..." />
 
-    <div v-if="filteredDevelopers.length" class="overflow-hidden rounded-lg border">
+    <div v-if="filteredDevelopers.length" class="overflow-x-auto rounded-lg border">
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b bg-muted/50">
@@ -59,6 +58,9 @@ async function deleteDeveloper(slug: string, name: string) {
             </th>
             <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
               GitLab ID
+            </th>
+            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">
+              GitHub ID
             </th>
             <th class="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">
               Actions
@@ -77,16 +79,19 @@ async function deleteDeveloper(slug: string, name: string) {
               </NuxtLink>
             </td>
             <td class="px-4 py-3 text-muted-foreground">
-              {{ dev.slackId || "-" }}
+              {{ dev.slackId }}
             </td>
             <td class="px-4 py-3 text-muted-foreground">
-              {{ dev.gitlabId || "-" }}
+              {{ dev.gitlabId }}
+            </td>
+            <td class="px-4 py-3 text-muted-foreground">
+              {{ dev.githubId }}
             </td>
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-1">
                 <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
                   <NuxtLink :to="`/developers/${dev.slug}/edit`">
-                    Edit
+                    <TrimText>Edit</TrimText>
                   </NuxtLink>
                 </UIButton>
                 <UIButton
@@ -106,20 +111,14 @@ async function deleteDeveloper(slug: string, name: string) {
       </table>
     </div>
 
-    <div
-      v-else-if="developers?.length === 0"
-      class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
-    >
-      <p class="text-sm text-muted-foreground">
-        No developers yet
-      </p>
+    <EmptyState v-else-if="developers?.length === 0" message="No developers yet">
       <UIButton as-child size="sm" class="mt-3">
         <NuxtLink to="/developers/new" class="gap-1.5">
           <Plus class="size-4" />
-          Add your first developer
+          <TrimText>Add your first developer</TrimText>
         </NuxtLink>
       </UIButton>
-    </div>
+    </EmptyState>
 
     <div
       v-else-if="search && filteredDevelopers.length === 0"

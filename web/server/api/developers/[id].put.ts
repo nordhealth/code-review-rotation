@@ -5,6 +5,7 @@ const schema = z.object({
   lastName: z.string().min(1).optional(),
   slackId: z.string().nullable().optional(),
   gitlabId: z.string().nullable().optional(),
+  githubId: z.string().nullable().optional(),
 })
 
 export default defineEventHandler(async (event) => {

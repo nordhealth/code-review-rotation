@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
 
-const email = ref('')
+const route = useRoute()
+const email = ref((route.query.email as string) ?? '')
 const password = ref('')
 const firstName = ref('')
 const lastName = ref('')
@@ -33,8 +34,7 @@ async function onSubmit() {
     }
   }
   catch (error) {
-    const message = (error as { data?: { statusMessage?: string } })?.data?.statusMessage
-    errorMessage.value = message || 'Registration failed'
+    errorMessage.value = extractErrorMessage(error, 'Registration failed')
   }
   finally {
     loading.value = false
@@ -87,13 +87,13 @@ async function onSubmit() {
 
       <UIButton v-if="devConfirmToken" as-child class="w-full">
         <NuxtLink :to="`/confirm?token=${devConfirmToken}`">
-          Confirm account (dev shortcut)
+          <TrimText>Confirm account (dev shortcut)</TrimText>
         </NuxtLink>
       </UIButton>
 
       <UIButton as-child variant="outline" class="w-full">
         <NuxtLink to="/login">
-          Back to sign in
+          <TrimText>Back to sign in</TrimText>
         </NuxtLink>
       </UIButton>
     </div>
@@ -152,11 +152,9 @@ async function onSubmit() {
         <UILabel for="register-password">
           Password
         </UILabel>
-        <UIInput
+        <PasswordInput
           id="register-password"
           v-model="password"
-          type="password"
-          name="password"
           autocomplete="new-password"
           :disabled="loading"
           placeholder="Min. 8 characters"

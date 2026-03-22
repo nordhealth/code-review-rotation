@@ -11,20 +11,12 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'ReviewLeash',
+      title: 'Nord Review',
       link: [
         {
-          rel: 'preconnect',
-          href: 'https://fonts.googleapis.com',
-        },
-        {
-          rel: 'preconnect',
-          href: 'https://fonts.gstatic.com',
-          crossorigin: '',
-        },
-        {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+          rel: 'icon',
+          type: 'image/x-icon',
+          href: '/favicon.ico',
         },
       ],
     },
@@ -32,18 +24,11 @@ export default defineNuxtConfig({
 
   modules: [
     '@nuxthub/core',
-    '@scalar/nuxt',
     'shadcn-nuxt',
     'nuxt-auth-utils',
     '@vueuse/nuxt',
     '@nuxtjs/color-mode',
   ],
-
-  scalar: {
-    pathRouting: {
-      basePath: '/docs/api',
-    },
-  },
 
   colorMode: {
     classSuffix: '',
@@ -74,6 +59,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     apiKey: '',
+    resendApiKey: '',
+    emailFrom: 'Nord Review <noreply@nordreview.nordhealth.com>',
     session: {
       maxAge: 60 * 60 * 24 * 7, // 7 days
     },

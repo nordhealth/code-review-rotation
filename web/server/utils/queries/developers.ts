@@ -8,17 +8,6 @@ import {
   teams,
 } from '../../db/schema'
 
-const NON_WORD_REGEX = /[^\w\s-]/g
-const WHITESPACE_UNDERSCORE_REGEX = /[\s_]+/g
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(NON_WORD_REGEX, '')
-    .replace(WHITESPACE_UNDERSCORE_REGEX, '-')
-}
-
 export async function queryDevelopers() {
   return db.select().from(developers).orderBy(asc(developers.firstName))
 }
@@ -45,8 +34,9 @@ export async function createDeveloper(data: {
   lastName: string
   slackId?: string
   gitlabId?: string
+  githubId?: string
 }) {
-  const slug = slugify(`${data.firstName} ${data.lastName}`)
+  const slug = makeSlug(`${data.firstName} ${data.lastName}`)
   const [developer] = await db
     .insert(developers)
     .values({ ...data, slug })
@@ -61,6 +51,7 @@ export async function updateDeveloper(
     lastName: string
     slackId: string | null
     gitlabId: string | null
+    githubId: string | null
   }>,
 ) {
   const updates: Partial<typeof developers.$inferInsert> = { ...data, updatedAt: new Date() }
@@ -69,7 +60,7 @@ export async function updateDeveloper(
     if (current) {
       const firstName = data.firstName ?? current.firstName
       const lastName = data.lastName ?? current.lastName
-      updates.slug = slugify(`${firstName} ${lastName}`)
+      updates.slug = makeSlug(`${firstName} ${lastName}`)
     }
   }
   const [developer] = await db

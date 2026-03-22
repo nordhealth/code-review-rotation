@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { sendConfirmationEmail } from '../../utils/email'
 
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -37,14 +38,12 @@ export default defineEventHandler(async (event) => {
     confirmationTokenExpiresAt: tokenExpiresAt(),
   })
 
-  // In development, log the confirmation link
-  if (import.meta.dev) {
-    const baseUrl = getRequestURL(event).origin
-    // eslint-disable-next-line no-console
-    console.log(`\n[auth] Confirmation link for ${body.email}:`)
-    // eslint-disable-next-line no-console
-    console.log(`  ${baseUrl}/confirm?token=${token}\n`)
-  }
+  const baseUrl = getRequestURL(event).origin
+  const confirmUrl = `${baseUrl}/confirm?token=${token}`
+
+  sendConfirmationEmail(body.email, body.firstName, confirmUrl).catch((emailError) => {
+    console.error('[auth] Failed to send confirmation email:', emailError)
+  })
 
   return {
     message: 'Account created. Please check your email to confirm your account.',
