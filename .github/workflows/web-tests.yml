@@ -81,6 +81,7 @@ jobs:
             web/.output
             web/.data
           retention-days: 1
+          include-hidden-files: true
 
   smoke:
     name: Smoke Tests
