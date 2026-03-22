@@ -73,6 +73,15 @@ export default defineNuxtConfig({
     fallback: 'light',
   },
 
+  components: {
+    dirs: [
+      {
+        path: '~/components',
+        ignore: ['**/index.ts'],
+      },
+    ],
+  },
+
   css: ['~/assets/css/main.css'],
 
   shadcn: {
