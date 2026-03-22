@@ -1,6 +1,22 @@
 <script setup lang="ts">
 useHead({ title: 'MCP Server | Nord Review' })
 
+const docsContainer = useTemplateRef<HTMLElement>('docsContainer')
+
+function openExternalLinksInNewTab() {
+  docsContainer.value?.querySelectorAll<HTMLAnchorElement>('a[href^="http"]').forEach((link) => {
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
+  })
+}
+
+useMutationObserver(docsContainer, () => openExternalLinksInNewTab(), { childList: true, subtree: true })
+
+onMounted(async () => {
+  await nextTick()
+  openExternalLinksInNewTab()
+})
+
 const content = `
 ## What is MCP?
 
@@ -118,7 +134,7 @@ Once connected, you can ask your AI assistant things like:
   <div class="space-y-6">
     <PageHeader title="MCP Server" description="Connect AI assistants to your rotation data." />
 
-    <div class="mcp-docs prose prose-sm dark:prose-invert max-w-none max-w-3xl">
+    <div ref="docsContainer" class="mcp-docs prose prose-sm dark:prose-invert max-w-none max-w-3xl">
       <MDC :value="content" />
     </div>
   </div>

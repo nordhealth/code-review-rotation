@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: '2026-03-22',
   devtools: { enabled: true },
 
   future: {
@@ -77,7 +77,7 @@ export default defineNuxtConfig({
     dirs: [
       {
         path: '~/components',
-        ignore: ['**/index.ts'],
+        ignore: ['**/ui/**'],
       },
     ],
   },

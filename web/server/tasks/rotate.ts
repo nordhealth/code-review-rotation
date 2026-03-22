@@ -9,7 +9,23 @@ export default defineTask({
     // eslint-disable-next-line no-console
     console.log('[rotate-task] Checking teams for due rotations...')
 
-    const allTeams = await queryTeams()
+    // Wait for DB to be ready (migrations may still be running on fresh starts)
+    let allTeams
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        allTeams = await queryTeams()
+        break
+      }
+      catch {
+        if (attempt < 2) {
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          continue
+        }
+        // eslint-disable-next-line no-console
+        console.log('[rotate-task] Database not ready after retries, skipping.')
+        return { result: { rotationsCreated: 0, results: [] } }
+      }
+    }
     const now = new Date()
     const results: { teamId: string, teamName: string, mode: string, rotationId: string }[] = []
 
