@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Developer, Rotation, Settings, Team, TeamMember } from '~/types'
+import type { Developer, Rotation, Settings, Squad, Team, TeamMember } from '~/types'
 import {
   CalendarClock,
   Check,
@@ -20,6 +20,7 @@ const { data: rotations, refresh: refreshRotations } = await useFetch<Rotation[]
 const { data: members } = await useFetch<TeamMember[]>(`/api/teams/${props.teamId}/members`)
 const { data: team } = await useFetch<Team>(`/api/teams/${props.teamId}`)
 const { data: globalSettings } = await useFetch<Settings>('/api/settings')
+const { data: squads } = await useFetch<Squad[]>(`/api/teams/${props.teamId}/squads`)
 
 const filteredRotations = computed(() => {
   if (!rotations.value)
@@ -159,18 +160,30 @@ const DAY_INDEX: Record<string, number> = {
   saturday: 6,
 }
 
-const nextRotationDate = computed(() => {
+function getNextRotationDate(squadId?: string): string | null {
   if (!team.value || !globalSettings.value)
     return null
-
-  const intervalDays
-    = team.value.rotationIntervalDays ?? globalSettings.value.defaultRotationIntervalDays
-  const targetDay = team.value.rotationDay ?? globalSettings.value.defaultRotationDay
-  const timezone = team.value.rotationTimezone ?? globalSettings.value.defaultRotationTimezone
 
   const lastRotation = filteredRotations.value[0]
   if (!lastRotation)
     return null
+
+  const squadOverride = squadId
+    ? squads.value?.find(squad => squad.id === squadId)
+    : undefined
+
+  const intervalDays
+    = squadOverride?.rotationIntervalDays
+      ?? team.value.rotationIntervalDays
+      ?? globalSettings.value.defaultRotationIntervalDays
+  const targetDay
+    = squadOverride?.rotationDay
+      ?? team.value.rotationDay
+      ?? globalSettings.value.defaultRotationDay
+  const timezone
+    = squadOverride?.rotationTimezone
+      ?? team.value.rotationTimezone
+      ?? globalSettings.value.defaultRotationTimezone
 
   const lastDate = new Date(lastRotation.date)
   const candidate = new Date(lastDate.getTime() + intervalDays * 24 * 60 * 60 * 1000)
@@ -196,6 +209,12 @@ const nextRotationDate = computed(() => {
     timeZone: timezone,
     timeZoneName: 'short',
   }).format(candidate)
+}
+
+const nextRotationDate = computed(() => {
+  if (props.mode === 'teams')
+    return null
+  return getNextRotationDate()
 })
 </script>
 
@@ -331,6 +350,13 @@ const nextRotationDate = computed(() => {
                 </NuxtLink>
               </template>
               <span v-else class="text-xs text-muted-foreground">No reviewers</span>
+              <span
+                v-if="mode === 'teams' && assignment.targetType === 'squad' && getNextRotationDate(assignment.targetId)"
+                class="ml-auto flex items-center gap-1 text-xs text-muted-foreground"
+              >
+                <CalendarClock class="size-3" />
+                Next: {{ getNextRotationDate(assignment.targetId) }}
+              </span>
             </template>
 
             <!-- Edit mode -->

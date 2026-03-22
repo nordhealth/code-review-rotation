@@ -89,7 +89,7 @@ async function deleteSquad(squadId: string, name: string) {
   <div class="space-y-6">
     <TeamSubNav :team-id="teamId" :team-name="team?.name ?? 'Loading...'">
       <template #actions>
-        <UIButton as-child size="sm">
+        <UIButton as-child>
           <NuxtLink :to="`/teams/${teamId}/squads/new`">
             <Plus class="size-4" />
             <TrimText>New Squad</TrimText>

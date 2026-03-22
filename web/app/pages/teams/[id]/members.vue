@@ -143,7 +143,7 @@ function getPreferableNames(member: TeamMember): string {
   <div class="space-y-6">
     <TeamSubNav :team-id="teamId" :team-name="team?.name ?? 'Loading...'">
       <template #actions>
-        <UIButton size="sm" type="button" @click="showAddForm = !showAddForm">
+        <UIButton type="button" @click="showAddForm = !showAddForm">
           <Plus class="size-4" />
           Add Member
         </UIButton>

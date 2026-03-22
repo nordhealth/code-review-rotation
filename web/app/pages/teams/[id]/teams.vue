@@ -14,7 +14,7 @@ const { data: team } = await useFetch(`/api/teams/${teamId}`)
     <TeamSubNav :team-id="teamId" :team-name="team?.name ?? 'Loading...'">
       <template #actions>
         <NuxtLink :to="`/teams/${teamId}/rotate`">
-          <UIButton size="sm">
+          <UIButton>
             <Play class="size-4" />
             Run Rotation
           </UIButton>

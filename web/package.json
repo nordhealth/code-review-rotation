@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "dev:fresh": "rm -rf .data && nuxt dev",
+    "dev:fresh": "rm -rf .data && mkdir -p .data/db && drizzle-kit migrate && nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",

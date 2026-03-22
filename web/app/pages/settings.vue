@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Settings, Team } from '~/types'
+import type { Settings } from '~/types'
 import { Check, Clock, Copy, Globe, Plus, Save, Trash2, Webhook } from 'lucide-vue-next'
 
 useHead({ title: 'Settings | Nord Review' })
@@ -17,7 +17,6 @@ const { confirm } = useConfirm()
 const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 const { data: settings, refresh: refreshSettings } = await useFetch<Settings>('/api/settings')
-const { data: teams } = await useFetch<Team[]>('/api/teams')
 const { data: webhooksList, refresh: refreshWebhooks }
   = await useFetch<WebhookEntry[]>('/api/webhooks')
 
@@ -54,18 +53,6 @@ async function save() {
   finally {
     submitting.value = false
   }
-}
-
-function hasOverride(team: Team) {
-  return (
-    team.rotationIntervalDays !== null
-    || team.rotationDay !== null
-    || team.rotationTimezone !== null
-  )
-}
-
-function effectiveValue(teamValue: string | number | null, globalValue: string | number) {
-  return teamValue ?? globalValue
 }
 
 const webhookForm = reactive({ name: '', url: '' })
@@ -198,68 +185,6 @@ async function copySecret() {
       </form>
     </div>
 
-    <UISeparator />
-
-    <div class="space-y-4">
-      <div>
-        <h2 class="text-xl font-semibold tracking-tight">
-          Team Schedules
-        </h2>
-        <p class="text-sm text-muted-foreground">
-          Effective schedule per team, combining global defaults with team-level overrides.
-        </p>
-      </div>
-
-      <div class="overflow-x-auto rounded-lg border">
-        <UITable>
-          <UITableHeader>
-            <UITableRow>
-              <UITableHead>Team</UITableHead>
-              <UITableHead>Interval</UITableHead>
-              <UITableHead>Day</UITableHead>
-              <UITableHead>Status</UITableHead>
-            </UITableRow>
-          </UITableHeader>
-          <UITableBody>
-            <UITableRow v-for="team in teams" :key="team.id">
-              <UITableCell class="font-medium">
-                <NuxtLink :to="`/teams/${team.slug}/settings`" class="hover:underline">
-                  {{ team.name }}
-                </NuxtLink>
-              </UITableCell>
-              <UITableCell>
-                {{
-                  effectiveValue(
-                    team.rotationIntervalDays,
-                    settings?.defaultRotationIntervalDays ?? 14,
-                  )
-                }}d
-              </UITableCell>
-              <UITableCell>
-                {{
-                  capitalizeFirst(
-                    String(
-                      effectiveValue(team.rotationDay, settings?.defaultRotationDay ?? "wednesday"),
-                    ),
-                  )
-                }}
-              </UITableCell>
-              <UITableCell>
-                <UIBadge v-if="hasOverride(team)" variant="outline" class="text-xs">
-                  Custom
-                </UIBadge>
-                <span v-else class="text-xs text-muted-foreground">Global default</span>
-              </UITableCell>
-            </UITableRow>
-            <UITableRow v-if="!teams?.length">
-              <UITableCell colspan="4" class="py-6 text-center text-sm text-muted-foreground">
-                No teams configured yet.
-              </UITableCell>
-            </UITableRow>
-          </UITableBody>
-        </UITable>
-      </div>
-    </div>
     <UISeparator />
 
     <div class="space-y-4">

@@ -107,6 +107,7 @@ export default defineNitroPlugin((nitroApp) => {
       teamId: team.id,
       name: 'Bug Sheriff',
       reviewerCount: 3,
+      rotationIntervalDays: 365,
       memberDeveloperIds: [
         cuong.id,
         marko.id,

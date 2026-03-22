@@ -101,58 +101,66 @@ async function deleteTeam() {
   <div class="space-y-6">
     <TeamSubNav :team-id="teamId" :team-name="team?.name ?? 'Loading...'" />
 
-    <div class="max-w-lg space-y-6">
+    <div class="max-w-xl space-y-6">
       <ErrorBanner v-if="error" :message="error" />
 
-      <form class="space-y-4" @submit.prevent="save">
-        <div class="space-y-2">
-          <UILabel for="team-name">
-            Team Name *
-          </UILabel>
-          <UIInput id="team-name" v-model="form.name" type="text" placeholder="Clinical Foundation" required />
-        </div>
+      <!-- General -->
+      <div class="rounded-lg border bg-card p-5 shadow-sm">
+        <h3 class="text-base font-semibold">
+          General
+        </h3>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Team name and default reviewer count.
+        </p>
 
-        <div class="space-y-2">
-          <UILabel for="team-count">
-            Default Reviewer Count
-          </UILabel>
-          <UINumberField v-model="form.defaultReviewerCount" :min="1">
-            <UINumberFieldContent>
-              <UINumberFieldDecrement />
-              <UINumberFieldInput id="team-count" />
-              <UINumberFieldIncrement />
-            </UINumberFieldContent>
-          </UINumberField>
-        </div>
+        <form class="mt-5 space-y-4" @submit.prevent="save">
+          <div class="space-y-2">
+            <UILabel for="team-name">
+              Team Name *
+            </UILabel>
+            <UIInput id="team-name" v-model="form.name" type="text" placeholder="Clinical Foundation" required />
+          </div>
 
-        <div class="flex items-center gap-3 pt-2">
+          <div class="space-y-2">
+            <UILabel for="team-count">
+              Default Reviewer Count
+            </UILabel>
+            <UINumberField v-model="form.defaultReviewerCount" :min="1">
+              <UINumberFieldContent>
+                <UINumberFieldDecrement />
+                <UINumberFieldInput id="team-count" />
+                <UINumberFieldIncrement />
+              </UINumberFieldContent>
+            </UINumberField>
+          </div>
+
           <UIButton type="submit" :disabled="submitting">
             <Save class="size-4" />
             {{ submitting ? "Saving..." : "Save Changes" }}
           </UIButton>
-        </div>
-      </form>
+        </form>
+      </div>
 
-      <div class="border-t pt-6">
-        <h3 class="text-lg font-semibold">
+      <!-- Rotation Schedule -->
+      <div class="rounded-lg border bg-card p-5 shadow-sm">
+        <h3 class="text-base font-semibold">
           Rotation Schedule
         </h3>
-        <p class="mt-1 text-sm text-muted-foreground">
+        <p class="mt-0.5 text-sm text-muted-foreground">
           Override global defaults for this team. Unchecked fields use the global default.
         </p>
 
-        <form class="mt-4 space-y-4" @submit.prevent="saveSchedule">
+        <form class="mt-5 space-y-5" @submit.prevent="saveSchedule">
+          <!-- Custom interval -->
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
+            <label for="use-custom-interval" class="flex items-center gap-2 cursor-pointer select-none">
               <UICheckbox
                 id="use-custom-interval"
                 :checked="customInterval"
                 @update:checked="customInterval = $event"
               />
-              <UILabel for="use-custom-interval">
-                Custom interval
-              </UILabel>
-            </div>
+              <span class="text-sm font-medium">Custom interval</span>
+            </label>
             <UINumberField
               v-model="scheduleForm.rotationIntervalDays"
               :min="1"
@@ -170,17 +178,16 @@ async function deleteTeam() {
             </p>
           </div>
 
+          <!-- Custom day -->
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
+            <label for="use-custom-day" class="flex items-center gap-2 cursor-pointer select-none">
               <UICheckbox
                 id="use-custom-day"
                 :checked="customDay"
                 @update:checked="customDay = $event"
               />
-              <UILabel for="use-custom-day">
-                Custom day
-              </UILabel>
-            </div>
+              <span class="text-sm font-medium">Custom day</span>
+            </label>
             <UISelect v-model="scheduleForm.rotationDay" :disabled="!customDay">
               <UISelectTrigger>
                 <UISelectValue placeholder="Select day" />
@@ -197,17 +204,16 @@ async function deleteTeam() {
             </p>
           </div>
 
+          <!-- Custom timezone -->
           <div class="space-y-2">
-            <div class="flex items-center gap-2">
+            <label for="use-custom-timezone" class="flex items-center gap-2 cursor-pointer select-none">
               <UICheckbox
                 id="use-custom-timezone"
                 :checked="customTimezone"
                 @update:checked="customTimezone = $event"
               />
-              <UILabel for="use-custom-timezone">
-                Custom timezone
-              </UILabel>
-            </div>
+              <span class="text-sm font-medium">Custom timezone</span>
+            </label>
             <UIInput
               v-model="scheduleForm.rotationTimezone"
               type="text"
@@ -220,23 +226,22 @@ async function deleteTeam() {
             </p>
           </div>
 
-          <div class="flex items-center gap-3 pt-2">
-            <UIButton type="submit" :disabled="scheduleSubmitting">
-              <Save class="size-4" />
-              {{ scheduleSubmitting ? "Saving..." : "Save Schedule" }}
-            </UIButton>
-          </div>
+          <UIButton type="submit" :disabled="scheduleSubmitting">
+            <Save class="size-4" />
+            {{ scheduleSubmitting ? "Saving..." : "Save Schedule" }}
+          </UIButton>
         </form>
       </div>
 
-      <div class="border-t pt-6">
-        <h3 class="text-lg font-medium text-destructive">
+      <!-- Danger Zone -->
+      <div class="rounded-lg border border-destructive/30 bg-destructive/5 p-5">
+        <h3 class="text-base font-semibold text-destructive">
           Danger Zone
         </h3>
-        <p class="mt-1 text-sm text-muted-foreground">
+        <p class="mt-0.5 text-sm text-muted-foreground">
           Deleting this team will remove all members, squads, and rotation history.
         </p>
-        <UIButton variant="destructive" type="button" class="mt-3" @click="deleteTeam">
+        <UIButton variant="destructive" type="button" class="mt-4" @click="deleteTeam">
           <Trash2 class="size-4" />
           Delete Team
         </UIButton>

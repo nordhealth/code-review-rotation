@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Rotation } from '~/types'
-import { ArrowLeft, ArrowRight, Play } from 'lucide-vue-next'
+import { ArrowLeft, ArrowRight, Check, Play } from 'lucide-vue-next'
 
 useHead({ title: 'Run Rotation | Nord Review' })
 
@@ -43,110 +43,115 @@ async function runRotation() {
   <div class="space-y-6">
     <TeamSubNav :team-id="teamId" :team-name="team?.name ?? 'Loading...'" />
 
-    <div v-if="!result" class="max-w-lg space-y-6">
-      <div>
-        <h2 class="text-xl font-medium">
-          Run Rotation
-        </h2>
-        <p class="text-sm text-muted-foreground">
-          Trigger a new code review rotation for {{ team?.name ?? "this team" }}
-        </p>
-      </div>
-
+    <!-- Run form -->
+    <div v-if="!result" class="max-w-xl space-y-6">
       <ErrorBanner v-if="error" :message="error" />
 
-      <div class="rounded-lg border bg-muted/30 p-4">
-        <h3 class="text-base font-medium">
-          Team Info
-        </h3>
-        <dl class="mt-2 space-y-1 text-sm">
-          <div class="flex gap-2">
-            <dt class="text-muted-foreground">
-              Team:
-            </dt>
-            <dd>{{ team?.name ?? "-" }}</dd>
-          </div>
-          <div class="flex gap-2">
-            <dt class="text-muted-foreground">
-              Default reviewers:
-            </dt>
-            <dd>{{ team?.defaultReviewerCount ?? "-" }}</dd>
-          </div>
-        </dl>
-      </div>
+      <div class="rounded-lg border bg-card p-5 shadow-sm">
+        <h2 class="text-base font-semibold">
+          Run Rotation
+        </h2>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Trigger a new code review rotation for {{ team?.name ?? "this team" }}.
+        </p>
 
-      <div class="space-y-4">
-        <div>
-          <UILabel class="mb-2">
-            Mode
-          </UILabel>
-          <div class="flex gap-1 rounded-lg bg-muted p-1 w-fit">
-            <button
-              type="button"
-              class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-              :class="
-                mode === 'devs'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              "
-              @click="mode = 'devs'"
-            >
-              Developers
-            </button>
-            <button
-              type="button"
-              class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-              :class="
-                mode === 'teams'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              "
-              @click="mode = 'teams'"
-            >
-              Squads
-            </button>
+        <div class="mt-5 space-y-5">
+          <!-- Mode toggle -->
+          <div class="space-y-2">
+            <span class="text-sm font-medium">Mode</span>
+            <div class="flex gap-1 rounded-lg bg-muted p-1 w-fit">
+              <button
+                type="button"
+                class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+                :class="
+                  mode === 'devs'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                "
+                @click="mode = 'devs'"
+              >
+                Developers
+              </button>
+              <button
+                type="button"
+                class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+                :class="
+                  mode === 'teams'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                "
+                @click="mode = 'teams'"
+              >
+                Squads
+              </button>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              {{
+                mode === "devs"
+                  ? "Assign reviewers to individual developers"
+                  : "Assign reviewers to squads"
+              }}
+            </p>
           </div>
-          <p class="mt-1 text-sm text-muted-foreground">
-            {{
-              mode === "devs"
-                ? "Assign reviewers to individual developers"
-                : "Assign reviewers to squads"
-            }}
-          </p>
+
+          <!-- Manual toggle -->
+          <label class="flex items-start gap-2 cursor-pointer select-none">
+            <UICheckbox class="mt-0.5" :checked="isManual" @update:checked="isManual = $event" />
+            <div>
+              <span class="text-sm font-medium">Manual rotation</span>
+              <p class="text-sm text-muted-foreground">
+                Update existing column instead of creating a new one
+              </p>
+            </div>
+          </label>
+
+          <!-- Team summary -->
+          <dl class="flex gap-x-6 gap-y-1 text-sm">
+            <div class="flex gap-1.5">
+              <dt class="text-muted-foreground">
+                Team:
+              </dt>
+              <dd class="font-medium">
+                {{ team?.name ?? "-" }}
+              </dd>
+            </div>
+            <div class="flex gap-1.5">
+              <dt class="text-muted-foreground">
+                Reviewers:
+              </dt>
+              <dd class="font-medium">
+                {{ team?.defaultReviewerCount ?? "-" }}
+              </dd>
+            </div>
+          </dl>
+
+          <UIButton type="button" :disabled="submitting" @click="runRotation">
+            <Play class="size-4" />
+            {{ submitting ? "Running..." : "Run Rotation" }}
+          </UIButton>
         </div>
-
-        <div>
-          <UILabel class="flex items-center gap-2">
-            <UICheckbox :checked="isManual" @update:checked="isManual = $event" />
-            <span>Manual rotation</span>
-          </UILabel>
-          <p class="ml-6 text-sm text-muted-foreground">
-            Update existing column instead of creating a new one
-          </p>
-        </div>
-
-        <UIButton type="button" :disabled="submitting" @click="runRotation">
-          <Play class="size-4" />
-          {{ submitting ? "Running..." : "Run Rotation" }}
-        </UIButton>
       </div>
     </div>
 
-    <div v-else class="space-y-6">
-      <div
-        class="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20"
-      >
-        <h2 class="font-medium text-green-800 dark:text-green-300">
-          Rotation Complete
-        </h2>
-        <p class="mt-1 text-sm text-green-700 dark:text-green-400">
-          The rotation has been run successfully.
-        </p>
+    <!-- Result -->
+    <div v-else class="max-w-xl space-y-6">
+      <div class="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+        <div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-green-600 text-white dark:bg-green-500">
+          <Check class="size-3" />
+        </div>
+        <div>
+          <h2 class="font-medium text-green-800 dark:text-green-300">
+            Rotation Complete
+          </h2>
+          <p class="mt-0.5 text-sm text-green-700 dark:text-green-400">
+            The rotation has been run successfully.
+          </p>
+        </div>
       </div>
 
-      <div v-if="result.assignments?.length" class="space-y-2">
-        <h3 class="text-base font-medium">
-          Assignments
+      <div v-if="result.assignments?.length" class="space-y-3">
+        <h3 class="text-sm font-medium text-muted-foreground">
+          Assignments ({{ result.assignments.length }})
         </h3>
         <div class="overflow-hidden rounded-lg border">
           <div

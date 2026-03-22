@@ -2,6 +2,7 @@
 import {
   BookOpen,
   Bot,
+  CalendarClock,
   ChevronDown,
   Key,
   LayoutDashboard,
@@ -27,6 +28,7 @@ const userMenuItems = computed(() => {
     return []
   return {
     admin: [
+      { name: 'All Schedules', to: '/all-schedules', icon: CalendarClock },
       { name: 'Users', to: '/users', icon: ShieldCheck },
       { name: 'Settings', to: '/settings', icon: Settings },
     ],
