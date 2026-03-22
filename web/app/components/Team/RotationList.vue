@@ -33,6 +33,12 @@ const pastRotations = computed(() => filteredRotations.value.slice(1))
 const expandedRotations = ref<Set<string>>(new Set())
 const historyOpen = ref(false)
 
+watch(historyOpen, (open) => {
+  if (open && expandedRotations.value.size === 0 && pastRotations.value.length > 0) {
+    expandedRotations.value.add(pastRotations.value[0].id)
+  }
+})
+
 const isEditing = ref(false)
 const editState = ref<Map<string, string[]>>(new Map())
 const openPopoverId = ref<string | null>(null)
@@ -112,6 +118,7 @@ function toggleExpanded(rotationId: string) {
     expandedRotations.value.delete(rotationId)
   }
   else {
+    expandedRotations.value.clear()
     expandedRotations.value.add(rotationId)
   }
 }
@@ -279,17 +286,17 @@ const nextRotationDate = computed(() => {
         <div
           v-for="assignment in activeRotation.assignments"
           :key="assignment.id"
-          class="flex items-start gap-2 border-b px-5 py-3 last:border-b-0 sm:gap-4"
+          class="flex items-start gap-2 border-b px-5 py-3 last:border-b-0 transition-colors even:bg-muted/40 hover:bg-muted sm:gap-4"
         >
           <div class="w-28 shrink-0 pt-0.5 sm:w-48">
             <NuxtLink
               v-if="assignment.targetSlug"
               :to="`/developers/${assignment.targetSlug}`"
-              class="text-sm font-medium hover:underline"
+              class="text-sm font-medium leading-6 hover:underline"
             >
               {{ assignment.targetName ?? assignment.targetId }}
             </NuxtLink>
-            <span v-else class="text-sm font-medium">
+            <span v-else class="text-sm font-medium leading-6">
               {{ assignment.targetName ?? assignment.targetId }}
             </span>
           </div>
@@ -470,17 +477,17 @@ const nextRotationDate = computed(() => {
               <div
                 v-for="assignment in rotation.assignments"
                 :key="assignment.id"
-                class="flex flex-col gap-1.5 border-t px-4 py-2.5 sm:flex-row sm:items-start sm:gap-4 sm:px-8"
+                class="flex flex-col gap-1.5 border-t px-4 py-2.5 transition-colors even:bg-muted/40 hover:bg-muted sm:flex-row sm:items-start sm:gap-4 sm:px-8"
               >
                 <div class="shrink-0 pt-0.5 sm:w-44">
                   <NuxtLink
                     v-if="assignment.targetSlug"
                     :to="`/developers/${assignment.targetSlug}`"
-                    class="text-sm text-muted-foreground hover:text-foreground hover:underline"
+                    class="text-sm leading-6 text-muted-foreground hover:text-foreground hover:underline"
                   >
                     {{ assignment.targetName ?? assignment.targetId }}
                   </NuxtLink>
-                  <span v-else class="text-sm text-muted-foreground">
+                  <span v-else class="text-sm leading-6 text-muted-foreground">
                     {{ assignment.targetName ?? assignment.targetId }}
                   </span>
                 </div>

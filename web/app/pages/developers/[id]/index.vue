@@ -26,16 +26,7 @@ const activeView = computed<ViewFilter>({
   },
 })
 
-const showHistory = computed({
-  get: () => route.query.history === '1',
-  set: (val) => {
-    const query = { ...route.query }
-    if (val)
-      query.history = '1'
-    else delete query.history
-    router.replace({ query })
-  },
-})
+const showHistory = ref(route.query.history === '1')
 
 const { data: developer } = await useFetch(`/api/developers/${devSlug}`)
 const { data: associations } = await useFetch(`/api/developers/${devSlug}/associations`)
@@ -167,13 +158,93 @@ const reviewsByTeam = computed<TeamGroup[]>(() => {
   }))
 })
 
+// Group squad review assignments (teams mode) — active only
+const squadAssignments = computed(() => {
+  if (!associations.value?.reviewingOthers)
+    return []
+
+  // Only latest (first) teams-mode rotation per team
+  const seen = new Map<string, { teamName: string, teamSlug: string, squadName: string, date: Date, reviewers: { name: string, id: string | null, slug: string | null }[] }>()
+  for (const row of associations.value.reviewingOthers) {
+    if (row.mode !== 'teams')
+      continue
+    const key = `${row.teamSlug}-${row.rotationId}`
+    if (!seen.has(key)) {
+      seen.set(key, {
+        teamName: row.teamName,
+        teamSlug: row.teamSlug,
+        squadName: row.targetName ?? 'Squad',
+        date: row.date,
+        reviewers: [],
+      })
+    }
+  }
+
+  // For squad assignments, this dev IS one of the reviewers.
+  // We need to find ALL reviewers for that same squad assignment.
+  // But the current data only has rows where THIS dev is the reviewer.
+  // So we can't show other co-reviewers from this query alone.
+  // Just show which squads this dev is assigned to review.
+  const uniqueSquads = new Map<string, { teamName: string, teamSlug: string, squadName: string, date: Date }>()
+  for (const row of associations.value.reviewingOthers) {
+    if (row.mode !== 'teams')
+      continue
+    const key = `${row.teamSlug}-${row.targetName}`
+    if (!uniqueSquads.has(key)) {
+      uniqueSquads.set(key, {
+        teamName: row.teamName,
+        teamSlug: row.teamSlug,
+        squadName: row.targetName ?? 'Squad',
+        date: row.date,
+      })
+    }
+  }
+  return Array.from(uniqueSquads.values())
+})
+
 const hasAnyHistory = computed(() =>
   reviewersByTeam.value.some(t => t.past.length > 0)
   || reviewsByTeam.value.some(t => t.past.length > 0),
 )
 
+const squadsByTeam = computed(() => {
+  const map = new Map<string, { squadId: string, squadName: string }[]>()
+  for (const squad of associations.value?.memberOfSquads ?? []) {
+    const existing = map.get(squad.teamId) ?? []
+    existing.push({ squadId: squad.squadId, squadName: squad.squadName })
+    map.set(squad.teamId, existing)
+  }
+  return map
+})
+
 const expandedHistory = ref<Set<string>>(new Set())
 const expandedRotations = ref<Set<string>>(new Set())
+
+watch(showHistory, (val) => {
+  const query = { ...route.query }
+  if (val) {
+    query.history = '1'
+    const hasOpenRotation = expandedRotations.value.size > 0
+    for (const group of reviewersByTeam.value) {
+      if (group.past.length) {
+        expandedHistory.value.add(`reviewers-${group.teamSlug}`)
+        if (!hasOpenRotation)
+          expandedRotations.value.add(group.past[0].rotationId)
+      }
+    }
+    for (const group of reviewsByTeam.value) {
+      if (group.past.length) {
+        expandedHistory.value.add(`reviews-${group.teamSlug}`)
+      }
+    }
+  }
+  else {
+    delete query.history
+    expandedHistory.value.clear()
+    expandedRotations.value.clear()
+  }
+  router.replace({ query })
+})
 
 function toggleHistory(key: string) {
   if (expandedHistory.value.has(key)) {
@@ -189,6 +260,7 @@ function toggleRotation(rotationId: string) {
     expandedRotations.value.delete(rotationId)
   }
   else {
+    expandedRotations.value.clear()
     expandedRotations.value.add(rotationId)
   }
 }
@@ -293,21 +365,46 @@ function toggleRotation(rotationId: string) {
         <h2 class="text-base font-semibold">
           Teams
         </h2>
-        <div class="flex flex-wrap gap-2">
-          <NuxtLink
-            v-for="team in associations.memberOf"
-            :key="team.teamId"
-            :to="`/teams/${team.teamSlug}/developers`"
-            class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors hover:bg-muted"
-          >
-            <Users class="size-4 text-muted-foreground" />
-            {{ team.teamName }}
-            <StatusBadge
-              :label="team.isExperienced ? 'Experienced' : 'Junior'"
-              :color="team.isExperienced ? 'green' : 'yellow'"
-            />
-            <ChevronRight class="size-3.5 text-muted-foreground" />
-          </NuxtLink>
+        <div class="flex flex-col gap-2">
+          <div v-for="team in associations.memberOf" :key="team.teamId" class="space-y-1.5">
+            <NuxtLink
+              :to="`/teams/${team.teamSlug}/developers`"
+              class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors hover:bg-muted"
+            >
+              <Users class="size-4 text-muted-foreground" />
+              {{ team.teamName }}
+              <StatusBadge
+                :label="team.isExperienced ? 'Experienced' : 'Junior'"
+                :color="team.isExperienced ? 'purple' : 'yellow'"
+              />
+              <ChevronRight class="size-3.5 text-muted-foreground" />
+            </NuxtLink>
+            <div v-if="squadsByTeam.get(team.teamId)?.length" class="ml-5 space-y-0">
+              <div
+                v-for="(squad, index) in squadsByTeam.get(team.teamId)"
+                :key="squad.squadId"
+                class="relative flex items-center gap-2 py-1 pl-5 before:absolute before:left-0 before:top-0 before:h-1/2 before:w-4 before:border-b-2 before:border-l-2 before:rounded-bl-md before:border-border before:content-['']"
+                :class="index < (squadsByTeam.get(team.teamId)?.length ?? 1) - 1 ? 'after:absolute after:left-0 after:top-1/2 after:h-1/2 after:border-l-2 after:border-border after:content-[\'\']' : ''"
+              >
+                <NuxtLink
+                  :to="`/teams/${team.teamSlug}/squads`"
+                  class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  <TrimText>{{ squad.squadName }}</TrimText>
+                </NuxtLink>
+                <StatusBadge
+                  v-if="squadAssignments.some(a => a.squadName === squad.squadName)"
+                  label="Active reviewer"
+                  color="green"
+                >
+                  <span class="relative flex size-2">
+                    <span class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
+                    <span class="relative inline-flex size-2 rounded-full bg-green-500" />
+                  </span>
+                </StatusBadge>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -330,7 +427,7 @@ function toggleRotation(rotationId: string) {
           </button>
         </div>
         <label v-if="hasAnyHistory" class="flex items-center gap-2 text-sm text-muted-foreground">
-          <UISwitch :checked="showHistory" @update:checked="showHistory = $event" />
+          <UISwitch v-model="showHistory" />
           Show history
         </label>
       </div>
@@ -410,10 +507,10 @@ function toggleRotation(rotationId: string) {
                 />
                 <ChevronRight v-else class="size-4 shrink-0 text-muted-foreground" />
                 <span class="text-sm font-medium text-muted-foreground">
-                  {{ teamGroup.teamName }} history
+                  Past assigned reviewers
                 </span>
                 <span class="ml-auto text-xs text-muted-foreground">
-                  {{ teamGroup.past.length }} past rotation{{
+                  {{ teamGroup.past.length }} rotation{{
                     teamGroup.past.length !== 1 ? "s" : ""
                   }}
                 </span>
@@ -555,10 +652,10 @@ function toggleRotation(rotationId: string) {
                 />
                 <ChevronRight v-else class="size-4 shrink-0 text-muted-foreground" />
                 <span class="text-sm font-medium text-muted-foreground">
-                  {{ teamGroup.teamName }} history
+                  Past reviews
                 </span>
                 <span class="ml-auto text-xs text-muted-foreground">
-                  {{ teamGroup.past.length }} past rotation{{
+                  {{ teamGroup.past.length }} rotation{{
                     teamGroup.past.length !== 1 ? "s" : ""
                   }}
                 </span>

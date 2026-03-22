@@ -108,6 +108,15 @@ a {
   text-box-edge: cap alphabetic;
 }
 
+/* Table zebra striping and hover */
+tbody tr:nth-child(even) {
+  background-color: color-mix(in oklch, var(--color-muted), transparent 60%);
+}
+
+tbody tr:hover {
+  background-color: var(--color-muted);
+}
+
 body {
   font-family: var(--font-sans);
   font-size: 0.875rem;

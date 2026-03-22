@@ -4,6 +4,8 @@ import {
   rotationAssignmentReviewers,
   rotationAssignments,
   rotations,
+  squadMembers,
+  squads,
   teamDevelopers,
   teams,
 } from '../../db/schema'
@@ -148,5 +150,17 @@ export async function queryDeveloperAssociations(developerId: string) {
     .innerJoin(teams, eq(teamDevelopers.teamId, teams.id))
     .where(eq(teamDevelopers.developerId, developerId))
 
-  return { assignedToMe, reviewingOthers, memberOf }
+  // 4. Squads this developer belongs to
+  const memberOfSquads = await db
+    .select({
+      squadId: squads.id,
+      squadName: squads.name,
+      teamId: squads.teamId,
+      reviewerCount: squads.reviewerCount,
+    })
+    .from(squadMembers)
+    .innerJoin(squads, eq(squadMembers.squadId, squads.id))
+    .where(eq(squadMembers.developerId, developerId))
+
+  return { assignedToMe, reviewingOthers, memberOf, memberOfSquads }
 }
