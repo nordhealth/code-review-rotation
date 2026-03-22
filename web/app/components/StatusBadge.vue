@@ -9,8 +9,8 @@ const colorClasses: Record<string, string> = {
   yellow: 'border border-yellow-400 bg-yellow-100 text-yellow-700 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   red: 'border border-red-200 bg-red-100 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400',
   purple: 'border border-purple-200 bg-purple-100 text-purple-700 dark:border-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  blue: 'bg-primary/10 text-primary-text',
-  muted: 'bg-muted text-muted-foreground',
+  blue: 'border border-primary/20 bg-primary/10 text-primary-text dark:border-primary/30',
+  muted: 'border border-border bg-muted text-muted-foreground',
 }
 </script>
 

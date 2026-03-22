@@ -40,7 +40,7 @@ const { data: teams } = await useFetch('/api/teams')
         <div class="flex items-center gap-2">
           <NuxtLink
             :to="`/teams/${team.slug}`"
-            class="relative z-10 inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/70"
+            class="relative z-10 inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground shadow-sm transition-all hover:bg-secondary/80 hover:shadow-md"
             @click.stop
           >
             <History class="size-3.5" />
@@ -48,7 +48,7 @@ const { data: teams } = await useFetch('/api/teams')
           </NuxtLink>
           <NuxtLink
             :to="`/teams/${team.slug}/members`"
-            class="relative z-10 inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/70"
+            class="relative z-10 inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground shadow-sm transition-all hover:bg-secondary/80 hover:shadow-md"
             @click.stop
           >
             <Users class="size-3.5" />
@@ -56,7 +56,7 @@ const { data: teams } = await useFetch('/api/teams')
           </NuxtLink>
           <NuxtLink
             :to="`/teams/${team.slug}/settings`"
-            class="relative z-10 inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/70"
+            class="relative z-10 inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground shadow-sm transition-all hover:bg-secondary/80 hover:shadow-md"
             @click.stop
           >
             <Settings class="size-3.5" />

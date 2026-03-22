@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Save } from 'lucide-vue-next'
+
 useHead({ title: 'New Team | Nord Review' })
 
 const router = useRouter()
@@ -35,51 +37,58 @@ async function submit() {
 </script>
 
 <template>
-  <div class="max-w-lg space-y-6">
+  <div class="space-y-8">
     <PageHeader title="New Team" description="Create a new code review rotation team" />
 
-    <ErrorBanner v-if="error" :message="error" />
+    <div class="max-w-xl space-y-6">
+      <ErrorBanner v-if="error" :message="error" />
 
-    <form class="space-y-4" @submit.prevent="submit">
-      <div class="space-y-2">
-        <UILabel for="new-team-name">
-          Team Name *
-        </UILabel>
-        <UIInput
-          id="new-team-name"
-          v-model="form.name"
-          type="text"
-          placeholder="Clinical Foundation"
-          required
-        />
-      </div>
-
-      <div class="space-y-2">
-        <UILabel for="new-team-count">
-          Default Reviewer Count
-        </UILabel>
-        <UINumberField v-model="form.defaultReviewerCount" :min="1">
-          <UINumberFieldContent>
-            <UINumberFieldDecrement />
-            <UINumberFieldInput id="new-team-count" />
-            <UINumberFieldIncrement />
-          </UINumberFieldContent>
-        </UINumberField>
-        <p class="text-sm text-muted-foreground">
-          Number of reviewers assigned per rotation
+      <!-- General -->
+      <div class="rounded-lg border bg-card p-5 shadow-sm">
+        <h3 class="text-lg font-semibold">
+          General
+        </h3>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Team name and default reviewer count for rotations.
         </p>
-      </div>
 
-      <div class="flex items-center gap-3 pt-2">
-        <UIButton type="submit" :disabled="submitting">
-          {{ submitting ? 'Creating...' : 'Create Team' }}
-        </UIButton>
-        <UIButton as-child variant="ghost">
-          <NuxtLink to="/">
-            <TrimText>Cancel</TrimText>
-          </NuxtLink>
-        </UIButton>
+        <form class="mt-5 space-y-4" @submit.prevent="submit">
+          <div class="space-y-2">
+            <UILabel for="new-team-name">
+              Team Name *
+            </UILabel>
+            <UIInput id="new-team-name" v-model="form.name" type="text" placeholder="Clinical Foundation" required />
+          </div>
+
+          <div class="space-y-2">
+            <UILabel for="new-team-count">
+              Default Reviewer Count
+            </UILabel>
+            <UINumberField v-model="form.defaultReviewerCount" :min="1">
+              <UINumberFieldContent>
+                <UINumberFieldDecrement />
+                <UINumberFieldInput id="new-team-count" />
+                <UINumberFieldIncrement />
+              </UINumberFieldContent>
+            </UINumberField>
+            <p class="text-sm text-muted-foreground">
+              Number of reviewers assigned per rotation
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <UIButton type="submit" :disabled="submitting">
+              <Save class="size-4" />
+              {{ submitting ? 'Creating...' : 'Create Team' }}
+            </UIButton>
+            <UIButton as-child variant="ghost">
+              <NuxtLink to="/">
+                Cancel
+              </NuxtLink>
+            </UIButton>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
 </template>

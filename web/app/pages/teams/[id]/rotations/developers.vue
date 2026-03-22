@@ -22,20 +22,12 @@ const { data: team } = await useFetch(`/api/teams/${teamId}`)
       </template>
     </TeamSubNav>
 
-    <div class="flex gap-1 rounded-lg bg-muted p-1 self-start w-fit">
-      <NuxtLink
-        :to="`/teams/${teamId}/developers`"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors bg-background text-foreground shadow-sm"
-      >
-        <TrimText>Developers</TrimText>
-      </NuxtLink>
-      <NuxtLink
-        :to="`/teams/${teamId}/teams`"
-        class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
-      >
-        <TrimText>Squads</TrimText>
-      </NuxtLink>
-    </div>
+    <SegmentControl
+      :options="[
+        { value: 'developers', label: 'Developers', to: `/teams/${teamId}/rotations/developers` },
+        { value: 'squads', label: 'Squads', to: `/teams/${teamId}/rotations/squads` },
+      ]"
+    />
 
     <TeamRotationList :team-id="teamId" mode="devs" />
   </div>

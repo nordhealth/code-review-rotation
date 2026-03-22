@@ -1,4 +1,4 @@
-import { users } from '../../db/schema'
+import { developers, users } from '../../db/schema'
 
 export async function queryAllUsers() {
   return db
@@ -87,4 +87,35 @@ export async function updateUserPassword(userId: string, passwordHash: string) {
       updatedAt: new Date(),
     })
     .where(eq(users.id, userId))
+}
+
+export async function updateUserDeveloperId(userId: string, developerId: string | null) {
+  const [updated] = await db
+    .update(users)
+    .set({ developerId, updatedAt: new Date() })
+    .where(eq(users.id, userId))
+    .returning({
+      id: users.id,
+      developerId: users.developerId,
+    })
+  return updated
+}
+
+export async function queryAllUsersWithDeveloper() {
+  return db
+    .select({
+      id: users.id,
+      email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      role: users.role,
+      emailConfirmed: users.emailConfirmed,
+      createdAt: users.createdAt,
+      developerId: users.developerId,
+      developerName: developers.firstName,
+      developerLastName: developers.lastName,
+    })
+    .from(users)
+    .leftJoin(developers, eq(users.developerId, developers.id))
+    .orderBy(asc(users.role), asc(users.createdAt))
 }

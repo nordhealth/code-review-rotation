@@ -106,7 +106,7 @@ async function deleteTeam() {
 
       <!-- General -->
       <div class="rounded-lg border bg-card p-5 shadow-sm">
-        <h3 class="text-base font-semibold">
+        <h3 class="text-lg font-semibold">
           General
         </h3>
         <p class="mt-0.5 text-sm text-muted-foreground">
@@ -143,7 +143,7 @@ async function deleteTeam() {
 
       <!-- Rotation Schedule -->
       <div class="rounded-lg border bg-card p-5 shadow-sm">
-        <h3 class="text-base font-semibold">
+        <h3 class="text-lg font-semibold">
           Rotation Schedule
         </h3>
         <p class="mt-0.5 text-sm text-muted-foreground">

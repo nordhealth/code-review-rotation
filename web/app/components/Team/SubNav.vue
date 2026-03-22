@@ -3,7 +3,7 @@ const props = defineProps<{ teamId: string, teamName: string }>()
 const route = useRoute()
 
 const links = computed(() => [
-  { name: 'Rotations', to: `/teams/${props.teamId}/developers` },
+  { name: 'Rotations', to: `/teams/${props.teamId}/rotations/developers` },
   { name: 'Members', to: `/teams/${props.teamId}/members` },
   { name: 'Squads', to: `/teams/${props.teamId}/squads` },
   { name: 'Rotate', to: `/teams/${props.teamId}/rotate` },
@@ -12,7 +12,7 @@ const links = computed(() => [
 
 function isActive(link: { name: string, to: string }) {
   if (link.name === 'Rotations') {
-    return route.path.endsWith('/developers') || route.path.endsWith('/teams')
+    return route.path.includes('/rotations/')
   }
   return route.path === link.to
 }

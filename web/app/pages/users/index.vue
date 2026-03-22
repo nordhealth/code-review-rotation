@@ -130,6 +130,9 @@ async function toggleRole(user: { id: string, role: string }) {
             <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Role
             </th>
+            <th class="hidden px-4 py-2.5 text-left text-sm font-medium text-muted-foreground sm:table-cell">
+              Developer
+            </th>
             <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
               Confirmed
             </th>
@@ -158,6 +161,12 @@ async function toggleRole(user: { id: string, role: string }) {
                 <ShieldCheck v-if="user.role === 'admin'" class="size-3" />
                 <Shield v-else class="size-3" />
               </StatusBadge>
+            </td>
+            <td class="hidden px-4 py-3 sm:table-cell">
+              <span v-if="user.developerName" class="text-sm">
+                {{ user.developerName }} {{ user.developerLastName }}
+              </span>
+              <span v-else class="text-xs text-muted-foreground">—</span>
             </td>
             <td class="px-4 py-3">
               <StatusBadge

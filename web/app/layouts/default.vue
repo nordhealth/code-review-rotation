@@ -12,6 +12,7 @@ import {
   Settings,
   ShieldCheck,
   Sun,
+  User,
   Users,
 } from 'lucide-vue-next'
 
@@ -19,6 +20,7 @@ const { user, clear } = useUserSession()
 const colorMode = useColorMode()
 
 const mainNav = [
+  { name: 'My Reviews', to: '/me', icon: User },
   { name: 'Teams', to: '/', icon: LayoutDashboard },
   { name: 'Developers', to: '/developers', icon: Users },
 ]
@@ -60,6 +62,8 @@ const isMainNavActive = computed(() =>
 function isMenuItemActive(to: string) {
   if (to === '/')
     return route.path === '/' || route.path.startsWith('/teams')
+  if (to === '/me')
+    return route.path === '/me'
   return route.path.startsWith(to)
 }
 

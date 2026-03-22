@@ -54,13 +54,22 @@ async function deleteDeveloper(slug: string, name: string) {
               Name
             </th>
             <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
-              Slack ID
+              <span class="inline-flex items-center gap-1.5 align-middle">
+                <IconsSlackIcon class="size-4 shrink-0" />
+                Slack ID
+              </span>
             </th>
             <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
-              GitLab ID
+              <span class="inline-flex items-center gap-1.5 align-middle">
+                <IconsGitlabIcon class="size-4 shrink-0" />
+                GitLab ID
+              </span>
             </th>
             <th class="px-4 py-2.5 text-left text-sm font-medium text-muted-foreground">
-              GitHub ID
+              <span class="inline-flex items-center gap-1.5 align-middle">
+                <IconsGithubIcon class="size-4 shrink-0" />
+                GitHub ID
+              </span>
             </th>
             <th class="px-4 py-2.5 text-right text-sm font-medium text-muted-foreground">
               Actions

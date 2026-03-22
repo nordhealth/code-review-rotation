@@ -1,8 +1,10 @@
 import { rmSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { stopServer } from '../setup'
 
-const ENV_FILE = join(__dirname, '.env.test')
+const currentDirectory = dirname(fileURLToPath(import.meta.url))
+const ENV_FILE = join(currentDirectory, '.env.test')
 
 export default async function globalTeardown() {
   stopServer()

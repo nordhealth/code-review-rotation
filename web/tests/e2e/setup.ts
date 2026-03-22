@@ -11,9 +11,12 @@ import type { Buffer } from 'node:buffer'
 import type { ChildProcess } from 'node:child_process'
 import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 import { createClient } from '@libsql/client'
+
+const currentDirectory = dirname(fileURLToPath(import.meta.url))
 
 let serverProcess: ChildProcess | null = null
 let baseUrl = ''
@@ -21,10 +24,10 @@ let patched = false
 
 const LISTENING_PATTERN = /Listening on\s+(http:\/\/\S+)/
 const TRAILING_SLASH_PATTERN = /\/$/
-const OUTPUT_DIR = resolve(__dirname, '../../.output')
+const OUTPUT_DIR = resolve(currentDirectory, '../../.output')
 const LIBSQL_VERSION_SUFFIX = /@.*$/
 
-const TEST_DB_DIR = resolve(__dirname, '../../.data/db')
+const TEST_DB_DIR = resolve(currentDirectory, '../../.data/db')
 const TEST_DB_PATH = resolve(TEST_DB_DIR, 'sqlite-test.db')
 const DB_MODULE_PATH = join(OUTPUT_DIR, 'server/node_modules/@nuxthub/db/db.mjs')
 const NITRO_BUNDLE_PATH = join(OUTPUT_DIR, 'server/chunks/nitro/nitro.mjs')
@@ -131,7 +134,7 @@ async function resetTestDb() {
   }
 
   const client = createClient({ url: `file:${TEST_DB_PATH}` })
-  const migrationsDir = resolve(OUTPUT_DIR, 'server/db/migrations')
+  const migrationsDir = resolve(currentDirectory, '../../server/db/migrations')
 
   if (existsSync(migrationsDir)) {
     const sqlFiles = readdirSync(migrationsDir)
@@ -159,7 +162,7 @@ async function resetTestDb() {
 
 export async function startServer(): Promise<string> {
   // Symlink native SQLite modules into build output (platform-agnostic)
-  const pnpmLibsqlDir = resolve(__dirname, '../../node_modules/.pnpm')
+  const pnpmLibsqlDir = resolve(currentDirectory, '../../node_modules/.pnpm')
   if (existsSync(pnpmLibsqlDir)) {
     const libsqlDirs = readdirSync(pnpmLibsqlDir).filter(
       directory => directory.startsWith('@libsql+') && !directory.startsWith('@libsql+client'),

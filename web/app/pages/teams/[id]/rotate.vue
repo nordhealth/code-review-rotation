@@ -59,32 +59,13 @@ async function runRotation() {
           <!-- Mode toggle -->
           <div class="space-y-2">
             <span class="text-sm font-medium">Mode</span>
-            <div class="flex gap-1 rounded-lg bg-muted p-1 w-fit">
-              <button
-                type="button"
-                class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-                :class="
-                  mode === 'devs'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                "
-                @click="mode = 'devs'"
-              >
-                Developers
-              </button>
-              <button
-                type="button"
-                class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-                :class="
-                  mode === 'teams'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                "
-                @click="mode = 'teams'"
-              >
-                Squads
-              </button>
-            </div>
+            <SegmentControl
+              v-model="mode"
+              :options="[
+                { value: 'devs', label: 'Developers' },
+                { value: 'teams', label: 'Squads' },
+              ]"
+            />
             <p class="text-sm text-muted-foreground">
               {{
                 mode === "devs"
@@ -95,8 +76,8 @@ async function runRotation() {
           </div>
 
           <!-- Manual toggle -->
-          <label class="flex items-start gap-2 cursor-pointer select-none">
-            <UICheckbox class="mt-0.5" :checked="isManual" @update:checked="isManual = $event" />
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <UICheckbox class="self-start mt-1" :checked="isManual" @update:checked="isManual = $event" />
             <div>
               <span class="text-sm font-medium">Manual rotation</span>
               <p class="text-sm text-muted-foreground">

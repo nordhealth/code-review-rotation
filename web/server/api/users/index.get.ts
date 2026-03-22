@@ -33,5 +33,5 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event)
-  return queryAllUsers()
+  return queryAllUsersWithDeveloper()
 })

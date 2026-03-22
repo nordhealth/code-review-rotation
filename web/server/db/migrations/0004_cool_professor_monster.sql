@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `developer_id` text REFERENCES developers(id);

@@ -1,5 +1,5 @@
-export function getInitials(firstName: string, lastName?: string): string {
-  const first = firstName.charAt(0)
+export function getInitials(firstName?: string, lastName?: string): string {
+  const first = firstName ? firstName.charAt(0) : ''
   const last = lastName ? lastName.charAt(0) : ''
   return `${first}${last}`.toUpperCase()
 }

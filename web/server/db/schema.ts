@@ -14,6 +14,24 @@ export const settings = sqliteTable('settings', {
     .$defaultFn(() => new Date()),
 })
 
+export const developers = sqliteTable('developers', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  slug: text('slug').notNull().unique(),
+  slackId: text('slack_id'),
+  gitlabId: text('gitlab_id'),
+  githubId: text('github_id'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
 export const users = sqliteTable('users', {
   id: text('id')
     .primaryKey()
@@ -26,29 +44,12 @@ export const users = sqliteTable('users', {
   role: text('role', { enum: ['admin', 'developer'] })
     .notNull()
     .default('developer'),
+  developerId: text('developer_id').references(() => developers.id, { onDelete: 'set null' }),
   emailConfirmed: integer('email_confirmed', { mode: 'boolean' }).notNull().default(false),
   confirmationToken: text('confirmation_token'),
   confirmationTokenExpiresAt: integer('confirmation_token_expires_at', { mode: 'timestamp' }),
   resetPasswordToken: text('reset_password_token'),
   resetPasswordTokenExpiresAt: integer('reset_password_token_expires_at', { mode: 'timestamp' }),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-})
-
-export const developers = sqliteTable('developers', {
-  id: text('id')
-    .primaryKey()
-    .$defaultFn(() => nanoid()),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  slug: text('slug').notNull().unique(),
-  slackId: text('slack_id'),
-  gitlabId: text('gitlab_id'),
-  githubId: text('github_id'),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),

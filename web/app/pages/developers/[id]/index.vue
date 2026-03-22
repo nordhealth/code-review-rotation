@@ -280,9 +280,6 @@ function toggleRotation(rotationId: string) {
       <!-- Header -->
       <div class="flex items-start justify-between">
         <div class="flex items-center gap-4">
-          <NuxtLink to="/developers" class="text-muted-foreground hover:text-foreground">
-            <ArrowLeft class="size-5" />
-          </NuxtLink>
           <UIAvatar class="size-12">
             <UIAvatarFallback
               class="text-xl"
@@ -292,71 +289,40 @@ function toggleRotation(rotationId: string) {
             </UIAvatarFallback>
           </UIAvatar>
           <div>
-            <h1 class="text-3xl font-semibold tracking-tight">
+            <h1 class="text-3xl font-semibold tracking-tight mb-1">
               {{ developer.firstName }} {{ developer.lastName }}
             </h1>
             <div class="flex items-center gap-3 text-sm text-muted-foreground">
               <span v-if="developer.slackId" class="inline-flex items-center gap-1.5">
-                <svg class="size-4" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M26.9 80.4a13.4 13.4 0 1 1-13.4-13.4h13.4v13.4zm6.7 0a13.4 13.4 0 0 1 26.8 0v33.5a13.4 13.4 0 1 1-26.8 0V80.4z"
-                    fill="#E01E5A"
-                  />
-                  <path
-                    d="M47.2 26.9a13.4 13.4 0 1 1 13.4-13.4v13.4H47.2zm0 6.7a13.4 13.4 0 0 1 0 26.8H13.4a13.4 13.4 0 0 1 0-26.8h33.8z"
-                    fill="#36C5F0"
-                  />
-                  <path
-                    d="M100.8 47.2a13.4 13.4 0 1 1 13.4 13.4h-13.4V47.2zm-6.7 0a13.4 13.4 0 0 1-26.8 0V13.4a13.4 13.4 0 1 1 26.8 0v33.8z"
-                    fill="#2EB67D"
-                  />
-                  <path
-                    d="M80.4 100.8a13.4 13.4 0 1 1-13.4 13.4v-13.4h13.4zm0-6.7a13.4 13.4 0 0 1 0-26.8h33.8a13.4 13.4 0 0 1 0 26.8H80.4z"
-                    fill="#ECB22E"
-                  />
-                </svg>
+                <IconsSlackIcon class="size-4" />
                 {{ developer.slackId }}
               </span>
               <span v-if="developer.gitlabId" class="inline-flex items-center gap-1.5">
-                <svg class="size-4" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
-                  <path d="m190.4 340.2 68.6-211.1H121.8l68.6 211.1z" fill="#E24329" />
-                  <path d="m190.4 340.2-68.6-211.1H30.8l159.6 211.1z" fill="#FC6D26" />
-                  <path
-                    d="M30.8 129.1 5.8 205.9a17.2 17.2 0 0 0 6.2 19.2l178.4 129.6L30.8 129.1z"
-                    fill="#FCA326"
-                  />
-                  <path
-                    d="M30.8 129.1h91l-39.1-120.3a8.6 8.6 0 0 0-16.4 0L30.8 129.1z"
-                    fill="#E24329"
-                  />
-                  <path d="m190.4 340.2 68.6-211.1H350l-159.6 211.1z" fill="#FC6D26" />
-                  <path
-                    d="M350 129.1l25 76.8a17.2 17.2 0 0 1-6.2 19.2L190.4 354.7 350 129.1z"
-                    fill="#FCA326"
-                  />
-                  <path
-                    d="M350 129.1h-91l39.1-120.3a8.6 8.6 0 0 1 16.4 0L350 129.1z"
-                    fill="#E24329"
-                  />
-                </svg>
+                <IconsGitlabIcon class="size-4" />
                 {{ developer.gitlabId }}
               </span>
               <span v-if="developer.githubId" class="inline-flex items-center gap-1.5">
-                <svg class="size-4" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6C29.304 70.024 17.9 65.787 17.9 46.854c0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="currentColor" />
-                </svg>
+                <IconsGithubIcon class="size-4" />
                 {{ developer.githubId }}
               </span>
               <span v-if="!developer.slackId && !developer.gitlabId && !developer.githubId">No integrations configured</span>
             </div>
           </div>
         </div>
-        <UIButton as-child variant="outline" size="sm">
-          <NuxtLink :to="`/developers/${devSlug}/edit`">
-            <Pencil class="size-3.5" />
-            <TrimText>Edit</TrimText>
-          </NuxtLink>
-        </UIButton>
+        <div class="flex items-center gap-2">
+          <UIButton as-child variant="outline">
+            <NuxtLink to="/developers">
+              <ArrowLeft class="size-4" />
+              Back to Developers
+            </NuxtLink>
+          </UIButton>
+          <UIButton as-child>
+            <NuxtLink :to="`/developers/${devSlug}/edit`">
+              <Pencil class="size-4" />
+              Edit
+            </NuxtLink>
+          </UIButton>
+        </div>
       </div>
 
       <!-- Teams -->
@@ -367,8 +333,8 @@ function toggleRotation(rotationId: string) {
         <div class="flex flex-col gap-2">
           <div v-for="team in associations.memberOf" :key="team.teamId" class="space-y-1.5">
             <NuxtLink
-              :to="`/teams/${team.teamSlug}/developers`"
-              class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors hover:bg-muted"
+              :to="`/teams/${team.teamSlug}/rotations/developers`"
+              class="inline-flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm shadow-sm transition-colors hover:bg-muted"
             >
               <Users class="size-4 text-muted-foreground" />
               {{ team.teamName }}
@@ -407,318 +373,312 @@ function toggleRotation(rotationId: string) {
         </div>
       </div>
 
-      <!-- View filter -->
-      <div class="flex items-center gap-4">
-        <div class="inline-flex items-center rounded-lg border bg-muted/30 p-0.5">
-          <button
-            v-for="opt in viewOptions"
-            :key="opt.value"
-            type="button"
-            class="rounded-md px-3 py-1.5 text-sm font-medium transition-all"
-            :class="
-              activeView === opt.value
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="activeView = opt.value"
-          >
-            {{ opt.label }}
-          </button>
-        </div>
-        <label v-if="hasAnyHistory" class="flex items-center gap-2 text-sm text-muted-foreground">
-          <UISwitch v-model="showHistory" />
-          Show history
-        </label>
-      </div>
+      <UISeparator />
 
-      <!-- Reviewers section -->
-      <div v-show="activeView === 'all' || activeView === 'reviewers'" class="space-y-3">
-        <div>
+      <!-- Rotation assignments -->
+      <div class="space-y-5">
+        <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold">
-            Assigned reviewers
+            Rotation Assignments
           </h2>
-          <p class="text-sm text-muted-foreground">
-            Who reviews {{ developer.firstName }}'s pull requests
-          </p>
+          <label v-if="hasAnyHistory" class="flex items-center gap-2 text-sm text-muted-foreground">
+            <UISwitch v-model="showHistory" />
+            Show history
+          </label>
         </div>
 
-        <template v-if="reviewersByTeam.length">
-          <div v-for="teamGroup in reviewersByTeam" :key="teamGroup.teamSlug" class="space-y-2">
-            <!-- Active rotation -->
-            <div
-              v-if="teamGroup.active"
-              class="overflow-hidden rounded-lg border border-primary/30"
-            >
-              <div class="flex items-center gap-3 bg-primary/5 px-4 py-2.5">
-                <span class="relative flex size-2">
-                  <span
-                    class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"
-                  />
-                  <span class="relative inline-flex size-2 rounded-full bg-green-500" />
-                </span>
-                <NuxtLink
-                  :to="`/teams/${teamGroup.teamSlug}/developers`"
-                  class="text-sm font-semibold hover:underline"
-                >
-                  {{ teamGroup.teamName }}
-                </NuxtLink>
-                <span class="text-xs text-muted-foreground">
-                  {{ formatDate(teamGroup.active.date) }}
-                </span>
-              </div>
-              <div class="flex flex-wrap gap-1.5 px-4 py-3">
-                <component
-                  :is="person.slug ? NuxtLink : 'span'"
-                  v-for="person in teamGroup.active.people"
-                  :key="person.id ?? person.name"
-                  :to="person.slug ? `/developers/${person.slug}` : undefined"
-                  class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2.5 py-1.5 text-sm font-medium shadow-sm"
-                  :class="
-                    person.slug && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
-                  "
-                >
-                  <UIAvatar class="size-5">
-                    <UIAvatarFallback
-                      class="!text-[8px] !font-semibold !leading-none"
-                      :label="getInitials(person.name.split(' ')[0], person.name.split(' ')[1])"
-                    >
-                      {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
-                    </UIAvatarFallback>
-                  </UIAvatar>
-                  <TrimText>{{ person.name }}</TrimText>
-                </component>
-              </div>
-            </div>
+        <!-- View filter -->
+        <SegmentControl v-model="activeView" :options="viewOptions" />
 
-            <!-- History (collapsed) -->
-            <div
-              v-if="teamGroup.past.length && showHistory"
-              class="overflow-hidden rounded-lg border"
-            >
-              <button
-                type="button"
-                class="flex w-full items-center gap-3 bg-muted/30 px-4 py-2.5 text-left transition-colors hover:bg-muted/50"
-                @click="toggleHistory(`reviewers-${teamGroup.teamSlug}`)"
+        <!-- Reviewers section -->
+        <div v-show="activeView === 'all' || activeView === 'reviewers'" class="space-y-3">
+          <div>
+            <h3 class="text-lg font-semibold">
+              Assigned reviewers
+            </h3>
+            <p class="text-sm text-muted-foreground">
+              Who reviews {{ developer.firstName }}'s pull requests
+            </p>
+          </div>
+
+          <template v-if="reviewersByTeam.length">
+            <div v-for="teamGroup in reviewersByTeam" :key="teamGroup.teamSlug" class="space-y-2">
+              <!-- Active rotation -->
+              <div
+                v-if="teamGroup.active"
+                class="overflow-hidden rounded-lg border border-primary/30"
               >
-                <ChevronDown
-                  v-if="expandedHistory.has(`reviewers-${teamGroup.teamSlug}`)"
-                  class="size-4 shrink-0 text-muted-foreground"
-                />
-                <ChevronRight v-else class="size-4 shrink-0 text-muted-foreground" />
-                <span class="text-sm font-medium text-muted-foreground">
-                  Past assigned reviewers
-                </span>
-                <span class="ml-auto text-xs text-muted-foreground">
-                  {{ teamGroup.past.length }} rotation{{
-                    teamGroup.past.length !== 1 ? "s" : ""
-                  }}
-                </span>
-              </button>
-
-              <div v-if="expandedHistory.has(`reviewers-${teamGroup.teamSlug}`)">
-                <div v-for="rotation in teamGroup.past" :key="rotation.rotationId">
-                  <button
-                    type="button"
-                    class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
-                    @click="toggleRotation(rotation.rotationId)"
-                  >
-                    <ChevronDown
-                      v-if="expandedRotations.has(rotation.rotationId)"
-                      class="size-3.5 shrink-0 text-muted-foreground"
+                <div class="flex items-center gap-3 bg-primary/5 px-4 py-2.5">
+                  <span class="relative flex size-2">
+                    <span
+                      class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"
                     />
-                    <ChevronRight v-else class="size-3.5 shrink-0 text-muted-foreground" />
-                    <span class="text-sm font-medium">{{ formatDate(rotation.date) }}</span>
-                    <span class="ml-auto text-xs text-muted-foreground">
-                      {{ rotation.people.length }} reviewer{{
-                        rotation.people.length !== 1 ? "s" : ""
-                      }}
-                    </span>
-                  </button>
-
-                  <div
-                    v-if="expandedRotations.has(rotation.rotationId)"
-                    class="border-t bg-muted/50 px-8 py-3"
+                    <span class="relative inline-flex size-2 rounded-full bg-green-500" />
+                  </span>
+                  <NuxtLink
+                    :to="`/teams/${teamGroup.teamSlug}/rotations/developers`"
+                    class="text-sm font-semibold hover:underline"
                   >
-                    <div class="flex flex-wrap gap-1.5">
-                      <component
-                        :is="person.slug ? NuxtLink : 'span'"
-                        v-for="person in rotation.people"
-                        :key="person.id ?? person.name"
-                        :to="person.slug ? `/developers/${person.slug}` : undefined"
-                        class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-background px-2 py-1 text-xs font-medium shadow-sm"
-                        :class="
-                          person.slug
-                            && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
-                        "
+                    {{ teamGroup.teamName }}
+                  </NuxtLink>
+                  <span class="text-xs text-muted-foreground">
+                    {{ formatDate(teamGroup.active.date) }}
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 px-4 py-3">
+                  <component
+                    :is="person.slug ? NuxtLink : 'span'"
+                    v-for="person in teamGroup.active.people"
+                    :key="person.id ?? person.name"
+                    :to="person.slug ? `/developers/${person.slug}` : undefined"
+                    class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2.5 py-1.5 text-sm font-medium shadow-sm"
+                    :class="
+                      person.slug && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
+                    "
+                  >
+                    <UIAvatar class="size-5">
+                      <UIAvatarFallback
+                        class="!text-[8px] !font-semibold !leading-none"
+                        :label="getInitials(person.name.split(' ')[0], person.name.split(' ')[1])"
                       >
-                        <UIAvatar class="size-5">
-                          <UIAvatarFallback
-                            class="!text-[8px] !font-semibold !leading-none"
-                            :label="
-                              getInitials(person.name.split(' ')[0], person.name.split(' ')[1])
-                            "
-                          >
-                            {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
-                          </UIAvatarFallback>
-                        </UIAvatar>
-                        {{ person.name }}
-                      </component>
+                        {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
+                      </UIAvatarFallback>
+                    </UIAvatar>
+                    <TrimText>{{ person.name }}</TrimText>
+                  </component>
+                </div>
+              </div>
+
+              <!-- History (collapsed) -->
+              <div
+                v-if="teamGroup.past.length && showHistory"
+                class="overflow-hidden rounded-lg border"
+              >
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-3 bg-muted/30 px-4 py-2.5 text-left transition-colors hover:bg-muted/50"
+                  @click="toggleHistory(`reviewers-${teamGroup.teamSlug}`)"
+                >
+                  <ChevronDown
+                    v-if="expandedHistory.has(`reviewers-${teamGroup.teamSlug}`)"
+                    class="size-4 shrink-0 text-muted-foreground"
+                  />
+                  <ChevronRight v-else class="size-4 shrink-0 text-muted-foreground" />
+                  <span class="text-sm font-medium text-muted-foreground">
+                    Past assigned reviewers
+                  </span>
+                  <span class="ml-auto text-xs text-muted-foreground">
+                    {{ teamGroup.past.length }} rotation{{
+                      teamGroup.past.length !== 1 ? "s" : ""
+                    }}
+                  </span>
+                </button>
+
+                <div v-if="expandedHistory.has(`reviewers-${teamGroup.teamSlug}`)">
+                  <div v-for="rotation in teamGroup.past" :key="rotation.rotationId">
+                    <button
+                      type="button"
+                      class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
+                      @click="toggleRotation(rotation.rotationId)"
+                    >
+                      <ChevronDown
+                        v-if="expandedRotations.has(rotation.rotationId)"
+                        class="size-3.5 shrink-0 text-muted-foreground"
+                      />
+                      <ChevronRight v-else class="size-3.5 shrink-0 text-muted-foreground" />
+                      <span class="text-sm font-medium">{{ formatDate(rotation.date) }}</span>
+                      <span class="ml-auto text-xs text-muted-foreground">
+                        {{ rotation.people.length }} reviewer{{
+                          rotation.people.length !== 1 ? "s" : ""
+                        }}
+                      </span>
+                    </button>
+
+                    <div
+                      v-if="expandedRotations.has(rotation.rotationId)"
+                      class="border-t bg-muted/50 px-8 py-3"
+                    >
+                      <div class="flex flex-wrap gap-1.5">
+                        <component
+                          :is="person.slug ? NuxtLink : 'span'"
+                          v-for="person in rotation.people"
+                          :key="person.id ?? person.name"
+                          :to="person.slug ? `/developers/${person.slug}` : undefined"
+                          class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-background px-2 py-1 text-xs font-medium shadow-sm"
+                          :class="
+                            person.slug
+                              && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
+                          "
+                        >
+                          <UIAvatar class="size-5">
+                            <UIAvatarFallback
+                              class="!text-[8px] !font-semibold !leading-none"
+                              :label="
+                                getInitials(person.name.split(' ')[0], person.name.split(' ')[1])
+                              "
+                            >
+                              {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
+                            </UIAvatarFallback>
+                          </UIAvatar>
+                          {{ person.name }}
+                        </component>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </template>
+          </template>
 
-        <p v-else class="text-sm text-muted-foreground">
-          No rotation history yet.
-        </p>
-      </div>
-
-      <!-- Reviews section -->
-      <div v-show="activeView === 'all' || activeView === 'reviewing'" class="space-y-3">
-        <div>
-          <h2 class="text-xl font-semibold">
-            Reviewing
-          </h2>
-          <p class="text-sm text-muted-foreground">
-            Pull requests {{ developer.firstName }} is assigned to review
+          <p v-else class="text-sm text-muted-foreground">
+            No rotation history yet.
           </p>
         </div>
 
-        <template v-if="reviewsByTeam.length">
-          <div v-for="teamGroup in reviewsByTeam" :key="teamGroup.teamSlug" class="space-y-2">
-            <!-- Active rotation -->
-            <div
-              v-if="teamGroup.active"
-              class="overflow-hidden rounded-lg border border-primary/30"
-            >
-              <div class="flex items-center gap-3 bg-primary/5 px-4 py-2.5">
-                <span class="relative flex size-2">
-                  <span
-                    class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"
-                  />
-                  <span class="relative inline-flex size-2 rounded-full bg-green-500" />
-                </span>
-                <NuxtLink
-                  :to="`/teams/${teamGroup.teamSlug}/developers`"
-                  class="text-sm font-semibold hover:underline"
-                >
-                  {{ teamGroup.teamName }}
-                </NuxtLink>
-                <span class="text-xs text-muted-foreground">
-                  {{ formatDate(teamGroup.active.date) }}
-                </span>
-              </div>
-              <div class="flex flex-wrap gap-1.5 px-4 py-3">
-                <component
-                  :is="person.slug ? NuxtLink : 'span'"
-                  v-for="person in teamGroup.active.people"
-                  :key="person.id ?? person.name"
-                  :to="person.slug ? `/developers/${person.slug}` : undefined"
-                  class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2.5 py-1.5 text-sm font-medium shadow-sm"
-                  :class="
-                    person.slug && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
-                  "
-                >
-                  <UIAvatar class="size-5">
-                    <UIAvatarFallback
-                      class="!text-[8px] !font-semibold !leading-none"
-                      :label="getInitials(person.name.split(' ')[0], person.name.split(' ')[1])"
-                    >
-                      {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
-                    </UIAvatarFallback>
-                  </UIAvatar>
-                  <TrimText>{{ person.name }}</TrimText>
-                </component>
-              </div>
-            </div>
+        <!-- Reviews section -->
+        <div v-show="activeView === 'all' || activeView === 'reviewing'" class="space-y-3">
+          <div>
+            <h3 class="text-lg font-semibold">
+              Reviewing
+            </h3>
+            <p class="text-sm text-muted-foreground">
+              Pull requests {{ developer.firstName }} is assigned to review
+            </p>
+          </div>
 
-            <!-- History (collapsed) -->
-            <div
-              v-if="teamGroup.past.length && showHistory"
-              class="overflow-hidden rounded-lg border"
-            >
-              <button
-                type="button"
-                class="flex w-full items-center gap-3 bg-muted/30 px-4 py-2.5 text-left transition-colors hover:bg-muted/50"
-                @click="toggleHistory(`reviews-${teamGroup.teamSlug}`)"
+          <template v-if="reviewsByTeam.length">
+            <div v-for="teamGroup in reviewsByTeam" :key="teamGroup.teamSlug" class="space-y-2">
+              <!-- Active rotation -->
+              <div
+                v-if="teamGroup.active"
+                class="overflow-hidden rounded-lg border border-primary/30"
               >
-                <ChevronDown
-                  v-if="expandedHistory.has(`reviews-${teamGroup.teamSlug}`)"
-                  class="size-4 shrink-0 text-muted-foreground"
-                />
-                <ChevronRight v-else class="size-4 shrink-0 text-muted-foreground" />
-                <span class="text-sm font-medium text-muted-foreground">
-                  Past reviews
-                </span>
-                <span class="ml-auto text-xs text-muted-foreground">
-                  {{ teamGroup.past.length }} rotation{{
-                    teamGroup.past.length !== 1 ? "s" : ""
-                  }}
-                </span>
-              </button>
-
-              <div v-if="expandedHistory.has(`reviews-${teamGroup.teamSlug}`)">
-                <div v-for="rotation in teamGroup.past" :key="rotation.rotationId">
-                  <button
-                    type="button"
-                    class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
-                    @click="toggleRotation(rotation.rotationId)"
-                  >
-                    <ChevronDown
-                      v-if="expandedRotations.has(rotation.rotationId)"
-                      class="size-3.5 shrink-0 text-muted-foreground"
+                <div class="flex items-center gap-3 bg-primary/5 px-4 py-2.5">
+                  <span class="relative flex size-2">
+                    <span
+                      class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"
                     />
-                    <ChevronRight v-else class="size-3.5 shrink-0 text-muted-foreground" />
-                    <span class="text-sm font-medium">{{ formatDate(rotation.date) }}</span>
-                    <span class="ml-auto text-xs text-muted-foreground">
-                      {{ rotation.people.length }} target{{
-                        rotation.people.length !== 1 ? "s" : ""
-                      }}
-                    </span>
-                  </button>
-
-                  <div
-                    v-if="expandedRotations.has(rotation.rotationId)"
-                    class="border-t bg-muted/50 px-8 py-3"
+                    <span class="relative inline-flex size-2 rounded-full bg-green-500" />
+                  </span>
+                  <NuxtLink
+                    :to="`/teams/${teamGroup.teamSlug}/rotations/developers`"
+                    class="text-sm font-semibold hover:underline"
                   >
-                    <div class="flex flex-wrap gap-1.5">
-                      <component
-                        :is="person.slug ? NuxtLink : 'span'"
-                        v-for="person in rotation.people"
-                        :key="person.id ?? person.name"
-                        :to="person.slug ? `/developers/${person.slug}` : undefined"
-                        class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-background px-2 py-1 text-xs font-medium shadow-sm"
-                        :class="
-                          person.slug
-                            && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
-                        "
+                    {{ teamGroup.teamName }}
+                  </NuxtLink>
+                  <span class="text-xs text-muted-foreground">
+                    {{ formatDate(teamGroup.active.date) }}
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 px-4 py-3">
+                  <component
+                    :is="person.slug ? NuxtLink : 'span'"
+                    v-for="person in teamGroup.active.people"
+                    :key="person.id ?? person.name"
+                    :to="person.slug ? `/developers/${person.slug}` : undefined"
+                    class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2.5 py-1.5 text-sm font-medium shadow-sm"
+                    :class="
+                      person.slug && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
+                    "
+                  >
+                    <UIAvatar class="size-5">
+                      <UIAvatarFallback
+                        class="!text-[8px] !font-semibold !leading-none"
+                        :label="getInitials(person.name.split(' ')[0], person.name.split(' ')[1])"
                       >
-                        <UIAvatar class="size-5">
-                          <UIAvatarFallback
-                            class="!text-[8px] !font-semibold !leading-none"
-                            :label="
-                              getInitials(person.name.split(' ')[0], person.name.split(' ')[1])
-                            "
-                          >
-                            {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
-                          </UIAvatarFallback>
-                        </UIAvatar>
-                        {{ person.name }}
-                      </component>
+                        {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
+                      </UIAvatarFallback>
+                    </UIAvatar>
+                    <TrimText>{{ person.name }}</TrimText>
+                  </component>
+                </div>
+              </div>
+
+              <!-- History (collapsed) -->
+              <div
+                v-if="teamGroup.past.length && showHistory"
+                class="overflow-hidden rounded-lg border"
+              >
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-3 bg-muted/30 px-4 py-2.5 text-left transition-colors hover:bg-muted/50"
+                  @click="toggleHistory(`reviews-${teamGroup.teamSlug}`)"
+                >
+                  <ChevronDown
+                    v-if="expandedHistory.has(`reviews-${teamGroup.teamSlug}`)"
+                    class="size-4 shrink-0 text-muted-foreground"
+                  />
+                  <ChevronRight v-else class="size-4 shrink-0 text-muted-foreground" />
+                  <span class="text-sm font-medium text-muted-foreground">
+                    Past reviews
+                  </span>
+                  <span class="ml-auto text-xs text-muted-foreground">
+                    {{ teamGroup.past.length }} rotation{{
+                      teamGroup.past.length !== 1 ? "s" : ""
+                    }}
+                  </span>
+                </button>
+
+                <div v-if="expandedHistory.has(`reviews-${teamGroup.teamSlug}`)">
+                  <div v-for="rotation in teamGroup.past" :key="rotation.rotationId">
+                    <button
+                      type="button"
+                      class="flex w-full items-center gap-3 border-t px-5 py-2.5 text-left transition-colors hover:bg-muted/30"
+                      @click="toggleRotation(rotation.rotationId)"
+                    >
+                      <ChevronDown
+                        v-if="expandedRotations.has(rotation.rotationId)"
+                        class="size-3.5 shrink-0 text-muted-foreground"
+                      />
+                      <ChevronRight v-else class="size-3.5 shrink-0 text-muted-foreground" />
+                      <span class="text-sm font-medium">{{ formatDate(rotation.date) }}</span>
+                      <span class="ml-auto text-xs text-muted-foreground">
+                        {{ rotation.people.length }} target{{
+                          rotation.people.length !== 1 ? "s" : ""
+                        }}
+                      </span>
+                    </button>
+
+                    <div
+                      v-if="expandedRotations.has(rotation.rotationId)"
+                      class="border-t bg-muted/50 px-8 py-3"
+                    >
+                      <div class="flex flex-wrap gap-1.5">
+                        <component
+                          :is="person.slug ? NuxtLink : 'span'"
+                          v-for="person in rotation.people"
+                          :key="person.id ?? person.name"
+                          :to="person.slug ? `/developers/${person.slug}` : undefined"
+                          class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-background px-2 py-1 text-xs font-medium shadow-sm"
+                          :class="
+                            person.slug
+                              && 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
+                          "
+                        >
+                          <UIAvatar class="size-5">
+                            <UIAvatarFallback
+                              class="!text-[8px] !font-semibold !leading-none"
+                              :label="
+                                getInitials(person.name.split(' ')[0], person.name.split(' ')[1])
+                              "
+                            >
+                              {{ getInitials(person.name.split(" ")[0], person.name.split(" ")[1]) }}
+                            </UIAvatarFallback>
+                          </UIAvatar>
+                          {{ person.name }}
+                        </component>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </template>
+          </template>
 
-        <p v-else class="text-sm text-muted-foreground">
-          No rotation history yet.
-        </p>
+          <p v-else class="text-sm text-muted-foreground">
+            No rotation history yet.
+          </p>
+        </div>
       </div>
     </template>
   </div>

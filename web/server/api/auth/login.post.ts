@@ -77,6 +77,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  let developerSlug: string | null = null
+  if (user.developerId) {
+    const developer = await queryDeveloperById(user.developerId)
+    developerSlug = developer?.slug ?? null
+  }
+
   await setUserSession(event, {
     user: {
       id: user.id,
@@ -86,6 +92,7 @@ export default defineEventHandler(async (event) => {
       lastName: user.lastName ?? '',
       avatarUrl: user.avatarUrl,
       role: user.role as 'admin' | 'developer',
+      developerSlug,
     },
   })
 

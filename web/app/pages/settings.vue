@@ -126,139 +126,144 @@ async function copySecret() {
   <div class="space-y-8">
     <PageHeader title="Settings" description="Global rotation schedule defaults. Teams inherit these unless they define overrides." />
 
-    <ErrorBanner v-if="error" :message="error" />
+    <div class="max-w-xl space-y-6">
+      <ErrorBanner v-if="error" :message="error" />
+      <SuccessBanner v-if="saved" message="Settings saved." />
 
-    <SuccessBanner v-if="saved" message="Settings saved." />
+      <!-- Rotation Schedule -->
+      <div class="rounded-lg border bg-card p-5 shadow-sm">
+        <h3 class="text-lg font-semibold">
+          Rotation Schedule
+        </h3>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Default interval, day, and timezone for all teams.
+        </p>
 
-    <div class="max-w-lg space-y-6">
-      <form class="space-y-4" @submit.prevent="save">
-        <div class="space-y-2">
-          <UILabel for="settings-interval">
-            Rotation Interval (days)
-          </UILabel>
-          <UINumberField v-model="form.defaultRotationIntervalDays" :min="1" :max="90">
-            <UINumberFieldContent>
-              <UINumberFieldDecrement />
-              <UINumberFieldInput id="settings-interval" />
-              <UINumberFieldIncrement />
-            </UINumberFieldContent>
-          </UINumberField>
-          <p class="text-sm text-muted-foreground">
-            Days between automatic rotations for each team
-          </p>
-        </div>
-
-        <div class="space-y-2">
-          <UILabel for="settings-day">
-            Rotation Day
-          </UILabel>
-          <UISelect v-model="form.defaultRotationDay">
-            <UISelectTrigger id="settings-day">
-              <UISelectValue placeholder="Select day" />
-            </UISelectTrigger>
-            <UISelectContent>
-              <UISelectItem v-for="day in DAYS_OF_WEEK" :key="day.value" :value="day.value">
-                {{ day.label }}
-              </UISelectItem>
-            </UISelectContent>
-          </UISelect>
-        </div>
-
-        <div class="space-y-2">
-          <UILabel>Timezone</UILabel>
-          <div class="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
-            <Globe class="size-4 text-muted-foreground" />
-            <span>{{ form.defaultRotationTimezone }}</span>
+        <form class="mt-5 space-y-4" @submit.prevent="save">
+          <div class="space-y-2">
+            <UILabel for="settings-interval">
+              Rotation Interval (days)
+            </UILabel>
+            <UINumberField v-model="form.defaultRotationIntervalDays" :min="1" :max="90">
+              <UINumberFieldContent>
+                <UINumberFieldDecrement />
+                <UINumberFieldInput id="settings-interval" />
+                <UINumberFieldIncrement />
+              </UINumberFieldContent>
+            </UINumberField>
+            <p class="text-sm text-muted-foreground">
+              Days between automatic rotations for each team
+            </p>
           </div>
-          <p class="text-sm text-muted-foreground">
-            <Clock class="mr-0.5 inline size-3" />
-            Your browser timezone: {{ browserTimezone }}
-          </p>
-        </div>
 
-        <div class="flex items-center gap-3 pt-2">
+          <div class="space-y-2">
+            <UILabel for="settings-day">
+              Rotation Day
+            </UILabel>
+            <UISelect v-model="form.defaultRotationDay">
+              <UISelectTrigger id="settings-day">
+                <UISelectValue placeholder="Select day" />
+              </UISelectTrigger>
+              <UISelectContent>
+                <UISelectItem v-for="day in DAYS_OF_WEEK" :key="day.value" :value="day.value">
+                  {{ day.label }}
+                </UISelectItem>
+              </UISelectContent>
+            </UISelect>
+          </div>
+
+          <div class="space-y-2">
+            <UILabel>Timezone</UILabel>
+            <div class="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+              <Globe class="size-4 text-muted-foreground" />
+              <span>{{ form.defaultRotationTimezone }}</span>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              <Clock class="mr-0.5 inline size-3" />
+              Your browser timezone: {{ browserTimezone }}
+            </p>
+          </div>
+
           <UIButton type="submit" :disabled="submitting">
             <Save class="size-4" />
             {{ submitting ? "Saving..." : "Save Changes" }}
           </UIButton>
-        </div>
-      </form>
-    </div>
-
-    <UISeparator />
-
-    <div class="space-y-4">
-      <div>
-        <h2 class="text-xl font-semibold tracking-tight">
-          Webhooks
-        </h2>
-        <p class="text-sm text-muted-foreground">
-          Send rotation notifications to external services. Each webhook receives a signed POST
-          request when a rotation is created.
-        </p>
-      </div>
-
-      <ErrorBanner v-if="webhookError" :message="webhookError" />
-
-      <div
-        v-if="revealedSecret"
-        class="rounded-md border border-green-500/30 bg-green-500/5 px-4 py-3"
-      >
-        <p class="text-sm font-medium text-green-700 dark:text-green-400">
-          Webhook created. Copy the signing secret now — it won't be shown again.
-        </p>
-        <div class="mt-2 flex items-center gap-2">
-          <code class="flex-1 rounded bg-muted px-3 py-2 text-xs font-mono overflow-x-auto">
-            {{ revealedSecret }}
-          </code>
-          <UIButton type="button" size="sm" variant="outline" class="shrink-0" @click="copySecret">
-            <Check v-if="copiedSecret" class="size-4" />
-            <Copy v-else class="size-4" />
-            {{ copiedSecret ? "Copied" : "Copy" }}
-          </UIButton>
-        </div>
-        <p class="mt-2 text-sm text-muted-foreground">
-          Verify payloads by computing HMAC-SHA256 of the request body using this secret and
-          comparing it to the <code class="font-mono">X-Webhook-Signature</code> header.
-        </p>
-      </div>
-
-      <div class="max-w-lg">
-        <form class="space-y-3" @submit.prevent="createNewWebhook">
-          <div class="space-y-2">
-            <UILabel for="webhook-name">
-              Name
-            </UILabel>
-            <UIInput
-              id="webhook-name"
-              v-model="webhookForm.name"
-              type="text"
-              placeholder="Slack Rotation Bot"
-              required
-            />
-          </div>
-          <div class="space-y-2">
-            <UILabel for="webhook-url">
-              URL
-            </UILabel>
-            <UIInput
-              id="webhook-url"
-              v-model="webhookForm.url"
-              type="url"
-              placeholder="https://your-service.com/webhook"
-              required
-            />
-          </div>
-          <UIButton
-            type="submit"
-            :disabled="creatingWebhook || !webhookForm.name.trim() || !webhookForm.url.trim()"
-          >
-            <Plus class="size-4" />
-            {{ creatingWebhook ? "Creating..." : "Add Webhook" }}
-          </UIButton>
         </form>
       </div>
 
+      <!-- Webhooks -->
+      <div class="rounded-lg border bg-card p-5 shadow-sm">
+        <h3 class="text-lg font-semibold">
+          Webhooks
+        </h3>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Send rotation notifications to external services. Each webhook receives a signed POST
+          request when a rotation is created.
+        </p>
+
+        <div class="mt-5 space-y-4">
+          <ErrorBanner v-if="webhookError" :message="webhookError" />
+
+          <div
+            v-if="revealedSecret"
+            class="rounded-md border border-green-500/30 bg-green-500/5 px-4 py-3"
+          >
+            <p class="text-sm font-medium text-green-700 dark:text-green-400">
+              Webhook created. Copy the signing secret now — it won't be shown again.
+            </p>
+            <div class="mt-2 flex items-center gap-2">
+              <code class="flex-1 rounded bg-muted px-3 py-2 text-xs font-mono overflow-x-auto">
+                {{ revealedSecret }}
+              </code>
+              <UIButton type="button" size="sm" variant="outline" class="shrink-0" @click="copySecret">
+                <Check v-if="copiedSecret" class="size-4" />
+                <Copy v-else class="size-4" />
+                {{ copiedSecret ? "Copied" : "Copy" }}
+              </UIButton>
+            </div>
+            <p class="mt-2 text-sm text-muted-foreground">
+              Verify payloads by computing HMAC-SHA256 of the request body using this secret and
+              comparing it to the <code class="font-mono">X-Webhook-Signature</code> header.
+            </p>
+          </div>
+
+          <form class="space-y-3" @submit.prevent="createNewWebhook">
+            <div class="space-y-2">
+              <UILabel for="webhook-name">
+                Name
+              </UILabel>
+              <UIInput
+                id="webhook-name"
+                v-model="webhookForm.name"
+                type="text"
+                placeholder="Slack Rotation Bot"
+                required
+              />
+            </div>
+            <div class="space-y-2">
+              <UILabel for="webhook-url">
+                URL
+              </UILabel>
+              <UIInput
+                id="webhook-url"
+                v-model="webhookForm.url"
+                type="url"
+                placeholder="https://your-service.com/webhook"
+                required
+              />
+            </div>
+            <UIButton
+              type="submit"
+              :disabled="creatingWebhook || !webhookForm.name.trim() || !webhookForm.url.trim()"
+            >
+              <Plus class="size-4" />
+              {{ creatingWebhook ? "Creating..." : "Add Webhook" }}
+            </UIButton>
+          </form>
+        </div>
+      </div>
+
+      <!-- Existing webhooks table (outside card for full width) -->
       <div v-if="webhooksList?.length" class="overflow-x-auto rounded-lg border">
         <table class="w-full text-sm">
           <thead>

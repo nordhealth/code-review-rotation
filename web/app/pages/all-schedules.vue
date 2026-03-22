@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Rotation, Settings, Squad, Team } from '~/types'
-import { Pencil } from 'lucide-vue-next'
 
 useHead({ title: 'All Schedules | Nord Review' })
 
@@ -128,11 +127,11 @@ function getNextRotationForSquad(team: Team, squad: Squad): string | null {
             {{ globalSettings?.defaultRotationTimezone ?? 'Europe/Helsinki' }}
           </span>
         </div>
-        <NuxtLink to="/settings">
-          <UIButton variant="ghost" size="sm" class="h-7 px-2">
-            <Pencil class="size-3.5" />
-          </UIButton>
-        </NuxtLink>
+        <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
+          <NuxtLink to="/settings">
+            Edit
+          </NuxtLink>
+        </UIButton>
       </div>
     </div>
 
@@ -142,11 +141,11 @@ function getNextRotationForSquad(team: Team, squad: Squad): string | null {
         <h2 class="text-lg font-semibold">
           {{ team.name }}
         </h2>
-        <NuxtLink :to="`/teams/${team.slug}/settings`">
-          <UIButton variant="ghost" size="sm" class="h-7 px-2">
-            <Pencil class="size-3.5" />
-          </UIButton>
-        </NuxtLink>
+        <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
+          <NuxtLink :to="`/teams/${team.slug}/settings`">
+            Edit
+          </NuxtLink>
+        </UIButton>
       </div>
 
       <div class="overflow-x-auto rounded-lg border">
@@ -192,11 +191,11 @@ function getNextRotationForSquad(team: Team, squad: Squad): string | null {
                 {{ getNextRotationForDevs(team) ?? '—' }}
               </UITableCell>
               <UITableCell class="text-right">
-                <NuxtLink :to="`/teams/${team.slug}/settings`">
-                  <UIButton variant="ghost" size="sm" class="h-7 px-2">
-                    <Pencil class="size-3.5" />
-                  </UIButton>
-                </NuxtLink>
+                <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
+                  <NuxtLink :to="`/teams/${team.slug}/settings`">
+                    Edit
+                  </NuxtLink>
+                </UIButton>
               </UITableCell>
             </UITableRow>
 
@@ -273,11 +272,11 @@ function getNextRotationForSquad(team: Team, squad: Squad): string | null {
                 {{ getNextRotationForSquad(team, squad) ?? '—' }}
               </UITableCell>
               <UITableCell class="text-right">
-                <NuxtLink :to="`/teams/${team.slug}/squads/${squad.id}/edit`">
-                  <UIButton variant="ghost" size="sm" class="h-7 px-2">
-                    <Pencil class="size-3.5" />
-                  </UIButton>
-                </NuxtLink>
+                <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
+                  <NuxtLink :to="`/teams/${team.slug}/squads/${squad.id}/edit`">
+                    Edit
+                  </NuxtLink>
+                </UIButton>
               </UITableCell>
             </UITableRow>
           </UITableBody>

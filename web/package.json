@@ -15,8 +15,8 @@
     "typecheck": "nuxt typecheck",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "test": "vitest run --coverage",
-    "test:unit": "vitest",
+    "test": "TEST_E2E=true vitest run --coverage",
+    "test:unit": "vitest run --coverage",
     "test:e2e": "TEST_E2E=true vitest run tests/e2e/",
     "test:playwright": "playwright test",
     "check": "eslint . && nuxt typecheck"
