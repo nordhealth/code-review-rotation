@@ -117,6 +117,9 @@ export const squads = sqliteTable('squads', {
     .references(() => teams.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   reviewerCount: integer('reviewer_count').notNull(),
+  rotationIntervalDays: integer('rotation_interval_days'),
+  rotationDay: text('rotation_day', { enum: ROTATION_DAYS }),
+  rotationTimezone: text('rotation_timezone'),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),

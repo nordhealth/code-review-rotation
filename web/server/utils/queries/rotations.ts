@@ -294,6 +294,27 @@ export async function createRotation(data: {
   return rotation
 }
 
+export async function queryLastSquadRotationDate(
+  teamId: string,
+  squadId: string,
+): Promise<Date | null> {
+  const [result] = await db
+    .select({ date: rotations.date })
+    .from(rotations)
+    .innerJoin(rotationAssignments, eq(rotationAssignments.rotationId, rotations.id))
+    .where(
+      and(
+        eq(rotations.teamId, teamId),
+        eq(rotations.mode, 'teams'),
+        eq(rotationAssignments.targetType, 'squad'),
+        eq(rotationAssignments.targetId, squadId),
+      ),
+    )
+    .orderBy(desc(rotations.date))
+    .limit(1)
+  return result?.date ?? null
+}
+
 export async function queryLatestRotations() {
   const latestPerTeamMode = db
     .select({

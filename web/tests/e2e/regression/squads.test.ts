@@ -102,6 +102,59 @@ describe.skipIf(!isE2E)('squads and members (regression)', () => {
     expect(squad.reviewerCount).toBe(1)
   })
 
+  it('creates a squad with schedule overrides', async () => {
+    const membersResponse = await authGet(baseUrl, `/api/teams/${teamId}/members`, cookie)
+    const members = await membersResponse.json()
+    const memberIds = members.slice(0, 2).map((member: { developerId: string }) => member.developerId)
+
+    const response = await authPost(baseUrl, `/api/teams/${teamId}/squads`, cookie, {
+      name: `Scheduled${RUN}`,
+      reviewerCount: 1,
+      memberDeveloperIds: memberIds,
+      rotationIntervalDays: 7,
+      rotationDay: 'friday',
+      rotationTimezone: 'America/New_York',
+    })
+    expect(response.status).toBe(200)
+    const squad = await response.json()
+    expect(squad.rotationIntervalDays).toBe(7)
+    expect(squad.rotationDay).toBe('friday')
+    expect(squad.rotationTimezone).toBe('America/New_York')
+
+    // Verify schedule fields are returned in list endpoint
+    const listResponse = await authGet(baseUrl, `/api/teams/${teamId}/squads`, cookie)
+    const squads = await listResponse.json()
+    const found = squads.find((s: { name: string }) => s.name === `Scheduled${RUN}`)
+    expect(found.rotationIntervalDays).toBe(7)
+    expect(found.rotationDay).toBe('friday')
+
+    // Clean up
+    await authDelete(baseUrl, `/api/teams/${teamId}/squads/${squad.id}`, cookie)
+  })
+
+  it('updates squad schedule overrides and clears them', async () => {
+    // Set schedule overrides
+    const setResponse = await authPut(baseUrl, `/api/teams/${teamId}/squads/${squadId}`, cookie, {
+      rotationIntervalDays: 21,
+      rotationDay: 'monday',
+    })
+    expect(setResponse.status).toBe(200)
+    const updated = await setResponse.json()
+    expect(updated.rotationIntervalDays).toBe(21)
+    expect(updated.rotationDay).toBe('monday')
+    expect(updated.rotationTimezone).toBeNull()
+
+    // Clear schedule overrides by sending null
+    const clearResponse = await authPut(baseUrl, `/api/teams/${teamId}/squads/${squadId}`, cookie, {
+      rotationIntervalDays: null,
+      rotationDay: null,
+    })
+    expect(clearResponse.status).toBe(200)
+    const cleared = await clearResponse.json()
+    expect(cleared.rotationIntervalDays).toBeNull()
+    expect(cleared.rotationDay).toBeNull()
+  })
+
   it('deletes a squad and confirms removal', async () => {
     const response = await authDelete(baseUrl, `/api/teams/${teamId}/squads/${squadId}`, cookie)
     expect(response.status).toBe(200)

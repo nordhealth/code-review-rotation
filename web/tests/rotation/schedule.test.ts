@@ -1,10 +1,11 @@
-import type { GlobalDefaults, ScheduleConfig, TeamOverrides } from '~/server/utils/rotation/schedule'
+import type { GlobalDefaults, ScheduleConfig, SquadOverrides, TeamOverrides } from '~/server/utils/rotation/schedule'
 import { describe, expect, it } from 'vitest'
 import {
   computeNextRotationDate,
 
   isRotationDue,
   mergeSchedule,
+  mergeSquadSchedule,
   ROTATION_DAYS,
   ROTATION_HOUR,
   ROTATION_MINUTE,
@@ -75,6 +76,51 @@ describe('mergeSchedule', () => {
     expect(result).toEqual({
       intervalDays: 7,
       day: 'monday',
+      timezone: 'Europe/Helsinki',
+    })
+  })
+})
+
+// ── mergeSquadSchedule ──────────────────────────────────────────────────────
+
+describe('mergeSquadSchedule', () => {
+  const teamSchedule: ScheduleConfig = {
+    intervalDays: 14,
+    day: 'wednesday',
+    timezone: 'Europe/Helsinki',
+  }
+
+  it('returns team schedule when all squad overrides are null', () => {
+    const squad: SquadOverrides = {
+      rotationIntervalDays: null,
+      rotationDay: null,
+      rotationTimezone: null,
+    }
+    expect(mergeSquadSchedule(teamSchedule, squad)).toEqual(teamSchedule)
+  })
+
+  it('uses squad overrides when provided', () => {
+    const squad: SquadOverrides = {
+      rotationIntervalDays: 7,
+      rotationDay: 'friday',
+      rotationTimezone: 'America/New_York',
+    }
+    expect(mergeSquadSchedule(teamSchedule, squad)).toEqual({
+      intervalDays: 7,
+      day: 'friday',
+      timezone: 'America/New_York',
+    })
+  })
+
+  it('mixes squad overrides and team defaults', () => {
+    const squad: SquadOverrides = {
+      rotationIntervalDays: 7,
+      rotationDay: null,
+      rotationTimezone: null,
+    }
+    expect(mergeSquadSchedule(teamSchedule, squad)).toEqual({
+      intervalDays: 7,
+      day: 'wednesday',
       timezone: 'Europe/Helsinki',
     })
   })

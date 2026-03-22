@@ -1,4 +1,4 @@
-import { isRotationDue } from '../utils/rotation/schedule'
+import { isRotationDue, mergeSquadSchedule } from '../utils/rotation/schedule'
 
 export default defineTask({
   meta: {
@@ -30,40 +30,59 @@ export default defineTask({
     const results: { teamId: string, teamName: string, mode: string, rotationId: string }[] = []
 
     for (const team of allTeams) {
-      const schedule = await getEffectiveSchedule(team)
+      const teamSchedule = await getEffectiveSchedule(team)
 
-      for (const mode of ['devs', 'teams'] as const) {
-        const recentRotations = await queryRotations(team.id, { limit: 10, offset: 0 })
-        const lastRotation = recentRotations.find(rotation => rotation.mode === mode)
-        const lastRotationDate = lastRotation ? new Date(lastRotation.date) : null
+      // --- devs mode: unchanged, uses team schedule ---
+      const recentRotations = await queryRotations(team.id, { limit: 10, offset: 0 })
+      const lastDevRotation = recentRotations.find(rotation => rotation.mode === 'devs')
+      const lastDevRotationDate = lastDevRotation ? new Date(lastDevRotation.date) : null
 
-        if (!isRotationDue(schedule, now, lastRotationDate))
-          continue
+      if (isRotationDue(teamSchedule, now, lastDevRotationDate)) {
+        const rawAssignments = await executeDevRotation(team.id)
+        if (rawAssignments.length > 0) {
+          const rotation = await createRotation({
+            teamId: team.id,
+            date: now,
+            isManual: false,
+            mode: 'devs',
+            assignments: rawAssignments.map(assignment => ({
+              targetType: 'developer' as const,
+              targetId: assignment.targetId,
+              reviewerDeveloperIds: assignment.reviewerIds,
+            })),
+          })
+          results.push({ teamId: team.id, teamName: team.name, mode: 'devs', rotationId: rotation.id })
+        }
+      }
 
-        const rawAssignments
-          = mode === 'devs' ? await executeDevRotation(team.id) : await executeTeamRotation(team.id)
+      // --- teams mode: per-squad schedules ---
+      const teamSquads = await querySquads(team.id)
+      const dueSquadIds: string[] = []
 
-        if (rawAssignments.length === 0)
-          continue
+      for (const squad of teamSquads) {
+        const squadSchedule = mergeSquadSchedule(teamSchedule, squad)
+        const lastSquadDate = await queryLastSquadRotationDate(team.id, squad.id)
+        if (isRotationDue(squadSchedule, now, lastSquadDate)) {
+          dueSquadIds.push(squad.id)
+        }
+      }
 
-        const rotation = await createRotation({
-          teamId: team.id,
-          date: now,
-          isManual: false,
-          mode,
-          assignments: rawAssignments.map(assignment => ({
-            targetType: mode === 'devs' ? ('developer' as const) : ('squad' as const),
-            targetId: assignment.targetId,
-            reviewerDeveloperIds: assignment.reviewerIds,
-          })),
-        })
-
-        results.push({
-          teamId: team.id,
-          teamName: team.name,
-          mode,
-          rotationId: rotation.id,
-        })
+      if (dueSquadIds.length > 0) {
+        const rawAssignments = await executeTeamRotation(team.id, dueSquadIds)
+        if (rawAssignments.length > 0) {
+          const rotation = await createRotation({
+            teamId: team.id,
+            date: now,
+            isManual: false,
+            mode: 'teams',
+            assignments: rawAssignments.map(assignment => ({
+              targetType: 'squad' as const,
+              targetId: assignment.targetId,
+              reviewerDeveloperIds: assignment.reviewerIds,
+            })),
+          })
+          results.push({ teamId: team.id, teamName: team.name, mode: 'teams', rotationId: rotation.id })
+        }
       }
     }
 

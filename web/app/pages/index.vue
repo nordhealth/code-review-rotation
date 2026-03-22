@@ -19,12 +19,12 @@ const { data: teams } = await useFetch('/api/teams')
     </div>
 
     <div v-if="teams?.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <NuxtLink
+      <div
         v-for="team in teams"
         :key="team.id"
-        :to="`/teams/${team.slug}`"
-        class="block rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow-md dark:shadow-none dark:hover:border-muted-foreground/20 dark:hover:shadow-[0_0_10px_rgb(255_255_255_/_0.05)]"
+        class="relative block rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow-md dark:shadow-none dark:hover:border-muted-foreground/20 dark:hover:shadow-[0_0_10px_rgb(255_255_255_/_0.05)]"
       >
+        <NuxtLink :to="`/teams/${team.slug}`" class="absolute inset-0 z-0" :aria-label="`View ${team.name}`" />
         <div class="mb-4 flex items-start justify-between">
           <div>
             <h3 class="font-semibold">
@@ -63,7 +63,7 @@ const { data: teams } = await useFetch('/api/teams')
             <TrimText>Settings</TrimText>
           </NuxtLink>
         </div>
-      </NuxtLink>
+      </div>
     </div>
 
     <EmptyState v-else message="No teams yet">

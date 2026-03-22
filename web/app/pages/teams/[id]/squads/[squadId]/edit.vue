@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Settings } from '~/types'
 import { ArrowLeft } from 'lucide-vue-next'
 
 useHead({ title: 'Edit Squad | Nord Review' })
@@ -11,12 +12,28 @@ const squadId = route.params.squadId as string
 const { data: team } = await useFetch(`/api/teams/${teamId}`)
 const { data: squad } = await useFetch(`/api/teams/${teamId}/squads/${squadId}`)
 const { data: members } = useFetch(`/api/teams/${teamId}/members`)
+const { data: globalSettings } = await useFetch<Settings>('/api/settings')
 
 const form = reactive({
   name: squad.value?.name ?? '',
   reviewerCount: squad.value?.reviewerCount ?? 2,
   memberDeveloperIds: squad.value?.members?.map(member => member.developer.id) ?? ([] as string[]),
 })
+
+const scheduleForm = reactive({
+  rotationIntervalDays: squad.value?.rotationIntervalDays ?? undefined as number | undefined,
+  rotationDay: squad.value?.rotationDay ?? undefined as string | undefined,
+  rotationTimezone: squad.value?.rotationTimezone ?? undefined as string | undefined,
+})
+
+const customInterval = ref(!!squad.value?.rotationIntervalDays)
+const customDay = ref(!!squad.value?.rotationDay)
+const customTimezone = ref(!!squad.value?.rotationTimezone)
+
+const effectiveTeamInterval = computed(() => team.value?.rotationIntervalDays ?? globalSettings.value?.defaultRotationIntervalDays ?? 14)
+const effectiveTeamDay = computed(() => team.value?.rotationDay ?? globalSettings.value?.defaultRotationDay ?? 'wednesday')
+const effectiveTeamTimezone = computed(() => team.value?.rotationTimezone ?? globalSettings.value?.defaultRotationTimezone ?? 'Europe/Helsinki')
+
 const submitting = ref(false)
 const error = ref('')
 
@@ -42,6 +59,11 @@ async function submit() {
         name: form.name,
         reviewerCount: form.reviewerCount,
         memberDeveloperIds: form.memberDeveloperIds,
+        rotationIntervalDays: customInterval.value
+          ? (scheduleForm.rotationIntervalDays ?? null)
+          : null,
+        rotationDay: customDay.value ? (scheduleForm.rotationDay ?? null) : null,
+        rotationTimezone: customTimezone.value ? (scheduleForm.rotationTimezone ?? null) : null,
       },
     })
     router.push(`/teams/${teamId}/squads`)
@@ -123,6 +145,93 @@ async function submit() {
           <p v-if="form.memberDeveloperIds.length" class="text-sm text-muted-foreground">
             {{ form.memberDeveloperIds.length }} selected
           </p>
+        </div>
+
+        <div class="border-t pt-4">
+          <h3 class="text-sm font-semibold">
+            Rotation Schedule
+          </h3>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Override the team schedule for this squad. Unchecked fields use the team's setting.
+          </p>
+
+          <div class="mt-4 space-y-4">
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <UICheckbox
+                  id="squad-custom-interval"
+                  :checked="customInterval"
+                  @update:checked="customInterval = $event"
+                />
+                <UILabel for="squad-custom-interval">
+                  Custom interval
+                </UILabel>
+              </div>
+              <UINumberField
+                v-model="scheduleForm.rotationIntervalDays"
+                :min="1"
+                :max="90"
+                :disabled="!customInterval"
+              >
+                <UINumberFieldContent>
+                  <UINumberFieldDecrement />
+                  <UINumberFieldInput />
+                  <UINumberFieldIncrement />
+                </UINumberFieldContent>
+              </UINumberField>
+              <p v-if="!customInterval" class="text-sm text-muted-foreground">
+                Using team setting: {{ effectiveTeamInterval }} days
+              </p>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <UICheckbox
+                  id="squad-custom-day"
+                  :checked="customDay"
+                  @update:checked="customDay = $event"
+                />
+                <UILabel for="squad-custom-day">
+                  Custom day
+                </UILabel>
+              </div>
+              <UISelect v-model="scheduleForm.rotationDay" :disabled="!customDay">
+                <UISelectTrigger>
+                  <UISelectValue placeholder="Select day" />
+                </UISelectTrigger>
+                <UISelectContent>
+                  <UISelectItem v-for="day in DAYS_OF_WEEK" :key="day.value" :value="day.value">
+                    {{ day.label }}
+                  </UISelectItem>
+                </UISelectContent>
+              </UISelect>
+              <p v-if="!customDay" class="text-sm text-muted-foreground">
+                Using team setting: {{ capitalizeFirst(effectiveTeamDay) }}
+              </p>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <UICheckbox
+                  id="squad-custom-timezone"
+                  :checked="customTimezone"
+                  @update:checked="customTimezone = $event"
+                />
+                <UILabel for="squad-custom-timezone">
+                  Custom timezone
+                </UILabel>
+              </div>
+              <UIInput
+                v-model="scheduleForm.rotationTimezone"
+                type="text"
+                :disabled="!customTimezone"
+                placeholder="America/New_York"
+              />
+              <p v-if="!customTimezone" class="text-sm text-muted-foreground">
+                Using team setting: {{ effectiveTeamTimezone }}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div class="flex items-center gap-3 pt-2">

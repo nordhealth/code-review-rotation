@@ -26,7 +26,13 @@ describe.skipIf(!isE2E)('auth happy paths (regression)', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password: 'testpass123!', firstName: 'Confirm', lastName: 'Happy' }),
     })
+    if (registerResponse.status !== 200) {
+      console.error('[DEBUG] Register failed:', registerResponse.status, await registerResponse.clone().text())
+    }
     expect(registerResponse.status).toBe(200)
+
+    // Small delay to ensure server commits
+    await new Promise(resolve => setTimeout(resolve, 200))
 
     // Get token from DB
     const rows = await queryTestDb('SELECT confirmation_token FROM users WHERE email = ?', [email])

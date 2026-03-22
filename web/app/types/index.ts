@@ -46,6 +46,9 @@ export interface Squad {
   teamId: string
   name: string
   reviewerCount: number
+  rotationIntervalDays: number | null
+  rotationDay: string | null
+  rotationTimezone: string | null
   members: { id: string, developerId: string, developer: Developer }[]
 }
 

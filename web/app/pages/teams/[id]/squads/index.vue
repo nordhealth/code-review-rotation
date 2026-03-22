@@ -102,8 +102,9 @@ async function deleteSquad(squadId: string, name: string) {
       <div
         v-for="squad in squads"
         :key="squad.id"
-        class="relative rounded-lg border bg-card p-5 shadow-sm"
+        class="relative rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow-md dark:shadow-none dark:hover:border-muted-foreground/20 dark:hover:shadow-[0_0_10px_rgb(255_255_255_/_0.05)]"
       >
+        <NuxtLink :to="`/teams/${teamId}/squads/${squad.id}/edit`" class="absolute inset-0 z-0" :aria-label="`Edit ${squad.name}`" />
         <div class="mb-3 flex items-start justify-between">
           <div>
             <h3 class="font-semibold">
@@ -113,7 +114,7 @@ async function deleteSquad(squadId: string, name: string) {
               {{ squad.reviewerCount }} reviewers per rotation
             </p>
           </div>
-          <div class="flex items-center gap-1">
+          <div class="relative z-10 flex items-center gap-1">
             <UIButton as-child variant="outline" size="sm" class="h-7 px-2.5 text-xs">
               <NuxtLink :to="`/teams/${teamId}/squads/${squad.id}/edit`">
                 <TrimText>Edit</TrimText>
@@ -162,6 +163,7 @@ async function deleteSquad(squadId: string, name: string) {
             </span>
             <UIPopover
               v-if="(visibleCounts[squad.id] ?? squad.members.length) < squad.members.length"
+              class="relative z-10"
             >
               <UIPopoverTrigger as-child>
                 <button

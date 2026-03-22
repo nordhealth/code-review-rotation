@@ -15,9 +15,11 @@
     "typecheck": "nuxt typecheck",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "test": "vitest",
+    "test": "vitest run --coverage",
+    "test:unit": "vitest",
     "test:e2e": "TEST_E2E=true vitest run tests/e2e/",
-    "test:playwright": "playwright test"
+    "test:playwright": "playwright test",
+    "check": "eslint . && nuxt typecheck"
   },
   "dependencies": {
     "@libsql/client": "^0.17.2",
@@ -66,7 +68,7 @@
   },
   "lint-staged": {
     "*.{js,ts,vue,json,md,yml,yaml}": [
-      "eslint --fix"
+      "eslint --no-warn-ignored --fix"
     ]
   }
 }

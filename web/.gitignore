@@ -39,3 +39,6 @@ storybook-static
 *.db
 *.db-journal
 *.db-wal
+
+# Duplicate Drizzle migration output
+server/db/migrations/sqlite/

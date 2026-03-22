@@ -71,6 +71,9 @@ export async function createSquad(data: {
   name: string
   reviewerCount: number
   memberDeveloperIds: string[]
+  rotationIntervalDays?: number | null
+  rotationDay?: string | null
+  rotationTimezone?: string | null
 }) {
   const [squad] = await db
     .insert(squads)
@@ -78,6 +81,9 @@ export async function createSquad(data: {
       teamId: data.teamId,
       name: data.name,
       reviewerCount: data.reviewerCount,
+      rotationIntervalDays: data.rotationIntervalDays ?? null,
+      rotationDay: data.rotationDay ?? null,
+      rotationTimezone: data.rotationTimezone ?? null,
     })
     .returning()
 
@@ -99,6 +105,9 @@ export async function updateSquad(
     name: string
     reviewerCount: number
     memberDeveloperIds: string[]
+    rotationIntervalDays: number | null
+    rotationDay: string | null
+    rotationTimezone: string | null
   }>,
 ) {
   const { memberDeveloperIds, ...squadData } = data

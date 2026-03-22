@@ -226,22 +226,26 @@ export async function executeDevRotation(
  */
 export async function executeTeamRotation(
   teamId: string,
+  squadIds?: string[],
 ): Promise<{ targetId: string, reviewerIds: string[] }[]> {
-  // Load all squads for this team
-  const teamSquads = await db.select().from(squads).where(eq(squads.teamId, teamId))
+  // Load squads for this team, optionally filtered to specific squad IDs
+  let teamSquads = await db.select().from(squads).where(eq(squads.teamId, teamId))
+  if (squadIds) {
+    teamSquads = teamSquads.filter(squad => squadIds.includes(squad.id))
+  }
 
   if (teamSquads.length === 0)
     return []
 
   // Load squad members
-  const squadIds = teamSquads.map(s => s.id)
+  const filteredSquadIds = teamSquads.map(s => s.id)
   const members = await db
     .select({
       squadId: squadMembers.squadId,
       developerId: squadMembers.developerId,
     })
     .from(squadMembers)
-    .where(inArray(squadMembers.squadId, squadIds))
+    .where(inArray(squadMembers.squadId, filteredSquadIds))
 
   // Group members by squad
   const membersBySquad = new Map<string, string[]>()

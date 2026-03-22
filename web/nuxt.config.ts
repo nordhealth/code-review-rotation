@@ -126,7 +126,9 @@ export default defineNuxtConfig({
   },
 
   hub: {
-    db: 'sqlite',
+    database: {
+      migrationsPath: './server/db/migrations',
+    },
   },
 
   runtimeConfig: {

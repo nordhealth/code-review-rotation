@@ -43,6 +43,12 @@ export interface TeamOverrides {
   rotationTimezone: string | null
 }
 
+export interface SquadOverrides {
+  rotationIntervalDays: number | null
+  rotationDay: string | null
+  rotationTimezone: string | null
+}
+
 /**
  * Merge team-level overrides with global defaults.
  * Null team values fall through to the global default.
@@ -52,6 +58,21 @@ export function mergeSchedule(global: GlobalDefaults, team: TeamOverrides): Sche
     intervalDays: team.rotationIntervalDays ?? global.defaultRotationIntervalDays,
     day: (team.rotationDay ?? global.defaultRotationDay) as RotationDay,
     timezone: team.rotationTimezone ?? global.defaultRotationTimezone,
+  }
+}
+
+/**
+ * Layer squad-level overrides on top of an already-resolved team schedule.
+ * Null squad values fall through to the team schedule.
+ */
+export function mergeSquadSchedule(
+  teamSchedule: ScheduleConfig,
+  squad: SquadOverrides,
+): ScheduleConfig {
+  return {
+    intervalDays: squad.rotationIntervalDays ?? teamSchedule.intervalDays,
+    day: (squad.rotationDay ?? teamSchedule.day) as RotationDay,
+    timezone: squad.rotationTimezone ?? teamSchedule.timezone,
   }
 }
 
