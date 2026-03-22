@@ -10,7 +10,7 @@
 import type { Buffer } from 'node:buffer'
 import type { ChildProcess } from 'node:child_process'
 import { spawn } from 'node:child_process'
-import { existsSync, mkdirSync, symlinkSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, symlinkSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { createClient } from '@libsql/client'
@@ -21,6 +21,7 @@ let baseUrl = ''
 const LISTENING_PATTERN = /Listening on\s+(http:\/\/\S+)/
 const TRAILING_SLASH_PATTERN = /\/$/
 const OUTPUT_DIR = resolve(__dirname, '../../.output')
+const LIBSQL_VERSION_SUFFIX = /@.*$/
 
 const DATABASE_PATH = resolve(__dirname, '../../.data/db/sqlite.db')
 
@@ -73,14 +74,25 @@ export async function registerAndConfirmUser(
 }
 
 export async function startServer(): Promise<string> {
-  // Ensure native SQLite module is available in the build output
-  // (pnpm doesn't hoist @libsql/darwin-arm64 into .output/server/node_modules)
-  const nativeModuleTarget = resolve(OUTPUT_DIR, 'server/node_modules/@libsql/darwin-arm64')
-  if (!existsSync(nativeModuleTarget)) {
-    const nativeModuleSource = resolve(__dirname, '../../node_modules/.pnpm/@libsql+darwin-arm64@0.5.22/node_modules/@libsql/darwin-arm64')
-    if (existsSync(nativeModuleSource)) {
-      mkdirSync(resolve(OUTPUT_DIR, 'server/node_modules/@libsql'), { recursive: true })
-      symlinkSync(nativeModuleSource, nativeModuleTarget)
+  // Ensure native SQLite module is available in the build output.
+  // pnpm doesn't hoist @libsql/<platform> into .output/server/node_modules,
+  // so we find it in the pnpm store and symlink it.
+  const pnpmLibsqlDir = resolve(__dirname, '../../node_modules/.pnpm')
+  if (existsSync(pnpmLibsqlDir)) {
+    const libsqlDirs = readdirSync(pnpmLibsqlDir).filter(
+      directory => directory.startsWith('@libsql+') && !directory.startsWith('@libsql+client'),
+    )
+    for (const directory of libsqlDirs) {
+      // e.g. "@libsql+darwin-arm64@0.5.22" → "darwin-arm64"
+      const platformName = directory.replace('@libsql+', '').replace(LIBSQL_VERSION_SUFFIX, '')
+      const target = resolve(OUTPUT_DIR, `server/node_modules/@libsql/${platformName}`)
+      if (!existsSync(target)) {
+        const source = resolve(pnpmLibsqlDir, directory, `node_modules/@libsql/${platformName}`)
+        if (existsSync(source)) {
+          mkdirSync(resolve(OUTPUT_DIR, 'server/node_modules/@libsql'), { recursive: true })
+          symlinkSync(source, target)
+        }
+      }
     }
   }
 
