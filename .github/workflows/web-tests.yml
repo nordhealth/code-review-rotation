@@ -1,4 +1,4 @@
-name: Web Tests
+name: Web App Tests
 
 on:
   pull_request:
