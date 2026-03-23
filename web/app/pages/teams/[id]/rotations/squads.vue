@@ -3,8 +3,10 @@ import type { Developer, Rotation, RotationAssignment, Settings, Squad, Team, Te
 import {
   CalendarClock,
   Check,
-  ChevronsUpDown,
+  Clock,
   Play,
+  Plus,
+  Users,
   X,
 } from 'lucide-vue-next'
 
@@ -111,6 +113,24 @@ async function saveAssignment(assignment: RotationAssignment) {
   }
 }
 
+// --- Search ---
+const selectedDeveloperId = ref<string | undefined>()
+
+const filteredSquads = computed(() => {
+  if (!squads.value)
+    return []
+  if (!selectedDeveloperId.value)
+    return squads.value
+  return squads.value.filter((squad) => {
+    const assignment = assignmentBySquadId.value.get(squad.id)
+    if (!assignment)
+      return false
+    return assignment.reviewers.some(
+      reviewer => reviewer.developer.id === selectedDeveloperId.value,
+    )
+  })
+})
+
 // --- Next rotation date ---
 const DAY_INDEX: Record<string, number> = {
   sunday: 0,
@@ -188,202 +208,213 @@ function getNextRotationDate(squad?: Squad): string | null {
     />
 
     <template v-if="squads?.length">
-      <!-- Squad cards -->
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div
-          v-for="squad in squads"
-          :key="squad.id"
-          class="flex flex-col rounded-lg border bg-card shadow-sm"
-        >
-          <!-- Card header -->
-          <div class="flex items-start justify-between gap-2 p-5 pb-0">
-            <div>
-              <h3 class="text-lg font-semibold">
-                {{ squad.name }}
-              </h3>
-              <p class="text-sm text-muted-foreground">
-                {{ squad.reviewerCount }} reviewers &middot; {{ squad.members?.length ?? 0 }} members
-              </p>
-            </div>
-            <UIButton
-              as-child
-              size="sm"
-              variant="outline"
-              class="h-7 shrink-0 px-2.5 text-xs"
-            >
-              <NuxtLink :to="`/teams/${teamId}/squads/${squad.id}/edit`">
-                Edit
-              </NuxtLink>
-            </UIButton>
-          </div>
+      <DeveloperFilter v-model="selectedDeveloperId" :developers="allDevelopers" />
 
-          <!-- Rotation status indicator -->
-          <div v-if="assignmentBySquadId.get(squad.id)" class="flex items-center gap-2 px-5 pt-2">
-            <span class="relative flex size-2">
-              <span class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
-              <span class="relative inline-flex size-2 rounded-full bg-green-500" />
-            </span>
-            <span class="text-xs font-medium text-muted-foreground">Active &mdash; {{ formatDate(activeRotation!.date) }}</span>
-            <span
-              v-if="activeRotation?.isManual"
-              class="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
-            >
-              Manual
-            </span>
-          </div>
-          <div v-else class="flex items-center gap-2 px-5 pt-2">
-            <span class="inline-flex size-2 rounded-full bg-red-500" />
-            <span class="text-xs font-medium text-muted-foreground">Not yet rotated</span>
-          </div>
+      <div>
+        <h1 class="flex items-center gap-2.5 text-2xl font-semibold tracking-tight">
+          <span class="relative flex size-2.5">
+            <span class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span class="relative inline-flex size-2.5 rounded-full bg-green-500" />
+          </span>
+          Current rotation{{ (squads?.length ?? 0) !== 1 ? 's' : '' }}
+        </h1>
+        <p class="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Users class="size-3.5" />
+          {{ squads?.length ?? 0 }} squad{{ (squads?.length ?? 0) !== 1 ? 's' : '' }}
+        </p>
+      </div>
 
-          <div class="flex flex-1 flex-col space-y-3 p-5">
-            <!-- Current reviewers -->
-            <div v-if="assignmentBySquadId.get(squad.id)">
-              <div class="mb-1.5 flex items-center justify-between">
-                <p class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Reviewers
+      <!-- Squad table -->
+      <div class="overflow-hidden rounded-lg border">
+        <!-- Table header -->
+        <div class="hidden items-center gap-4 border-b bg-primary/5 px-5 py-2.5 sm:flex">
+          <div class="w-64 shrink-0 text-xs font-semibold uppercase tracking-wider text-primary-text">
+            Squad
+          </div>
+          <div class="flex-1 text-xs font-semibold uppercase tracking-wider text-primary-text">
+            Reviewers
+          </div>
+        </div>
+
+        <!-- Squad rows -->
+        <div class="divide-y">
+          <div
+            v-for="squad in filteredSquads"
+            :key="squad.id"
+            class="transition-colors even:bg-muted/40 hover:bg-muted"
+            :class="[getNextRotationDate(squad) ? 'pb-4' : '']"
+          >
+            <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:gap-4">
+              <!-- Squad info cell -->
+              <div class="w-64 shrink-0">
+                <h3 class="mb-1 text-lg font-semibold">
+                  {{ squad.name }}
+                </h3>
+                <p class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Users class="size-3.5" />
+                  {{ squad.reviewerCount }} reviewers • {{ squad.members?.length ?? 0 }} members
                 </p>
-                <div v-if="editingAssignmentId === assignmentBySquadId.get(squad.id)!.id" class="flex items-center gap-1">
-                  <UIButton
-                    size="sm"
-                    variant="default"
-                    type="button"
-                    :disabled="saving"
-                    class="h-6 px-2 text-xs"
-                    @click="saveAssignment(assignmentBySquadId.get(squad.id)!)"
-                  >
-                    {{ saving ? "Saving..." : "Save" }}
-                  </UIButton>
-                  <UIButton
-                    size="sm"
-                    variant="ghost"
-                    type="button"
-                    class="h-6 px-2 text-xs"
-                    @click="cancelEditing"
-                  >
-                    Cancel
-                  </UIButton>
-                </div>
-                <button
-                  v-else
-                  type="button"
-                  class="text-xs text-muted-foreground hover:text-foreground"
-                  @click="startEditing(assignmentBySquadId.get(squad.id)!)"
-                >
-                  Change
-                </button>
+                <p v-if="assignmentBySquadId.get(squad.id)" class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock class="size-3.5" />
+                  Last rotated: {{ formatDate(activeRotation!.date) }}
+                </p>
+                <p v-else class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock class="size-3.5" />
+                  Not yet rotated
+                </p>
               </div>
-              <div class="flex flex-wrap gap-1.5">
-                <template v-if="editingAssignmentId !== assignmentBySquadId.get(squad.id)!.id">
-                  <template v-if="assignmentBySquadId.get(squad.id)!.reviewers?.length">
-                    <NuxtLink
-                      v-for="reviewer in assignmentBySquadId.get(squad.id)!.reviewers"
-                      :key="reviewer.id"
-                      :to="reviewer.developer.slug ? `/developers/${reviewer.developer.slug}` : undefined"
-                      class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2 py-1 text-xs font-medium shadow-sm"
-                      :class="[reviewer.developer.slug ? 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80' : '']"
+
+              <!-- Reviewers cell -->
+              <div class="flex min-w-0 flex-1 flex-wrap items-start gap-1.5">
+                <template v-if="assignmentBySquadId.get(squad.id)">
+                  <template v-if="editingAssignmentId !== assignmentBySquadId.get(squad.id)!.id">
+                    <div class="flex w-full items-start justify-between gap-2">
+                      <div class="flex flex-wrap gap-1.5">
+                        <template v-if="assignmentBySquadId.get(squad.id)!.reviewers?.length">
+                          <NuxtLink
+                            v-for="reviewer in assignmentBySquadId.get(squad.id)!.reviewers"
+                            :key="reviewer.id"
+                            :to="reviewer.developer.slug ? `/developers/${reviewer.developer.slug}` : undefined"
+                            class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2.5 py-1.5 text-sm font-medium shadow-sm"
+                            :class="[reviewer.developer.slug ? 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80' : '']"
+                          >
+                            <UIAvatar class="size-6">
+                              <UIAvatarFallback
+                                class="!text-[9px] !font-semibold !leading-none"
+                                :label="getInitials(reviewer.developer.firstName, reviewer.developer.lastName)"
+                              >
+                                {{ getInitials(reviewer.developer.firstName, reviewer.developer.lastName) }}
+                              </UIAvatarFallback>
+                            </UIAvatar>
+                            <TrimText>{{ reviewer.developer.firstName }} {{ reviewer.developer.lastName }}</TrimText>
+                          </NuxtLink>
+                        </template>
+                        <span v-else class="text-sm text-muted-foreground">No reviewers</span>
+                      </div>
+                      <UIButton
+                        size="sm"
+                        variant="outline"
+                        type="button"
+                        class="h-6 shrink-0 px-2 text-xs"
+                        @click="startEditing(assignmentBySquadId.get(squad.id)!)"
+                      >
+                        Edit
+                      </UIButton>
+                    </div>
+                  </template>
+
+                  <template v-else>
+                    <span
+                      v-for="developerId in editReviewerIds"
+                      :key="developerId"
+                      class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1.5 text-sm font-medium text-primary"
                     >
-                      <UIAvatar class="size-5">
+                      <UIAvatar class="size-6">
                         <UIAvatarFallback
-                          class="!text-[8px] !font-semibold !leading-none"
-                          :label="getInitials(reviewer.developer.firstName, reviewer.developer.lastName)"
+                          class="!text-[9px] !font-semibold !leading-none"
+                          :label="developerInitials(developerId)"
                         >
-                          {{ getInitials(reviewer.developer.firstName, reviewer.developer.lastName) }}
+                          {{ developerInitials(developerId) }}
                         </UIAvatarFallback>
                       </UIAvatar>
-                      <TrimText>{{ reviewer.developer.firstName }} {{ reviewer.developer.lastName }}</TrimText>
-                    </NuxtLink>
-                  </template>
-                  <span v-else class="text-xs text-muted-foreground">No reviewers</span>
-                </template>
-
-                <template v-else>
-                  <span
-                    v-for="developerId in editReviewerIds"
-                    :key="developerId"
-                    class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
-                  >
-                    <UIAvatar class="size-5">
-                      <UIAvatarFallback
-                        class="!text-[8px] !font-semibold !leading-none"
-                        :label="developerInitials(developerId)"
-                      >
-                        {{ developerInitials(developerId) }}
-                      </UIAvatarFallback>
-                    </UIAvatar>
-                    <TrimText>{{ developerName(developerId) }}</TrimText>
-                    <button
-                      type="button"
-                      class="ml-0.5 rounded-full p-0.5 hover:bg-primary/20"
-                      @click="toggleReviewer(developerId)"
-                    >
-                      <X class="size-3" />
-                    </button>
-                  </span>
-
-                  <UIPopover
-                    :open="openPopoverId === assignmentBySquadId.get(squad.id)!.id"
-                    @update:open="(v: boolean) => (openPopoverId = v ? assignmentBySquadId.get(squad.id)!.id : null)"
-                  >
-                    <UIPopoverTrigger as-child>
+                      <TrimText>{{ developerName(developerId) }}</TrimText>
                       <button
                         type="button"
-                        class="inline-flex items-center gap-1 rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-muted hover:text-foreground"
+                        class="ml-0.5 rounded-full p-0.5 hover:bg-primary/20"
+                        @click="toggleReviewer(developerId)"
                       >
-                        <ChevronsUpDown class="size-3" />
-                        Add
+                        <X class="size-3" />
                       </button>
-                    </UIPopoverTrigger>
-                    <UIPopoverContent class="w-56 p-0" align="start">
-                      <UICommand>
-                        <UICommandInput placeholder="Search developer..." />
-                        <UICommandEmpty>No developer found.</UICommandEmpty>
-                        <UICommandList>
-                          <UICommandGroup>
-                            <UICommandItem
-                              v-for="developer in allDevelopers"
-                              :key="developer.id"
-                              :value="`${developer.firstName} ${developer.lastName}`"
-                              @select="toggleReviewer(developer.id)"
-                            >
-                              <div class="flex items-center gap-2">
-                                <div class="flex size-4 items-center justify-center">
-                                  <Check
-                                    v-if="editReviewerIds.includes(developer.id)"
-                                    class="size-3.5"
-                                  />
+                    </span>
+
+                    <UIPopover
+                      :open="openPopoverId === assignmentBySquadId.get(squad.id)!.id"
+                      @update:open="(v: boolean) => (openPopoverId = v ? assignmentBySquadId.get(squad.id)!.id : null)"
+                    >
+                      <UIPopoverTrigger as-child>
+                        <button
+                          type="button"
+                          class="inline-flex items-center gap-1 rounded-md border border-dashed px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-solid hover:bg-muted hover:text-foreground"
+                        >
+                          <Plus class="size-3.5" />
+                          Add
+                        </button>
+                      </UIPopoverTrigger>
+                      <UIPopoverContent class="w-56 p-0" align="start">
+                        <UICommand>
+                          <UICommandInput placeholder="Search developer..." />
+                          <UICommandEmpty>No developer found.</UICommandEmpty>
+                          <UICommandList>
+                            <UICommandGroup>
+                              <UICommandItem
+                                v-for="developer in allDevelopers"
+                                :key="developer.id"
+                                :value="`${developer.firstName} ${developer.lastName}`"
+                                @select="toggleReviewer(developer.id)"
+                              >
+                                <div class="flex items-center gap-2">
+                                  <div class="flex size-4 items-center justify-center">
+                                    <Check
+                                      v-if="editReviewerIds.includes(developer.id)"
+                                      class="size-3.5"
+                                    />
+                                  </div>
+                                  <UIAvatar class="size-5">
+                                    <UIAvatarFallback
+                                      class="!text-[8px] !font-semibold !leading-none"
+                                      :label="getInitials(developer.firstName, developer.lastName)"
+                                    >
+                                      {{ getInitials(developer.firstName, developer.lastName) }}
+                                    </UIAvatarFallback>
+                                  </UIAvatar>
+                                  {{ developer.firstName }} {{ developer.lastName }}
                                 </div>
-                                <UIAvatar class="size-5">
-                                  <UIAvatarFallback
-                                    class="!text-[8px] !font-semibold !leading-none"
-                                    :label="getInitials(developer.firstName, developer.lastName)"
-                                  >
-                                    {{ getInitials(developer.firstName, developer.lastName) }}
-                                  </UIAvatarFallback>
-                                </UIAvatar>
-                                {{ developer.firstName }} {{ developer.lastName }}
-                              </div>
-                            </UICommandItem>
-                          </UICommandGroup>
-                        </UICommandList>
-                      </UICommand>
-                    </UIPopoverContent>
-                  </UIPopover>
+                              </UICommandItem>
+                            </UICommandGroup>
+                          </UICommandList>
+                        </UICommand>
+                      </UIPopoverContent>
+                    </UIPopover>
+
+                    <div class="ml-auto flex items-center gap-1">
+                      <UIButton
+                        size="sm"
+                        variant="default"
+                        type="button"
+                        :disabled="saving"
+                        class="h-6 px-2 text-xs"
+                        @click="saveAssignment(assignmentBySquadId.get(squad.id)!)"
+                      >
+                        {{ saving ? "Saving..." : "Save" }}
+                      </UIButton>
+                      <UIButton
+                        size="sm"
+                        variant="ghost"
+                        type="button"
+                        class="h-6 px-2 text-xs"
+                        @click="cancelEditing"
+                      >
+                        Cancel
+                      </UIButton>
+                    </div>
+                  </template>
                 </template>
+                <span v-else class="text-sm text-muted-foreground">—</span>
               </div>
             </div>
-            <!-- Next rotation date -->
+            <!-- Next rotation banner -->
             <div
               v-if="getNextRotationDate(squad)"
-              class="mt-auto flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-3 py-2"
+              class="mx-5 flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-2.5"
             >
               <CalendarClock class="size-4 shrink-0 text-muted-foreground" />
-              <TrimText>
-                <span class="text-xs text-muted-foreground">Next: </span>
-                <span class="text-xs font-medium">{{ getNextRotationDate(squad) }}</span>
-              </TrimText>
+              <span class="text-sm text-muted-foreground">Next rotation: </span>
+              <span class="text-sm font-medium">{{ getNextRotationDate(squad) }}</span>
             </div>
           </div>
+          <p v-if="!filteredSquads.length && selectedDeveloperId" class="px-5 py-4 text-sm text-muted-foreground">
+            No squads match the selected developer
+          </p>
         </div>
       </div>
     </template>

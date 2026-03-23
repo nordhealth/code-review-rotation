@@ -32,7 +32,7 @@ const inactiveClass = 'text-muted-foreground hover:text-foreground'
     <template v-for="option in options" :key="option.value">
       <NuxtLink
         v-if="option.to"
-        :to="option.to"
+        :to="{ path: option.to, query: route.query }"
         class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
         :class="isActive(option) ? activeClass : inactiveClass"
       >

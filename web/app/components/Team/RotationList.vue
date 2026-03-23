@@ -5,7 +5,9 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  ChevronsUpDown,
+  Clock,
+  Plus,
+  Users,
   X,
 } from 'lucide-vue-next'
 
@@ -144,10 +146,13 @@ function devInitials(devId: string) {
   return d ? getInitials(d.firstName, d.lastName) : '??'
 }
 
-const reviewerCountLabel = computed(() => {
+const summaryLabel = computed(() => {
   if (!team.value)
     return ''
-  return `${team.value.defaultReviewerCount} reviewer${team.value.defaultReviewerCount !== 1 ? 's' : ''} each`
+  const reviewerPart = `${team.value.defaultReviewerCount} reviewer${team.value.defaultReviewerCount !== 1 ? 's' : ''}`
+  const memberCount = members.value?.length ?? 0
+  const memberPart = `${memberCount} member${memberCount !== 1 ? 's' : ''}`
+  return `${reviewerPart} • ${memberPart}`
 })
 
 const DAY_INDEX: Record<string, number> = {
@@ -217,128 +222,114 @@ const nextRotationDate = computed(() => {
   return getNextRotationDate()
 })
 
-const searchQuery = ref('')
+const selectedDeveloperId = ref<string | undefined>()
+
+const selectedDeveloperName = computed(() => {
+  if (!selectedDeveloperId.value)
+    return ''
+  const developer = allDevelopers.value.find(d => d.id === selectedDeveloperId.value)
+  return developer ? `${developer.firstName} ${developer.lastName}` : ''
+})
 
 const filteredAssignments = computed(() => {
   const assignments = activeRotation.value?.assignments
   if (!assignments)
     return []
-  if (!searchQuery.value)
+  if (!selectedDeveloperId.value)
     return assignments
-  const query = searchQuery.value.toLowerCase()
   return assignments.filter((assignment) => {
-    const targetMatch = (assignment.targetName ?? '').toLowerCase().includes(query)
+    const targetMatch = assignment.targetId === selectedDeveloperId.value
     const reviewerMatch = assignment.reviewers?.some(
-      reviewer =>
-        `${reviewer.developer.firstName} ${reviewer.developer.lastName}`
-          .toLowerCase()
-          .includes(query),
+      reviewer => reviewer.developer.id === selectedDeveloperId.value,
     )
     return targetMatch || reviewerMatch
   })
 })
-
-const showSearch = computed(() => (activeRotation.value?.assignments?.length ?? 0) > 5)
 </script>
 
 <template>
   <template v-if="filteredRotations.length">
-    <!-- Next rotation banner -->
-    <div
-      v-if="nextRotationDate"
-      class="flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-2.5"
-    >
-      <CalendarClock class="size-4 text-muted-foreground" />
-      <TrimText>
-        <span class="text-sm text-muted-foreground">Next rotation: </span>
-        <span class="text-sm font-medium">{{ nextRotationDate }}</span>
-      </TrimText>
-    </div>
+    <!-- Developer filter -->
+    <DeveloperFilter v-model="selectedDeveloperId" :developers="allDevelopers" data-testid="rotation-search" />
 
-    <!-- Search filter -->
-    <SearchInput
-      v-if="showSearch"
-      v-model="searchQuery"
-      data-testid="rotation-search"
-      placeholder="Filter by developer name..."
-    />
-
-    <!-- Active rotation -->
-    <div v-if="activeRotation" class="overflow-hidden rounded-lg border border-primary/30">
-      <div class="flex flex-wrap items-center gap-2 border-b bg-primary/5 px-4 py-3 sm:gap-3">
-        <div class="flex items-center gap-2 sm:gap-3">
+    <!-- Title + last rotated + edit controls -->
+    <div v-if="activeRotation" class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h1 class="flex items-center gap-2.5 text-2xl font-semibold tracking-tight">
           <span class="relative flex size-2.5">
-            <span
-              class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"
-            />
+            <span class="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
             <span class="relative inline-flex size-2.5 rounded-full bg-green-500" />
           </span>
-          <span class="text-sm font-semibold">Current Rotation</span>
-          <span class="hidden text-sm text-muted-foreground sm:inline">&mdash;</span>
-          <span class="text-sm font-medium">{{ formatDate(activeRotation.date) }}</span>
+          Current rotation
+        </h1>
+        <p class="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Users class="size-3.5" />
+          {{ summaryLabel }}
+        </p>
+        <p class="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Clock class="size-3.5" />
+          Last rotated: {{ formatDate(activeRotation.date) }}
           <span
             v-if="activeRotation.isManual"
-            class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-          >
-            Manual
-          </span>
-        </div>
-        <div class="ml-auto flex items-center gap-2">
-          <span v-if="reviewerCountLabel" class="hidden text-xs text-muted-foreground sm:inline">
-            {{ reviewerCountLabel }}
-          </span>
-          <template v-if="!isEditing">
-            <UIButton
-              size="sm"
-              variant="outline"
-              type="button"
-              class="h-7 px-2.5 text-xs"
-              @click="startEditing"
-            >
-              Edit
-            </UIButton>
-          </template>
-          <template v-else>
-            <UIButton
-              size="sm"
-              variant="default"
-              type="button"
-              :disabled="saving"
-              class="h-7 px-2.5 text-xs"
-              @click="saveAll"
-            >
-              {{ saving ? "Saving..." : "Save" }}
-            </UIButton>
-            <UIButton
-              size="sm"
-              variant="ghost"
-              type="button"
-              class="h-7 px-2.5 text-xs"
-              @click="cancelEditing"
-            >
-              Cancel
-            </UIButton>
-          </template>
-        </div>
+            class="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs"
+          >Manual</span>
+        </p>
       </div>
+    </div>
 
+    <!-- Active rotation -->
+    <div v-if="activeRotation" class="overflow-hidden rounded-lg border">
       <div v-if="filteredAssignments.length">
         <!-- Developer mode: table layout -->
         <template v-if="mode === 'devs'">
           <!-- Column headers -->
-          <div class="hidden items-center gap-4 border-b bg-muted/50 px-5 py-2 sm:flex">
-            <div class="w-48 shrink-0 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <div class="hidden items-center gap-4 border-b bg-primary/5 px-5 py-2.5 sm:flex">
+            <div class="w-48 shrink-0 text-xs font-semibold uppercase tracking-wider text-primary-text">
               Developer
             </div>
-            <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <div class="flex-1 text-xs font-semibold uppercase tracking-wider text-primary-text">
               Reviewers
+            </div>
+            <div class="ml-auto flex items-center gap-1">
+              <template v-if="!isEditing">
+                <UIButton
+                  size="sm"
+                  variant="outline"
+                  type="button"
+                  class="h-6 px-2 text-xs"
+                  @click="startEditing"
+                >
+                  Edit
+                </UIButton>
+              </template>
+              <template v-else>
+                <UIButton
+                  size="sm"
+                  variant="default"
+                  type="button"
+                  :disabled="saving"
+                  class="h-6 px-2 text-xs"
+                  @click="saveAll"
+                >
+                  {{ saving ? "Saving..." : "Save" }}
+                </UIButton>
+                <UIButton
+                  size="sm"
+                  variant="ghost"
+                  type="button"
+                  class="h-6 px-2 text-xs"
+                  @click="cancelEditing"
+                >
+                  Cancel
+                </UIButton>
+              </template>
             </div>
           </div>
 
           <div
             v-for="assignment in filteredAssignments"
             :key="assignment.id"
-            class="flex items-start gap-2 border-b px-5 py-3.5 last:border-b-0 transition-colors even:bg-muted/40 hover:bg-muted sm:gap-4"
+            class="flex items-start gap-2 border-b px-5 py-2 leading-[2.0625rem] last:border-b-0 transition-colors even:bg-muted/40 hover:bg-muted sm:gap-4"
           >
             <div class="w-28 shrink-0 pt-0.5 sm:w-48">
               <NuxtLink
@@ -363,15 +354,15 @@ const showSearch = computed(() => (activeRotation.value?.assignments?.length ?? 
                     :to="
                       reviewer.developer.slug ? `/developers/${reviewer.developer.slug}` : undefined
                     "
-                    class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2 py-1 text-xs font-medium shadow-sm" :class="[
+                    class="inline-flex items-center gap-1.5 rounded-md border border-border/30 bg-muted/30 px-2.5 py-1.5 text-sm font-medium shadow-sm" :class="[
                       reviewer.developer.slug
                         ? 'cursor-pointer transition-all hover:shadow-md hover:bg-muted/80'
                         : '',
                     ]"
                   >
-                    <UIAvatar class="size-5">
+                    <UIAvatar class="size-6">
                       <UIAvatarFallback
-                        class="!text-[8px] !font-semibold !leading-none"
+                        class="!text-[9px] !font-semibold !leading-none"
                         :label="
                           getInitials(reviewer.developer.firstName, reviewer.developer.lastName)
                         "
@@ -382,18 +373,18 @@ const showSearch = computed(() => (activeRotation.value?.assignments?.length ?? 
                     <TrimText>{{ reviewer.developer.firstName }} {{ reviewer.developer.lastName }}</TrimText>
                   </NuxtLink>
                 </template>
-                <span v-else class="text-xs text-muted-foreground">No reviewers</span>
+                <span v-else class="text-sm text-muted-foreground">No reviewers</span>
               </template>
 
               <template v-else>
                 <span
                   v-for="devId in getEditReviewerIds(assignment.id)"
                   :key="devId"
-                  class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+                  class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1.5 text-sm font-medium text-primary"
                 >
-                  <UIAvatar class="size-5">
+                  <UIAvatar class="size-6">
                     <UIAvatarFallback
-                      class="!text-[8px] !font-semibold !leading-none"
+                      class="!text-[9px] !font-semibold !leading-none"
                       :label="devInitials(devId)"
                     >{{ devInitials(devId) }}</UIAvatarFallback>
                   </UIAvatar>
@@ -414,9 +405,9 @@ const showSearch = computed(() => (activeRotation.value?.assignments?.length ?? 
                   <UIPopoverTrigger as-child>
                     <button
                       type="button"
-                      class="inline-flex items-center gap-1 rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-muted hover:text-foreground"
+                      class="inline-flex items-center gap-1 rounded-md border border-dashed px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-solid hover:bg-muted hover:text-foreground"
                     >
-                      <ChevronsUpDown class="size-3" />
+                      <Plus class="size-3.5" />
                       Add
                     </button>
                   </UIPopoverTrigger>
@@ -535,9 +526,9 @@ const showSearch = computed(() => (activeRotation.value?.assignments?.length ?? 
                     <UIPopoverTrigger as-child>
                       <button
                         type="button"
-                        class="inline-flex items-center gap-1 rounded-md border border-dashed px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-solid hover:bg-muted hover:text-foreground"
+                        class="inline-flex items-center gap-1 rounded-md border border-dashed px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-solid hover:bg-muted hover:text-foreground"
                       >
-                        <ChevronsUpDown class="size-3" />
+                        <Plus class="size-3.5" />
                         Add
                       </button>
                     </UIPopoverTrigger>
@@ -591,12 +582,24 @@ const showSearch = computed(() => (activeRotation.value?.assignments?.length ?? 
           </div>
         </template>
       </div>
-      <p v-else-if="searchQuery && activeRotation.assignments?.length" class="px-5 py-4 text-sm text-muted-foreground">
-        No assignments matching "{{ searchQuery }}"
+      <p v-else-if="selectedDeveloperId && activeRotation.assignments?.length" class="px-5 py-4 text-sm text-muted-foreground">
+        No assignments matching "{{ selectedDeveloperName }}"
       </p>
       <p v-else class="px-5 py-4 text-sm text-muted-foreground">
         No assignments for this rotation
       </p>
+    </div>
+
+    <!-- Next rotation banner -->
+    <div
+      v-if="nextRotationDate"
+      class="flex items-center gap-2 rounded-lg border border-dashed bg-muted/30 px-4 py-2.5"
+    >
+      <CalendarClock class="size-4 text-muted-foreground" />
+      <TrimText>
+        <span class="text-sm text-muted-foreground">Next rotation: </span>
+        <span class="text-sm font-medium">{{ nextRotationDate }}</span>
+      </TrimText>
     </div>
 
     <!-- Past rotations -->
@@ -651,11 +654,11 @@ const showSearch = computed(() => (activeRotation.value?.assignments?.length ?? 
           <div v-if="expandedRotations.has(rotation.id)" class="bg-muted/50">
             <div v-if="rotation.assignments?.length">
               <!-- Column headers for history -->
-              <div class="hidden items-center gap-4 border-t bg-muted px-4 py-2 sm:flex sm:px-8">
-                <div class="w-44 shrink-0 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <div class="hidden items-center gap-4 border-t bg-primary/5 px-4 py-2.5 sm:flex sm:px-8">
+                <div class="w-44 shrink-0 text-xs font-semibold uppercase tracking-wider text-primary-text">
                   {{ mode === "devs" ? "Developer" : "Target" }}
                 </div>
-                <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div class="text-xs font-semibold uppercase tracking-wider text-primary-text">
                   Reviewers
                 </div>
               </div>

@@ -61,7 +61,7 @@ export default defineNuxtConfig({
         title: 'Public API',
         description: 'API-key authenticated endpoints for external integrations.',
         links: [
-          { title: 'Current Rotations', href: '/api/public/rotations', description: 'Get latest rotation assignments. Filterable by teamId, developerId, squadId, and mode (devs/teams)' },
+          { title: 'Current rotations', href: '/api/public/rotations', description: 'Get latest rotation assignments. Filterable by teamId, developerId, squadId, and mode (devs/teams)' },
         ],
       },
     ],
