@@ -131,41 +131,47 @@ These verify the app boots and critical paths work. Fast, no side effects.
 Full user flows that catch regressions in core functionality.
 
 **Authentication flows:**
-| Test | Steps |
-|------|-------|
-| `e2e/auth/register.spec.ts` | Fill form, submit, verify confirmation token page. Test invalid domain rejection. Test duplicate email. |
-| `e2e/auth/login-errors.spec.ts` | Wrong password shows error. Unconfirmed user gets 403 message. |
-| `e2e/auth/password-reset.spec.ts` | Request reset, use token, login with new password |
+
+| Test                              | Steps                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `e2e/auth/register.spec.ts`       | Fill form, submit, verify confirmation token page. Test invalid domain rejection. Test duplicate email. |
+| `e2e/auth/login-errors.spec.ts`   | Wrong password shows error. Unconfirmed user gets 403 message.                                          |
+| `e2e/auth/password-reset.spec.ts` | Request reset, use token, login with new password                                                       |
 
 **Team management:**
-| Test | Steps |
-|------|-------|
-| `e2e/teams/crud.spec.ts` | Create team, verify in list, edit name, delete team |
+
+| Test                        | Steps                                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `e2e/teams/crud.spec.ts`    | Create team, verify in list, edit name, delete team                                            |
 | `e2e/teams/members.spec.ts` | Add member to team, set reviewer count and experience, add preferable reviewers, remove member |
-| `e2e/teams/squads.spec.ts` | Create squad, add members, edit, delete |
+| `e2e/teams/squads.spec.ts`  | Create squad, add members, edit, delete                                                        |
 
 **Developer management:**
-| Test | Steps |
-|------|-------|
-| `e2e/developers/crud.spec.ts` | Create developer, verify in list, edit, delete |
+
+| Test                                  | Steps                                                    |
+| ------------------------------------- | -------------------------------------------------------- |
+| `e2e/developers/crud.spec.ts`         | Create developer, verify in list, edit, delete           |
 | `e2e/developers/associations.spec.ts` | View developer profile, verify rotation history grouping |
 
 **Rotation:**
-| Test | Steps |
-|------|-------|
-| `e2e/rotation/run-dev-rotation.spec.ts` | Navigate to rotate page, select Developers mode, run rotation, verify assignments appear |
-| `e2e/rotation/run-team-rotation.spec.ts` | Select Squads mode, run rotation, verify assignments |
-| `e2e/rotation/edit-assignment.spec.ts` | Open rotation, enter edit mode, change reviewer, save, verify |
+
+| Test                                     | Steps                                                                                    |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `e2e/rotation/run-dev-rotation.spec.ts`  | Navigate to rotate page, select Developers mode, run rotation, verify assignments appear |
+| `e2e/rotation/run-team-rotation.spec.ts` | Select Squads mode, run rotation, verify assignments                                     |
+| `e2e/rotation/edit-assignment.spec.ts`   | Open rotation, enter edit mode, change reviewer, save, verify                            |
 
 **User management (admin):**
-| Test | Steps |
-|------|-------|
+
+| Test                                | Steps                                                                      |
+| ----------------------------------- | -------------------------------------------------------------------------- |
 | `e2e/users/role-management.spec.ts` | Admin sees Users nav, opens page, toggles user role, verifies badge change |
-| `e2e/users/self-protection.spec.ts` | Admin cannot change own role (button shows "You") |
+| `e2e/users/self-protection.spec.ts` | Admin cannot change own role (button shows "You")                          |
 
 **Authorization:**
-| Test | Steps |
-|------|-------|
+
+| Test                           | Steps                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
 | `e2e/auth/role-access.spec.ts` | Developer user cannot access /users (API returns 403). Developer cannot create teams (API returns 403). |
 
 ---
