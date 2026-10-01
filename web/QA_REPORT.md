@@ -16,12 +16,13 @@
 **Description:** Developers with accented characters in their names have broken slugs. The `slugify` library was added to fix this, but the seed data was created BEFORE the fix, so existing developers have corrupted slugs.
 
 **Affected developers:**
-| Name | Current Slug | Expected Slug |
-|------|-------------|---------------|
-| João Gonçalves | `joo-gonalves` | `joao-goncalves` |
+
+| Name              | Current Slug       | Expected Slug       |
+| ----------------- | ------------------ | ------------------- |
+| João Gonçalves    | `joo-gonalves`     | `joao-goncalves`    |
 | Gonzalo Fernández | `gonzalo-fernndez` | `gonzalo-fernandez` |
-| Miia Leppänen | `miia-leppnen` | `miia-leppanen` |
-| Vilhelm Leppälä | `vilhelm-leppl` | `vilhelm-leppala` |
+| Miia Leppänen     | `miia-leppnen`     | `miia-leppanen`     |
+| Vilhelm Leppälä   | `vilhelm-leppl`    | `vilhelm-leppala`   |
 
 **Impact:** Clicking developer names in rotation lists navigates to broken URLs showing "Developer not found". Only developers with ASCII-only names (Anja, Cuong, Marko, Pekka, Sergio) have working profile pages.
 
